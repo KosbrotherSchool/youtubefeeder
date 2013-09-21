@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">YoutubeFeeder</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    
+    <string name="refresh">Refresh</string>
+    <string name="accounts">Accounts</string>
+    
+    <string name="error">Error</string>
+    <string name="error_format">[Error] %s</string>
+    
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    
+    <string name="no_data">No Data</string>
+    
+    <!-- video list -->
+    <string name="likes">Likes</string>
+    <string name="time">Time</string>
+    <string name="views">Views</string>
+    <string name="launch">Launch</string>
+    
+    <!-- Youtube Player -->
+    <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
+	
+    <!-- Contexual menu -->
+    <string name="play_all">Play All</string>
+    
+</resources>

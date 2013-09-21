@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kosbrother.youtubefeeder"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+    
+    <uses-permission android:name="android.permission.NETWORK" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 允許 API 存取以網頁為基礎的服務 -->
+	<uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+	
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.kosbrother.youtubefeeder.MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ChannelTabs"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="portrait" 
+            >
+        </activity>
+        <activity
+        	android:name=".PlayerViewActivity"	
+        	android:screenOrientation="nosensor"
+        	android:configChanges="orientation|screenSize|keyboardHidden">
+    	</activity>
+    	<activity
+        	android:name=".PlaylistVideosActivity"	
+        	android:screenOrientation="nosensor"
+        	android:configChanges="orientation|screenSize|keyboardHidden">
+    	</activity>
+        
+        
+        <provider android:name="com.kosbrother.youtubefeeder.database.DatabaseProvider"
+                  android:authorities="com.kosbrother.youtubefeeder.database" />
+    </application>
+
+</manifest>
