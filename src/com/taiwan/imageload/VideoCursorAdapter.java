@@ -60,7 +60,7 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
         
         
         /**
-         * tt
+         * tttt
          * public static final String COLUMN_NAME_DATA1 = "video_title";
          * public static final String COLUMN_NAME_DATA2 = "video_link";
     	 * public static final String COLUMN_NAME_DATA3 = "video_thumbnail";
