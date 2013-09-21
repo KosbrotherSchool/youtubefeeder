@@ -1,7 +1,5 @@
 package com.taiwan.imageload;
 
-// ttt
-
 import com.kosbrother.youtubefeeder.R;
 
 import android.app.Activity;

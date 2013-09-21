@@ -16,7 +16,9 @@
 
 package com.kosbrother.youtubefeeder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -76,7 +78,15 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	public static final String Repeat_Key = "IS_REPEAT";
 	public static final String AutoPlay_Key = "IS_AutoPlay";
 	public static final String RandomPlay_Key = "IS_RandomPlay";
-
+	
+	public static final String Videos_Key = "Videos_Key";
+	public static final String Videos_Title_Key = "Videos_Title_Key";
+	
+	private List<String> videosKey = new ArrayList<String>();
+	private List<String> videosTitle = new ArrayList<String>();
+	
+	private Boolean isVideos = false;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -90,12 +100,23 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		isRandomPlay = sp.getBoolean(RandomPlay_Key, true);
 
 		mBundle = this.getIntent().getExtras();
-		videoTitle = mBundle.getString("VideoTitle");
-		videoId = mBundle.getString("VideoId");
-
+		try{
+			videoTitle = mBundle.getString("VideoTitle");
+			videoId = mBundle.getString("VideoId");
+			videosKey = mBundle.getStringArrayList(Videos_Key);
+			videosTitle = mBundle.getStringArrayList(Videos_Title_Key);
+		}catch(Exception e){
+			
+		}
+		
 		findViews();
-
-		textTitle.setText(videoTitle);
+		
+		if (videoTitle !=null){
+			isVideos = false;
+			textTitle.setText(videoTitle);
+		}else{
+			isVideos = true;
+		}		
 
 		credential = GoogleAccountCredential.usingOAuth2(
 				getApplicationContext(), Arrays.asList(Auth.SCOPES));
@@ -149,8 +170,16 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		mPlayer = player;
 		mPlayer.setPlayerStateChangeListener(playerStateChangeListener);
 		if (!wasRestored) {
-//			mPlayer.cueVideo(videoId);
-			mPlayer.cuePlaylist("PLMDSacPyadX3gD_k9awyJf_4pzLLdHDhg");
+			if(isVideos){
+//				List<String> vs = new ArrayList<String>();
+//				vs.add("5nMf6a927l8");
+//				vs.add("mbcJ0QFfPIo");
+//				mPlayer.cueVideos(vs);
+				mPlayer.cueVideos(videosKey);			
+			}else{
+				mPlayer.cueVideo(videoId);
+			}
+//			mPlayer.cuePlaylist("PLMDSacPyadX3gD_k9awyJf_4pzLLdHDhg");
 		}
 	}
 

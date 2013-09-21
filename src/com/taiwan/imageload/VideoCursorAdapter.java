@@ -1,6 +1,7 @@
 package com.taiwan.imageload;
 
 import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.Locale;
 
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.kosbrother.youtubefeeder.MainActivity;
 import com.kosbrother.youtubefeeder.PlayerViewActivity;
 import com.kosbrother.youtubefeeder.R;
 import com.kosbrother.youtubefeeder.database.VideoTable;
@@ -26,7 +28,8 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
 //    private Cursor cr;
     private final LayoutInflater inflater;
     public ImageLoader imageLoader;
-
+    private static HashMap<String,String> checkMap = new HashMap<String, String>();
+    
     @SuppressWarnings("deprecation")
 	public VideoCursorAdapter(Context context,int layout, Cursor c,String[] from,int[] to) {
         super(context,layout,c,from,to);
@@ -43,7 +46,7 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(final View view, Context context, Cursor cursor) {
 //        super.bindView(view, context, cursor);	
     	
 //    	cr = cursor;
@@ -56,11 +59,9 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
         TextView textLikes = (TextView) view.findViewById(R.id.text_list_like);
         TextView textId = (TextView) view.findViewById(R.id.text_id);
         CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkbox_video);
-        
-        
-        
+       
+	    
         /**
-         * tttt,ttt
          * public static final String COLUMN_NAME_DATA1 = "video_title";
          * public static final String COLUMN_NAME_DATA2 = "video_link";
     	 * public static final String COLUMN_NAME_DATA3 = "video_thumbnail";
@@ -80,7 +81,9 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
         int likes_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA7);
 //      int dislikes_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA8);
         
-        textId.setText(parseVideoLink(cursor.getString(link_index)));
+        String mId = parseVideoLink(cursor.getString(link_index));
+        
+        textId.setText(mId);
         
         
         // set title text
@@ -117,6 +120,12 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
 //        final String videoId = parseVideoLink(cursor.getString(link_index));
 //        final String videoTitle = cursor.getString(title_index);
         
+        if (checkMap.get(mId) != null){
+        	checkBox.setChecked(true);
+        }else{
+        	checkBox.setChecked(false);
+        }
+        
         // set view onClick Listener
     	view.setClickable(true);
     	view.setFocusable(true);
@@ -136,6 +145,23 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
             }
 
         });
+    	
+    	checkBox.setOnClickListener((new OnClickListener(){  
+            public void onClick(View v) {          	
+            	TextView idView = (TextView) view.findViewById(R.id.text_id);
+				String id = idView.getText().toString();			
+				TextView titleView = (TextView) view.findViewById(R.id.text_news_list);
+				String title = titleView.getText().toString();
+				
+            	CheckBox theCheckBox = (CheckBox) v.findViewById(R.id.checkbox_video);
+            	if(theCheckBox.isChecked()){
+            		checkMap.put(id, title);
+            		MainActivity.showActionMode();
+            	}else{
+            		checkMap.remove(id);
+            	}
+            }  
+        }));
     	
     }
     
@@ -164,6 +190,8 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
         return ints;
     }
 	
-	
+	public static HashMap<String,String> getMap(){
+		return checkMap;
+	}
     
 }

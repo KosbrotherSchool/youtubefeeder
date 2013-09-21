@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -92,7 +93,7 @@ import at.bartinger.list.item.SectionItem;
 public class MainActivity extends FragmentActivity implements ConnectionCallbacks,
 		OnConnectionFailedListener,LoaderManager.LoaderCallbacks<Cursor> {
 
-	 public static final String AUTHORITY = "com.kosbrother.youtubefeeder.database";
+	public static final String AUTHORITY = "com.kosbrother.youtubefeeder.database";
 	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerListView;
@@ -101,7 +102,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private ArrayList<Item> items = new ArrayList<Item>();
 	private ArrayList<Channel> mSubscriptionChannels = new ArrayList<Channel>();
 
-	private VideoCursorAdapter mVideoAdapter;
+	private static VideoCursorAdapter mVideoAdapter;
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
 	
 //	private ChannelCursorAdapter mChannelAdapter;
@@ -122,6 +123,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private static final String TAG = "MainActivity";
 	
 	private static Activity mActivity;
+	private static boolean mModeIsShowing = false;
 	private static ActionMode mMode;
 	private static ActionMode.Callback modeCallBack = new ActionMode.Callback() {
     	
@@ -136,7 +138,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		@Override
 		public void onDestroyActionMode(ActionMode mode) {
 			mMode = null;
-			
+			mModeIsShowing = false;
 		}
 		
 		/** This is called when the action mode is created. This is called by startActionMode() */
@@ -152,7 +154,20 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			switch(item.getItemId()){
 				case R.id.action1:
-					Toast.makeText(mActivity.getBaseContext(), "Selected Action1 ", Toast.LENGTH_LONG).show();
+					ArrayList<String> videoKeys = new ArrayList<String>();
+					ArrayList<String> videoValues = new ArrayList<String>();
+					HashMap<String, String> map = mVideoAdapter.getMap();
+					for (HashMap.Entry<String, String> entry : map.entrySet()) {
+					    // use "entry.getKey()" and "entry.getValue()"
+						videoKeys.add(entry.getKey());
+						videoValues.add(entry.getValue());						
+					}
+					Intent intent = new Intent(mActivity, PlayerViewActivity.class);  
+		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
+		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
+		    		mActivity.startActivity(intent);  
+					
+//					Toast.makeText(mActivity.getBaseContext(), "Selected Action1 ", Toast.LENGTH_LONG).show();
 					mode.finish();	// Automatically exists the action mode, when the user selects this action
 					break;						
 			}
@@ -221,8 +236,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	}
 
 	public static void showActionMode() {
-		// TODO Auto-generated method stub
-		mMode = mActivity.startActionMode(modeCallBack);		
+		if (!mModeIsShowing){
+			mMode = mActivity.startActionMode(modeCallBack);
+			mModeIsShowing = true;
+		}
 	}
 
 	private class DemoDrawerListener implements DrawerLayout.DrawerListener {
