@@ -1,11 +1,18 @@
 package com.kosbrother.youtubefeeder.fragments;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -13,6 +20,7 @@ import android.widget.Toast;
 
 import com.costum.android.widget.LoadMoreListView;
 import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
+import com.kosbrother.youtubefeeder.PlayerViewActivity;
 import com.kosbrother.youtubefeeder.R;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
 import com.taiwan.imageload.ListNothingAdapter;
@@ -30,9 +38,64 @@ public class PlaylistVideosFragment extends Fragment {
 	private ArrayList<YoutubeVideo> moreVideos;
 	private Boolean checkLoad = true;
 	private LinearLayout progressLayout;
-	private ListVideoAdapter myListAdapter;
+	private static ListVideoAdapter myListAdapter;
+	private static Activity mActivity;
 	
-    public static PlaylistVideosFragment newInstance(String listId, int page ) {     
+	private static boolean mModeIsShowing = false;
+	private static ActionMode mMode;
+	@SuppressLint("NewApi")
+	private static ActionMode.Callback modeCallBack = new ActionMode.Callback() {
+    	
+    	/** Invoked whenever the action mode is shown. This is invoked immediately after onCreateActionMode */ 
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {		
+			return false;
+		}
+		
+		
+		/** Called when user exits action mode */			
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mMode = null;
+			mModeIsShowing = false;
+		}
+		
+		/** This is called when the action mode is created. This is called by startActionMode() */
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+//			mode.setTitle("Demo");				
+			mActivity.getMenuInflater().inflate(R.menu.context_menu, menu);
+			return true;
+		}
+		
+		/** This is called when an item in the context menu is selected */
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			switch(item.getItemId()){
+				case R.id.action1:
+					ArrayList<String> videoKeys = new ArrayList<String>();
+					ArrayList<String> videoValues = new ArrayList<String>();
+					HashMap<String, String> map = myListAdapter.getMap();
+					for (HashMap.Entry<String, String> entry : map.entrySet()) {
+					    // use "entry.getKey()" and "entry.getValue()"
+						videoKeys.add(entry.getKey());
+						videoValues.add(entry.getValue());						
+					}
+					Intent intent = new Intent(mActivity, PlayerViewActivity.class);  
+		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
+		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
+		    		mActivity.startActivity(intent);  
+					
+//					Toast.makeText(mActivity.getBaseContext(), "Selected Action1 ", Toast.LENGTH_LONG).show();
+					mode.finish();	// Automatically exists the action mode, when the user selects this action
+					break;						
+			}
+			return false;
+		}
+	};
+	
+	
+    public static PlaylistVideosFragment newInstance(String listId, int page, Activity theActivity) {     
    	 
   	  myPage = page;
 //  	  mChannelId = channelId;
@@ -40,6 +103,7 @@ public class PlaylistVideosFragment extends Fragment {
   	  Bundle bdl = new Bundle();
   	  bdl.putString("listId", listId);
   	  fragment.setArguments(bdl);
+  	  mActivity = theActivity;
       return fragment;
         
     }
@@ -85,6 +149,14 @@ public class PlaylistVideosFragment extends Fragment {
         super.onSaveInstanceState(outState);
        
     }
+    
+    @SuppressLint("NewApi")
+	public static void showActionMode() {
+		if (!mModeIsShowing){
+			mMode = mActivity.startActionMode(modeCallBack);
+			mModeIsShowing = true;
+		}
+	}
     
     private class DownloadChannelsTask extends AsyncTask {
 

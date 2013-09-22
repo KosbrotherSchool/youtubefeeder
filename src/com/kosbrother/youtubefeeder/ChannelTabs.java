@@ -136,7 +136,7 @@ public class ChannelTabs extends FragmentActivity {
         public Fragment getItem(int position) {
         	Fragment kk = new Fragment();     	
         	if(position==0){
-        		kk = NewVideosFragment.newInstance(channelId, 0);
+        		kk = NewVideosFragment.newInstance(channelId, 0, mContext);
         	}else if(position == 1){
         		kk = PopularFragment.newInstance(channelId, 0);
         	}else if(position == 2){

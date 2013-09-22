@@ -28,7 +28,7 @@ public class PlaylistVideosActivity extends FragmentActivity {
         listId = mBundle.getString("ListId");
         
         
-        PlaylistVideosFragment newFragment =  PlaylistVideosFragment.newInstance(listId, 0);
+        PlaylistVideosFragment newFragment =  PlaylistVideosFragment.newInstance(listId, 0, PlaylistVideosActivity.this);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(CONTENT_VIEW_ID, newFragment).commit();
         
