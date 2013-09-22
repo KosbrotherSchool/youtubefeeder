@@ -25,6 +25,7 @@ import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
 import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
+import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
@@ -47,6 +48,10 @@ import android.widget.TextView;
 public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 
 	private LinearLayout progressLayout;
+	private LinearLayout layoutVideos;
+	private LinearLayout layoutVideosList;
+	private LinearLayout layoutActionButtons;
+	private LinearLayout layoutVideoIntroduction;
 	private String mChosenAccountName;
 
 	private String videoId;
@@ -70,7 +75,8 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 
 	private YouTubePlayer mPlayer;
 	private MyPlayerStateChangeListener playerStateChangeListener;
-
+	private MyPlaylistEventListener playlistEventListener;
+	
 	private Boolean isRepeat = true;
 	private Boolean isAutoPlay = true;
 	private Boolean isRandomPlay = false;
@@ -84,6 +90,7 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	
 	private List<String> videosKey = new ArrayList<String>();
 	private List<String> videosTitle = new ArrayList<String>();
+	private int hilightTorch = 0;
 	
 	private Boolean isVideos = false;
 	
@@ -116,6 +123,10 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 			textTitle.setText(videoTitle);
 		}else{
 			isVideos = true;
+			layoutVideos.setVisibility(View.VISIBLE);
+			layoutActionButtons.setVisibility(View.GONE);
+			layoutVideoIntroduction.setVisibility(View.GONE);
+			textTitle.setVisibility(View.GONE);
 		}		
 
 		credential = GoogleAccountCredential.usingOAuth2(
@@ -127,8 +138,8 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
-		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
-
+		
+		playlistEventListener = new MyPlaylistEventListener();
 		playerStateChangeListener = new MyPlayerStateChangeListener();
 
 		new DownloadDescriptionTask().execute();
@@ -136,6 +147,12 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	}
 
 	private void findViews() {
+		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
+		layoutVideos = (LinearLayout) findViewById(R.id.layout_videos);
+		layoutVideosList = (LinearLayout) findViewById(R.id.layout_video_list);
+		layoutActionButtons = (LinearLayout) findViewById(R.id.layout_action_buttons);
+		layoutVideoIntroduction = (LinearLayout) findViewById(R.id.layout_video_introduction);
+		
 		textTitle = (TextView) findViewById(R.id.youtube_text_title);
 		textDescription = (TextView) findViewById(R.id.youtube_text_description);
 		buttonFavorite = (Button) findViewById(R.id.button_favorite);
@@ -169,13 +186,19 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 			YouTubePlayer player, boolean wasRestored) {
 		mPlayer = player;
 		mPlayer.setPlayerStateChangeListener(playerStateChangeListener);
+		mPlayer.setPlaylistEventListener(playlistEventListener);
 		if (!wasRestored) {
 			if(isVideos){
-//				List<String> vs = new ArrayList<String>();
-//				vs.add("5nMf6a927l8");
-//				vs.add("mbcJ0QFfPIo");
-//				mPlayer.cueVideos(vs);
-				mPlayer.cueVideos(videosKey);			
+				for(String item: videosTitle){
+					TextView newTV = new TextView(this);
+					newTV.setText(item);
+					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+						     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+				    params.setMargins(5, 5, 5, 5); //left, top, right, bottom
+					layoutVideosList.addView(newTV,params);
+				}
+				layoutVideosList.getChildAt(hilightTorch).setBackgroundColor(getResources().getColor(R.color.light_blue));
+				mPlayer.cueVideos(videosKey);
 			}else{
 				mPlayer.cueVideo(videoId);
 			}
@@ -187,7 +210,31 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	protected YouTubePlayer.Provider getYouTubePlayerProvider() {
 		return (YouTubePlayerView) findViewById(R.id.youtube_view);
 	}
+	
+	
+	private final class MyPlaylistEventListener implements PlaylistEventListener {
+	    @Override
+	    public void onNext() {
+//	      log("NEXT VIDEO");
+	      layoutVideosList.getChildAt(hilightTorch).setBackgroundColor(getResources().getColor(R.color.white));
+	      hilightTorch = hilightTorch +1;
+	      layoutVideosList.getChildAt(hilightTorch).setBackgroundColor(getResources().getColor(R.color.light_blue));
+	    }
 
+	    @Override
+	    public void onPrevious() {
+//	      log("PREVIOUS VIDEO");
+	      layoutVideosList.getChildAt(hilightTorch).setBackgroundColor(getResources().getColor(R.color.white));
+		  hilightTorch = hilightTorch -  1;
+		  layoutVideosList.getChildAt(hilightTorch).setBackgroundColor(getResources().getColor(R.color.light_blue));
+	    }
+
+	    @Override
+	    public void onPlaylistEnded() {
+//	      log("PLAYLIST ENDED");
+	    }
+	}
+	
 	private final class MyPlayerStateChangeListener implements
 			PlayerStateChangeListener {
 		String playerState = "UNINITIALIZED";
