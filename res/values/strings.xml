@@ -26,6 +26,9 @@
     <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
 	
     <!-- Contexual menu -->
+    <string name="play_selected">Play Selected</string>
     <string name="play_all">Play All</string>
+    
+    <string name="not_signed_in">Not signed in</string>
     
 </resources>

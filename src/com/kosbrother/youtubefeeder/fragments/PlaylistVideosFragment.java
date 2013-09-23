@@ -74,21 +74,22 @@ public class PlaylistVideosFragment extends Fragment {
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			switch(item.getItemId()){
 				case R.id.action1:
-					ArrayList<String> videoKeys = new ArrayList<String>();
-					ArrayList<String> videoValues = new ArrayList<String>();
 					HashMap<String, String> map = myListAdapter.getMap();
-					for (HashMap.Entry<String, String> entry : map.entrySet()) {
-					    // use "entry.getKey()" and "entry.getValue()"
-						videoKeys.add(entry.getKey());
-						videoValues.add(entry.getValue());						
+					if (map.size()!=0){
+						ArrayList<String> videoKeys = new ArrayList<String>();
+						ArrayList<String> videoValues = new ArrayList<String>();
+						
+						for (HashMap.Entry<String, String> entry : map.entrySet()) {
+						    // use "entry.getKey()" and "entry.getValue()"
+							videoKeys.add(entry.getKey());
+							videoValues.add(entry.getValue());						
+						}
+						Intent intent = new Intent(mActivity, PlayerViewActivity.class);  
+			    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
+			    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
+			    		mActivity.startActivity(intent);  
 					}
-					Intent intent = new Intent(mActivity, PlayerViewActivity.class);  
-		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
-		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
-		    		mActivity.startActivity(intent);  
-					
-//					Toast.makeText(mActivity.getBaseContext(), "Selected Action1 ", Toast.LENGTH_LONG).show();
-					mode.finish();	// Automatically exists the action mode, when the user selects this action
+					mode.finish();
 					break;						
 			}
 			return false;
@@ -106,7 +107,9 @@ public class PlaylistVideosFragment extends Fragment {
   	  fragment.setArguments(bdl);
   	  mActivity = theActivity;
   	  isFirst = true;
-  	  videos.clear();
+  	  if (videos!=null){
+  		  videos.clear();
+  	  }
       return fragment;
         
     }

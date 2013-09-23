@@ -10,6 +10,8 @@ import java.util.List;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.plus.model.people.Person;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
@@ -19,6 +21,10 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.Playlist;
+import com.google.api.services.youtube.model.PlaylistListResponse;
+import com.google.api.services.youtube.model.PlaylistSnippet;
+import com.google.api.services.youtube.model.PlaylistStatus;
 import com.google.api.services.youtube.model.Subscription;
 import com.google.api.services.youtube.model.SubscriptionListResponse;
 import com.google.ytdl.util.Utils;
@@ -26,7 +32,7 @@ import com.google.ytdl.util.VideoData;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
 import com.kosbrother.youtubefeeder.database.ChannelTable;
 import com.kosbrother.youtubefeeder.database.VideoTable;
-import com.taiwan.imageload.ChannelCursorAdapter;
+import com.taiwan.imageload.ImageLoader;
 import com.taiwan.imageload.VideoCursorAdapter;
 import com.youtube.music.channels.entity.Channel;
 import com.youtube.music.channels.entity.YoutubeVideo;
@@ -41,7 +47,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -53,7 +58,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -61,7 +65,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import at.bartinger.list.item.EntryAdapter;
 import at.bartinger.list.item.EntryItem;
@@ -105,7 +111,11 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private EntryAdapter mDrawerAdapter;
 	private ArrayList<Item> items = new ArrayList<Item>();
 	private ArrayList<Channel> mSubscriptionChannels = new ArrayList<Channel>();
-
+	
+	private TextView textName;
+	private ImageView viewAvatar;
+	public ImageLoader imageLoader;
+	
 	private static VideoCursorAdapter mVideoAdapter;
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
 	
@@ -118,8 +128,19 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private static final int REQUEST_AUTHORIZATION = 3;
 
 	public static final String ACCOUNT_KEY = "accountName";
+	public static final String ACCOUNT_DISPLAY_NAME_KEY = "accountDisplayName";
+	public static final String ACCOUNT_IMAGE_KEY = "accountImage";
 	private String mChosenAccountName;
-
+	private String mDisplayName;
+	private String mAccountImage;
+	
+	public static final String Initialized_Key = "Initial_Action";
+	private boolean isInitialized = false;
+	
+	private int sectionListPosition;
+	
+	private PlusClient mPlusClient;
+	
 	GoogleAccountCredential credential;
 	final HttpTransport transport = AndroidHttp.newCompatibleTransport();
 	final JsonFactory jsonFactory = new GsonFactory();
@@ -158,20 +179,20 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			switch(item.getItemId()){
 				case R.id.action1:
-					ArrayList<String> videoKeys = new ArrayList<String>();
-					ArrayList<String> videoValues = new ArrayList<String>();
 					HashMap<String, String> map = mVideoAdapter.getMap();
-					for (HashMap.Entry<String, String> entry : map.entrySet()) {
-					    // use "entry.getKey()" and "entry.getValue()"
-						videoKeys.add(entry.getKey());
-						videoValues.add(entry.getValue());						
+					if (map.size()!=0){
+						ArrayList<String> videoKeys = new ArrayList<String>();
+						ArrayList<String> videoValues = new ArrayList<String>();					
+						for (HashMap.Entry<String, String> entry : map.entrySet()) {
+						    // use "entry.getKey()" and "entry.getValue()"
+							videoKeys.add(entry.getKey());
+							videoValues.add(entry.getValue());						
+						}
+						Intent intent = new Intent(mActivity, PlayerViewActivity.class);  
+			    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
+			    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
+			    		mActivity.startActivity(intent);  
 					}
-					Intent intent = new Intent(mActivity, PlayerViewActivity.class);  
-		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
-		    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
-		    		mActivity.startActivity(intent);  
-					
-//					Toast.makeText(mActivity.getBaseContext(), "Selected Action1 ", Toast.LENGTH_LONG).show();
 					mode.finish();	// Automatically exists the action mode, when the user selects this action
 					break;						
 			}
@@ -184,11 +205,16 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.drawer_layout);
 		mActivity = this;
+		imageLoader = new ImageLoader(MainActivity.this, 70);
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		isInitialized = sp.getBoolean(Initialized_Key, false);
 		
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
 		mainListView = (ListView) findViewById(R.id.main_list_view);
-
+		textName = (TextView) findViewById(R.id.left_name);
+		viewAvatar = (ImageView) findViewById(R.id.left_avatar);
+		
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
 				GravityCompat.START);
@@ -202,15 +228,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		//(Context context,int layout, Cursor c,String[] from,int[] to)
 		mVideoAdapter = new VideoCursorAdapter(this, R.layout.item_video_list, null, PROJECTION, null);
 		mainListView.setAdapter(mVideoAdapter);
-		
-		mainListView.setOnItemClickListener((new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id) {
-		    					    		
-		    		Toast.makeText(MainActivity.this, "tttt" , Toast.LENGTH_SHORT).show();				    		
-		    		
-			}
-		}));
 		
 		// set drawer adapter
 //		mChannelAdapter = new ChannelCursorAdapter(this, R.layout.list_item_entry, null, PROJECTION_CHANNEL, null);
@@ -233,12 +250,38 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		}
 		credential.setSelectedAccountName(mChosenAccountName);
 		
-		// load data after get credential
+		if (mDisplayName == null){
+			mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+			.setScopes(Auth.SCOPES)
+			.build();
+			mPlusClient.connect();
+		}else {
+			textName.setText(mDisplayName);
+			imageLoader.DisplayImage(mAccountImage, viewAvatar);
+		}
+		
 		loadData();
 		
-//		showActionMode();
 	}
-
+	
+	public void setProfileInfo() {	
+        if (!mPlusClient.isConnected() || mPlusClient.getCurrentPerson() == null) {            
+        	textName.setText(R.string.not_signed_in);
+        } else {
+            Person currentPerson = mPlusClient.getCurrentPerson();
+            if (currentPerson.hasImage()) {
+            	imageLoader.DisplayImage(currentPerson.getImage().getUrl(), viewAvatar);
+            }
+            if (currentPerson.hasDisplayName()) {
+            	textName.setText(currentPerson.getDisplayName());
+            }
+            SharedPreferences sp = PreferenceManager
+    				.getDefaultSharedPreferences(this);
+    		sp.edit().putString(ACCOUNT_DISPLAY_NAME_KEY, currentPerson.getDisplayName()).commit();
+    		sp.edit().putString(ACCOUNT_IMAGE_KEY, currentPerson.getImage().getUrl()).commit();
+        }
+    }
+	
 	public static void showActionMode() {
 		if (!mModeIsShowing){
 			mMode = mActivity.startActionMode(modeCallBack);
@@ -284,7 +327,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		public void onDrawerOpened() {}
 		public void setTitle(CharSequence title) {}
 	}
-
+	
 	private class ActionBarHelperICS extends ActionBarHelper {
 		private final ActionBar mActionBar;
 		private CharSequence mDrawerTitle;
@@ -347,6 +390,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		mChosenAccountName = sp.getString(ACCOUNT_KEY, null);
+		mAccountImage = sp.getString(ACCOUNT_IMAGE_KEY, null);
+		mDisplayName = sp.getString(ACCOUNT_DISPLAY_NAME_KEY, null);
 		invalidateOptionsMenu();
 	}
 
@@ -360,8 +405,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		if (mChosenAccountName == null) {
 			return;
 		}
-
 		loadVideos();
+		
 	}
 
 	// Load Videos
@@ -446,11 +491,41 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				        }
 					}
 					
+					sectionListPosition = items.size();
 					items.add(new SectionItem("播放清單"));
-					items.add(new EntryItem("我的最愛","",""));
+					
+					
+					if (!isInitialized){
+						try{							
+							// need add favorite to playlist at first?
+							PlaylistSnippet playlistSnippet = new PlaylistSnippet();
+						    playlistSnippet.setTitle("我的最愛 (YoutubeFeeder)");
+							
+						    PlaylistStatus playlistStatus = new PlaylistStatus();
+						    playlistStatus.setPrivacyStatus("public");
+						    
+							Playlist youTubePlaylist = new Playlist();
+						    youTubePlaylist.setSnippet(playlistSnippet);
+						    youTubePlaylist.setStatus(playlistStatus);
+						    
+						    youtube.playlists().insert("snippet", youTubePlaylist).execute();
+						    
+						    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+				    		sp.edit().putBoolean(Initialized_Key, true).commit();
+						}catch(Exception e){
+							
+						}
+					}
+				    
+//					items.add(new EntryItem("我的最愛","",""));
+					
+					PlaylistListResponse mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 20).execute();
+					List<Playlist> lists = mLists.getItems();
+					for (Playlist item : lists){
+						items.add(new EntryItem(item.getSnippet().getTitle(),item.getId(),""));
+					}
 					
 					mVideos = ChannelApi.getChannelVideo(mSubscriptionChannels.get(0).getId(), 0, "");
-					
 					
 					/**
 			         * public static final String COLUMN_NAME_DATA1 = "video_title";
@@ -482,23 +557,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			        	values.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
 			        	cr.insert(VideoTable.CONTENT_URI, values);
 					}
-					
-//					for (YoutubeVideo video : mVideos){
-//						ContentValues values = new ContentValues();
-//			        	values.put(VideoTable.COLUMN_NAME_DATA1, video.getTitle());
-//			        	values.put(VideoTable.COLUMN_NAME_DATA2, video.getLink());
-//			        	values.put(VideoTable.COLUMN_NAME_DATA3, video.getThumbnail());
-//			        	// date to string 
-//			        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
-//			            final String dateString = formatter.format(video.getUploadDate()); 
-//			        	values.put(VideoTable.COLUMN_NAME_DATA4, dateString);
-//			        	
-//			        	values.put(VideoTable.COLUMN_NAME_DATA5, video.getViewCount());
-//			        	values.put(VideoTable.COLUMN_NAME_DATA6, video.getDuration());
-//			        	values.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
-//			        	values.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
-//			        	cr.insert(VideoTable.CONTENT_URI, values);
-//					}
 					
 					// next page token 是要取得下一頁資料時用的
 //					String bbb = mSubscriptions.getNextPageToken();
@@ -548,13 +606,20 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					public void onItemClick(AdapterView<?> parent, View v,
 							int position, long id) {
 						if(!items.get(position).isSection()){
-				    		
-				    		EntryItem item = (EntryItem)items.get(position);			    		
-//				    		Toast.makeText(MainActivity.this, "id =  " + item.subtitle , Toast.LENGTH_SHORT).show();				    		
-				    		Intent intent = new Intent(MainActivity.this, ChannelTabs.class);  
-				    		intent.putExtra("ChannelTitle", item.title);  
-				    		intent.putExtra("ChannelId", item.subtitle);  
-				    		startActivity(intent);  
+				    		if (position < sectionListPosition){
+					    		EntryItem item = (EntryItem)items.get(position);			    		
+	//				    		Toast.makeText(MainActivity.this, "id =  " + item.subtitle , Toast.LENGTH_SHORT).show();				    		
+					    		Intent intent = new Intent(MainActivity.this, ChannelTabs.class);  
+					    		intent.putExtra("ChannelTitle", item.title);  
+					    		intent.putExtra("ChannelId", item.subtitle);  
+					    		startActivity(intent);  
+				    		}else{
+				    			EntryItem item = (EntryItem)items.get(position);			    					    		
+				    			Intent intent = new Intent(MainActivity.this, PlaylistVideosActivity.class);  
+				    			intent.putExtra("ListTitle", item.title);  
+				    			intent.putExtra("ListId", item.subtitle);  
+				    			startActivity(intent);  
+				    		}
 				    		
 				    	}
 					}
@@ -630,7 +695,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	@Override
 	public void onConnected(Bundle arg0) {
 		// TODO Auto-generated method stub
-		loadData();
+//		loadData();
+		setProfileInfo();
 	}
 
 	@Override

@@ -44,15 +44,15 @@
     	    android:orientation="horizontal"
     	    android:background="#D6D6D6"
     	    >
-    	    <ImageView 
+    	    <ImageView android:id ="@+id/left_avatar"
     	        android:layout_width="40dp"
     	    	android:layout_height="40dp"
     	    	android:background="@drawable/ic_launcher"
+    	    	android:layout_marginLeft="9dp"
     	        />
-    	    <TextView 
+    	    <TextView android:id ="@+id/left_name"
     	        android:layout_width="wrap_content"
     	        android:layout_height="wrap_content"
-    	        android:text="Jason Ko"
     	        android:textSize = "25dp"
     	        android:layout_marginLeft="10dip"
     	        />
