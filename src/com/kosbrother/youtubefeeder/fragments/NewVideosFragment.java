@@ -44,6 +44,9 @@ public final class NewVideosFragment extends Fragment {
 	
 	private static boolean mModeIsShowing = false;
 	private static ActionMode mMode;
+	
+	private static boolean isFirst = true;
+	
 	@SuppressLint("NewApi")
 	private static ActionMode.Callback modeCallBack = new ActionMode.Callback() {
     	
@@ -105,6 +108,7 @@ public final class NewVideosFragment extends Fragment {
   	  bdl.putString("channelId", channelId);
   	  fragment.setArguments(bdl);
   	  mActivity = (Activity) mContext; 
+  	  isFirst = true;
       return fragment;
         
     }
@@ -135,7 +139,7 @@ public final class NewVideosFragment extends Fragment {
 			}
 		});
         
-        if (myListAdapter != null) {
+        if (myListAdapter != null && !isFirst) {
             progressLayout.setVisibility(View.GONE);
             myList.setAdapter(myListAdapter);
         } else {
@@ -183,6 +187,7 @@ public final class NewVideosFragment extends Fragment {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
             progressLayout.setVisibility(View.GONE);
+            isFirst = false;
             
             if(videos !=null){
           	  try{

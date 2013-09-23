@@ -46,7 +46,7 @@ public class ChannelApi {
 
     public static ArrayList<YoutubeVideo> getPlaylistVideos(String listId, int page) {
         ArrayList<YoutubeVideo> videos = new ArrayList();
-        String url = "http://gdata.youtube.com/feeds/api/playlists/" + listId + "?v=2&alt=json&start-index=" + (page * 10 + 1) + "&max-results=10";
+        String url = "http://gdata.youtube.com/feeds/api/playlists/" + listId + "?v=2&alt=json&start-index=" + (page * 50 + 1) + "&max-results=50";
         String message = getMessageFromServer("GET", null, null, url);
         if (message == null) {
             return null;

@@ -86,6 +86,10 @@ import at.bartinger.list.item.SectionItem;
  * 
  * 之後要把 video 的 insert 寫在 Service, 也要加個欄位用來 check 這個欄位已經讀過了 or not
  * 
+ * 1. get playlist
+ * 2. play all playlist
+ * 3. get picture, get name
+ * 
  * @author JasonKo
  */
 

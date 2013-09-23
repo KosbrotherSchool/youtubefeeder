@@ -233,6 +233,7 @@ containing a value of this type.
         public static final int none=0x7f060000;
         public static final int normal=0x7f060001;
         public static final int pager=0x7f06000e;
+        public static final int play_all=0x7f06003d;
         public static final int pull_to_refresh_header=0x7f060034;
         public static final int pull_to_refresh_image=0x7f060036;
         public static final int pull_to_refresh_progress=0x7f060035;
@@ -277,6 +278,7 @@ containing a value of this type.
         public static final int activity_main=0x7f090000;
         public static final int context_menu=0x7f090001;
         public static final int main=0x7f090002;
+        public static final int play_list_menu=0x7f090003;
     }
     public static final class string {
         public static final int accounts=0x7f05001e;

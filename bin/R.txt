@@ -102,6 +102,7 @@ int id news_list 0x7f060024
 int id none 0x7f060000
 int id normal 0x7f060001
 int id pager 0x7f06000e
+int id play_all 0x7f06003d
 int id pull_to_refresh_header 0x7f060034
 int id pull_to_refresh_image 0x7f060036
 int id pull_to_refresh_progress 0x7f060035
@@ -142,6 +143,7 @@ int layout pull_to_refresh_header 0x7f03000d
 int menu activity_main 0x7f090000
 int menu context_menu 0x7f090001
 int menu main 0x7f090002
+int menu play_list_menu 0x7f090003
 int string accounts 0x7f05001e
 int string action_settings 0x7f05001b
 int string app_name 0x7f05001a

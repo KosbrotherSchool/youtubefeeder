@@ -29,7 +29,7 @@ import com.youtube.music.channels.entity.YoutubeVideo;
 
 public class PlaylistVideosFragment extends Fragment {
     
-	private ArrayList<YoutubeVideo> videos = new ArrayList<YoutubeVideo>();
+	private static ArrayList<YoutubeVideo> videos = new ArrayList<YoutubeVideo>();
 //	private static String myChannelName;
 	private static int myPage = 0;
 //	private static ArrayList<MyYoutubeVideo> myVideos;
@@ -40,6 +40,7 @@ public class PlaylistVideosFragment extends Fragment {
 	private LinearLayout progressLayout;
 	private static ListVideoAdapter myListAdapter;
 	private static Activity mActivity;
+	private static Boolean isFirst = true;
 	
 	private static boolean mModeIsShowing = false;
 	private static ActionMode mMode;
@@ -104,6 +105,8 @@ public class PlaylistVideosFragment extends Fragment {
   	  bdl.putString("listId", listId);
   	  fragment.setArguments(bdl);
   	  mActivity = theActivity;
+  	  isFirst = true;
+  	  videos.clear();
       return fragment;
         
     }
@@ -134,7 +137,7 @@ public class PlaylistVideosFragment extends Fragment {
 			}
 		});
         
-        if (myListAdapter != null) {
+        if (myListAdapter != null && !isFirst) {
             progressLayout.setVisibility(View.GONE);
             myList.setAdapter(myListAdapter);
         } else {
@@ -182,6 +185,7 @@ public class PlaylistVideosFragment extends Fragment {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
             progressLayout.setVisibility(View.GONE);
+            isFirst = false;
             
             if(videos !=null){
           	  try{
@@ -236,9 +240,28 @@ public class PlaylistVideosFragment extends Fragment {
                 Toast.makeText(getActivity(), "no more data", Toast.LENGTH_SHORT).show();            	
             }       
           	myList.onLoadMoreComplete();
-          	
-          	
         }
+
+		
     }
+    
+    
+    public static HashMap<String, String> getAllVideos() {
+    	HashMap<String,String> videoMap = new HashMap<String, String>();
+    	for(YoutubeVideo item : videos){
+    		videoMap.put(parseVideoLink(item.getLink()), item.getTitle());
+    	}
+		return videoMap;
+	}
+    
+    private static String parseVideoLink(String videoUrl) {
+        String id = "";
+        if(videoUrl.indexOf("&feature")!= -1){
+     	   id = videoUrl.substring(videoUrl.indexOf("v=")+2, videoUrl.indexOf("&feature"));
+        }else{
+     	   id = videoUrl.substring(videoUrl.indexOf("videos/")+7, videoUrl.indexOf("?v=2"));
+        }
+ 		return id;
+ 	}
     
 }
