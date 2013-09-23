@@ -31,7 +31,7 @@ import android.widget.Toast;
 public final class NewVideosFragment extends Fragment {
     
 	private ArrayList<YoutubeVideo> videos = new ArrayList<YoutubeVideo>();
-//	private static String myChannelName;
+//	private static String myChannelName; ttt
 	private static int myPage = 0;
 //	private static ArrayList<MyYoutubeVideo> myVideos;
 	private static String mChannelId;
