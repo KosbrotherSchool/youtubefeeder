@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.kosbrother.youtubefeeder.PlaylistVideosActivity;
 import com.kosbrother.youtubefeeder.R;
-import com.youtube.music.channels.entity.Playlist;
+import com.youtube.music.channels.entity.YoutubePlaylist;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,11 +22,11 @@ import android.widget.TextView;
 public class ListPlaylistAdapter extends BaseAdapter {
 
     private final Activity        activity;
-    private final ArrayList<Playlist> data;
+    private final ArrayList<YoutubePlaylist> data;
     private static LayoutInflater inflater = null;
     public ImageLoader            imageLoader;
 
-    public ListPlaylistAdapter(Activity a, ArrayList<Playlist> d) {
+    public ListPlaylistAdapter(Activity a, ArrayList<YoutubePlaylist> d) {
         activity = a;
         data = d;
         inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

@@ -19,7 +19,7 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.youtube.music.channels.entity.Channel;
-import com.youtube.music.channels.entity.Playlist;
+import com.youtube.music.channels.entity.YoutubePlaylist;
 import com.youtube.music.channels.entity.YoutubeVideo;
 
 //new AsyncTask() {
@@ -105,8 +105,8 @@ public class ChannelApi {
         return videos;
     }
 
-    public static ArrayList<Playlist> getChannelPlaylists(String channelName, int page) {
-        ArrayList<Playlist> lists = new ArrayList();
+    public static ArrayList<YoutubePlaylist> getChannelPlaylists(String channelName, int page) {
+        ArrayList<YoutubePlaylist> lists = new ArrayList();
         String url = "https://gdata.youtube.com/feeds/api/users/" + channelName + "/playlists?v=2&alt=json&start-index=" + (page * 10 + 1) + "&max-results=10";
         String message = getMessageFromServer("GET", null, null, url);
 
@@ -129,7 +129,7 @@ public class ChannelApi {
                 	}catch(Exception e){
                 		title = "nothing";
                 	}
-                    Playlist list = new Playlist(title, listId, thumbnail);
+                    YoutubePlaylist list = new YoutubePlaylist(title, listId, thumbnail);
                     if(!title.equals("nothing")){
                     	lists.add(list);
                     }

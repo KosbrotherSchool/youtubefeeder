@@ -1,15 +1,15 @@
 package com.youtube.music.channels.entity;
 
-public class Playlist {
+public class YoutubePlaylist {
     String title;
     String listId;
     String thumbnail;
 
-    public Playlist() {
+    public YoutubePlaylist() {
         this("", "", "");
     }
 
-    public Playlist(String title, String listId, String thumbnail) {
+    public YoutubePlaylist(String title, String listId, String thumbnail) {
         this.title = title;
         this.listId = listId;
         this.thumbnail = thumbnail;

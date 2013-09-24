@@ -35,6 +35,7 @@ import com.kosbrother.youtubefeeder.database.VideoTable;
 import com.taiwan.imageload.ImageLoader;
 import com.taiwan.imageload.VideoCursorAdapter;
 import com.youtube.music.channels.entity.Channel;
+import com.youtube.music.channels.entity.YoutubePlaylist;
 import com.youtube.music.channels.entity.YoutubeVideo;
 
 import android.os.AsyncTask;
@@ -92,9 +93,9 @@ import at.bartinger.list.item.SectionItem;
  * 
  * 之後要把 video 的 insert 寫在 Service, 也要加個欄位用來 check 這個欄位已經讀過了 or not
  * 
- * 1. get playlist
- * 2. play all playlist
- * 3. get picture, get name
+ * 1. set player view functions
+ * 2. add to playlist
+ * 3. add to favorite
  * 
  * @author JasonKo
  */
@@ -120,6 +121,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
 	
 //	private ChannelCursorAdapter mChannelAdapter;
+	private static ArrayList<YoutubePlaylist>  myPlayList =  new ArrayList<YoutubePlaylist>();
 	
 	private ActionBarHelper mActionBar;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -133,6 +135,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private String mChosenAccountName;
 	private String mDisplayName;
 	private String mAccountImage;
+	
+	public static String favoriteListId;
 	
 	public static final String Initialized_Key = "Initial_Action";
 	private boolean isInitialized = false;
@@ -236,7 +240,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		// Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getSupportLoaderManager().initLoader(0, null, this);
-//        getSupportLoaderManager().initLoader(1, null, this);
 				
 		// get GoogleAccount OAuth
 		credential = GoogleAccountCredential.usingOAuth2(
@@ -287,6 +290,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			mMode = mActivity.startActionMode(modeCallBack);
 			mModeIsShowing = true;
 		}
+	}
+	
+	public static ArrayList<YoutubePlaylist> getMyList() {
+		 return myPlayList;
 	}
 
 	private class DemoDrawerListener implements DrawerLayout.DrawerListener {
@@ -522,7 +529,15 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					PlaylistListResponse mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 20).execute();
 					List<Playlist> lists = mLists.getItems();
 					for (Playlist item : lists){
-						items.add(new EntryItem(item.getSnippet().getTitle(),item.getId(),""));
+						String title = item.getSnippet().getTitle();
+						if(title.indexOf("(YoutubeFeeder)")!=-1){
+							title = title.subSequence(0, title.indexOf("(YoutubeFeeder)")-1).toString();
+							favoriteListId = item.getId();
+						}else{
+							YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
+							myPlayList.add(thePlayList);
+						}
+						items.add(new EntryItem(title,item.getId(),""));
 					}
 					
 					mVideos = ChannelApi.getChannelVideo(mSubscriptionChannels.get(0).getId(), 0, "");

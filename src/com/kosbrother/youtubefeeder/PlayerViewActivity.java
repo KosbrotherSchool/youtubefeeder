@@ -1,25 +1,16 @@
 package com.kosbrother.youtubefeeder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
-import com.google.android.youtube.player.YouTubeBaseActivity;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerView;
-import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
-import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
-import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.VideoListResponse;
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -28,6 +19,25 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
+import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
+import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
+import com.google.android.youtube.player.YouTubePlayerView;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.PlaylistItem;
+import com.google.api.services.youtube.model.PlaylistItemSnippet;
+import com.google.api.services.youtube.model.ResourceId;
+import com.google.api.services.youtube.model.VideoListResponse;
+import com.youtube.music.channels.entity.YoutubePlaylist;
 
 public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 
@@ -163,6 +173,56 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		} else {
 			checkRandom.setChecked(false);
 		}
+		buttonFavorite.setOnClickListener(new Button.OnClickListener(){ 
+            @Override
+            public void onClick(View v) {
+            	new AddToFavoriteList().execute();
+            }         
+
+        });
+		buttonPlayList.setOnClickListener(new Button.OnClickListener(){ 
+            @Override
+            public void onClick(View v) {
+            	
+            	final ArrayList<YoutubePlaylist> myList = MainActivity.getMyList();
+            	
+            	final String[] ListStr = new String[myList.size()];
+            	for (int i=0;i< myList.size();i++){
+            		ListStr[i] = myList.get(i).getTitle();
+            	}
+            	
+                AlertDialog.Builder builder = new AlertDialog.Builder(PlayerViewActivity.this);
+                builder.setTitle("Select List");
+                builder.setItems(ListStr, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {                   
+                        	new AddToList().execute(myList.get(item));     
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+            }         
+
+        });
+		buttonShare.setOnClickListener(new Button.OnClickListener(){ 
+            @Override
+            public void onClick(View v) {
+            	Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, Constants.YOUTUBE_WATCH_URL_PREFIX+videoId);
+                startActivity(Intent.createChooser(intent, "Share..."));          	
+            }         
+
+        });
+		buttonYoutube.setOnClickListener(new Button.OnClickListener(){ 
+            @Override
+            public void onClick(View v) {          	
+            	Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.YOUTUBE_WATCH_URL_PREFIX+videoId));
+                startActivity(browserIntent);
+            }         
+
+        });
+		
 	}
 
 	@Override
@@ -186,7 +246,6 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 			}else{
 				mPlayer.cueVideo(videoId);
 			}
-//			mPlayer.cuePlaylist("PLMDSacPyadX3gD_k9awyJf_4pzLLdHDhg");
 		}
 	}
 
@@ -319,5 +378,107 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		sp.edit().putBoolean(AutoPlay_Key, isAutoPlay).commit();
 		sp.edit().putBoolean(RandomPlay_Key, isRandomPlay).commit();
     }
+	
+	private class AddToFavoriteList extends AsyncTask<Void, Void, PlaylistItem> {
+
+	      @Override
+	      protected void onPreExecute() {
+	          // TODO Auto-generated method stub
+	          super.onPreExecute();          
+	          Toast.makeText(PlayerViewActivity.this, "Adding to Favorite", Toast.LENGTH_SHORT).show();
+	      }
+
+	      @Override
+	      protected PlaylistItem doInBackground(Void... voids) {
+	          // TODO Auto-generated method stub
+	    	  YouTube youtube = new YouTube.Builder(transport, jsonFactory,
+						credential).setApplicationName(Constants.APP_NAME)
+						.build();
+	    	  
+	    	  ResourceId resourceId = new ResourceId();
+	    	  resourceId.setKind("youtube#video");
+	    	  resourceId.setVideoId(videoId);
+	    	  
+	    	  PlaylistItemSnippet playlistItemSnippet = new PlaylistItemSnippet();
+	    	  playlistItemSnippet.setPlaylistId(MainActivity.favoriteListId);
+	    	  playlistItemSnippet.setResourceId(resourceId);
+	    	  
+	    	  PlaylistItem playlistItem = new PlaylistItem();
+	    	  playlistItem.setSnippet(playlistItemSnippet);
+	    	  
+	    	  PlaylistItem returnedPlaylistItem = null;
+	    	  
+		      try {
+					returnedPlaylistItem = youtube.playlistItems().insert("snippet,contentDetails", playlistItem).execute();
+			  } catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+			  }
+	    	  
+	         return returnedPlaylistItem;
+	      }
+
+	      @Override
+	      protected void onPostExecute(PlaylistItem result) {
+	          if (result!=null){
+	        	  Toast.makeText(PlayerViewActivity.this, "Added to Favorite", Toast.LENGTH_SHORT).show();
+	          }else{
+	        	  Toast.makeText(PlayerViewActivity.this, "Failed to Fovorite", Toast.LENGTH_SHORT).show();
+	          }
+	      }
+	  }
+	
+	private class AddToList extends AsyncTask<YoutubePlaylist, Void, YoutubePlaylist> {
+
+	      @Override
+	      protected void onPreExecute() {
+	          // TODO Auto-generated method stub
+	          super.onPreExecute();          
+	          Toast.makeText(PlayerViewActivity.this, "Adding to List", Toast.LENGTH_SHORT).show();
+	      }
+
+	      @Override
+	      protected YoutubePlaylist doInBackground(YoutubePlaylist... playlists) {
+	          // TODO Auto-generated method stub
+	    	  YouTube youtube = new YouTube.Builder(transport, jsonFactory,
+						credential).setApplicationName(Constants.APP_NAME)
+						.build();
+	    	  
+	    	  ResourceId resourceId = new ResourceId();
+	    	  resourceId.setKind("youtube#video");
+	    	  resourceId.setVideoId(videoId);
+	    	  
+	    	  PlaylistItemSnippet playlistItemSnippet = new PlaylistItemSnippet();
+	    	  playlistItemSnippet.setPlaylistId(playlists[0].getListId());
+	    	  playlistItemSnippet.setResourceId(resourceId);
+	    	  
+	    	  PlaylistItem playlistItem = new PlaylistItem();
+	    	  playlistItem.setSnippet(playlistItemSnippet);
+	    	  
+	    	  PlaylistItem returnedPlaylistItem = null;
+	    	  
+		      try {
+					returnedPlaylistItem = youtube.playlistItems().insert("snippet,contentDetails", playlistItem).execute();
+			  } catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+			  }
+	    	  
+		     if (returnedPlaylistItem!=null){
+		    	 return playlists[0];
+		     }else{
+		    	 return null;
+		     }
+	      }
+
+	      @Override
+	      protected void onPostExecute(YoutubePlaylist result) {
+	          if (result!=null){
+	        	  Toast.makeText(PlayerViewActivity.this, "Added to " + result.getTitle(), Toast.LENGTH_SHORT).show();
+	          }else{
+	        	  Toast.makeText(PlayerViewActivity.this, "Failed to Add", Toast.LENGTH_SHORT).show();
+	          }
+	      }
+	  }
 	
 }

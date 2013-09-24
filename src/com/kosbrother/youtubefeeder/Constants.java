@@ -20,10 +20,8 @@ package com.kosbrother.youtubefeeder;
  *         This class hold constants.
  */
 public class Constants {
-//    public static final int MAX_KEYWORD_LENGTH = 30;
-//    public static final String DEFAULT_KEYWORD = "ytdl";
-    // A playlist ID is a string that begins with PL. You must replace this string with the correct
-    // playlist ID for the app to work
-//    public static final String UPLOAD_PLAYLIST = "PL7C1piMRGTRId-HqdYFvSQPy42mO09-Gn";
+
     public static final String APP_NAME = "Youtube Feeder";
+    public static final String YOUTUBE_WATCH_URL_PREFIX = "http://www.youtube.com/watch?v=";
+    
 }

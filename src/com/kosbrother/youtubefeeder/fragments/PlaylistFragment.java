@@ -8,7 +8,7 @@ import com.kosbrother.youtubefeeder.R;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
 import com.taiwan.imageload.ListNothingAdapter;
 import com.taiwan.imageload.ListPlaylistAdapter;
-import com.youtube.music.channels.entity.Playlist;
+import com.youtube.music.channels.entity.YoutubePlaylist;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,10 +22,10 @@ import android.widget.Toast;
 
 public class PlaylistFragment extends Fragment {
 
-  private ArrayList<Playlist> playlists = new ArrayList<Playlist>();
+  private ArrayList<YoutubePlaylist> playlists = new ArrayList<YoutubePlaylist>();
   private static String mChannelId;
   private static int myPage;
-  private ArrayList<Playlist> morePlaylist = new ArrayList<Playlist>();
+  private ArrayList<YoutubePlaylist> morePlaylist = new ArrayList<YoutubePlaylist>();
   private ListPlaylistAdapter myListAdapter;
   private Boolean checkLoad = true;
   private LoadMoreListView  myList;
