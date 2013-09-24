@@ -4,6 +4,8 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -73,21 +75,28 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
          */
         
         int title_index  = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA1);
-        int link_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA2);
+        int id_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA2);
         int thumbnail_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA3);
         int uploadTime_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA4);
         int viewCount_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA5);
         int duration_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA6);
         int likes_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA7);
 //      int dislikes_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA8);
+        int is_read_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA9);
         
-        String mId = parseVideoLink(cursor.getString(link_index));
-        
+        String mId = cursor.getString(id_index);      
         textId.setText(mId);
         
         
+        int isRead = cursor.getInt(is_read_index);
+        if (isRead == 0){
+        	textTitle.setTextColor(mContext.getResources().getColor(R.color.black));
+        }else{
+        	textTitle.setTextColor(mContext.getResources().getColor(R.color.gray_1));
+        }
         // set title text
         textTitle.setText(cursor.getString(title_index));
+        
         
         // set views text
         int views = cursor.getInt(viewCount_index);
@@ -141,7 +150,12 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
             	Intent intent = new Intent(mContext, PlayerViewActivity.class);
             	intent.putExtra("VideoId", id);
             	intent.putExtra("VideoTitle", title);
-            	mContext.startActivity(intent);  
+            	mContext.startActivity(intent);
+            	
+            	ContentResolver cr = mContext.getContentResolver();
+            	ContentValues values = new ContentValues();
+            	values.put(VideoTable.COLUMN_NAME_DATA9, 1);
+            	cr.update(VideoTable.CONTENT_URI, values, VideoTable.COLUMN_NAME_DATA2+" = ?", new String[] {id});
             }
 
         });
@@ -165,17 +179,6 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
     	
     }
     
-    
-    
-    private String parseVideoLink(String videoUrl) {
-        String id = "";
-        if(videoUrl.indexOf("&feature")!= -1){
-     	   id = videoUrl.substring(videoUrl.indexOf("v=")+2, videoUrl.indexOf("&feature"));
-        }else{
-     	   id = videoUrl.substring(videoUrl.indexOf("videos/")+7, videoUrl.indexOf("?v=2"));
-        }
- 		return id;
- 	}
 
 	public static int[] splitToComponentTimes(int i)
     {

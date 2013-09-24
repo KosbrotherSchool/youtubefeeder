@@ -42,7 +42,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + VideoTable.COLUMN_NAME_DATA5 + " INTEGER,"
                 + VideoTable.COLUMN_NAME_DATA6 + " INTEGER,"
                 + VideoTable.COLUMN_NAME_DATA7 + " INTEGER,"
-                + VideoTable.COLUMN_NAME_DATA8 + " INTEGER"
+                + VideoTable.COLUMN_NAME_DATA8 + " INTEGER,"
+                + VideoTable.COLUMN_NAME_DATA9 + " INTEGER,"
+                + VideoTable.COLUMN_NAME_DATA10 + " TEXT"
                 + ");");
         
         db.execSQL("CREATE TABLE " + ChannelTable.TABLE_NAME + " ("

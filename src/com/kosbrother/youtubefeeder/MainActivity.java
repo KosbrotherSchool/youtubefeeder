@@ -97,6 +97,14 @@ import at.bartinger.list.item.SectionItem;
  * 2. add to playlist
  * 3. add to favorite
  * 
+ * 1. add is_read column to video table
+ * 2. write a service to run in background to download videos
+ * a. for initiate 每個頻道讀2個影片
+ * b. 定期檢查影片有新的就加入(Channel 要記下目前的影片數)
+ * c. 該頻道 havn't read 留著, read 了的砍掉
+ * 
+ * 剩 Service!!
+ * 
  * @author JasonKo
  */
 
@@ -432,16 +440,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						.build();
 
 				try {
-					/*
-					 * Now that the user is authenticated, the app makes a
-					 * channels list request to get the authenticated user's
-					 * channel. Returned with that data is the playlist id for
-					 * the uploaded videos.
-					 * https://developers.google.com/youtube
-					 * /v3/docs/channels/list
-					 */
-					// ChannelListResponse clr = youtube.channels()
-					// .list("contentDetails").setMine(true).execute();
 
 					// Use setPageToken to set the page
 					// Therefore,
@@ -457,6 +455,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					Cursor channelCursor = cr.query(ChannelTable.CONTENT_URI, PROJECTION_CHANNEL, null, null, null);
 					
 					if (channelCursor.getCount() == 0){
+						// read from internet youtube
 						SubscriptionListResponse mSubscriptions = youtube
 								.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();
 						
@@ -480,6 +479,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 							cr.insert(ChannelTable.CONTENT_URI, values);
 						}
 					}else{
+						// read from database
 						int id_index = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA1);
 				        int title_index  = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA2);
 				        int thumbnail_index = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA3);     
@@ -498,13 +498,14 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				        }
 					}
 					
+					// set drawer list 					
 					sectionListPosition = items.size();
 					items.add(new SectionItem("播放清單"));
 					
 					
+					// need add favorite to playlist for first time
 					if (!isInitialized){
-						try{							
-							// need add favorite to playlist at first?
+						try{													
 							PlaylistSnippet playlistSnippet = new PlaylistSnippet();
 						    playlistSnippet.setTitle("我的最愛 (YoutubeFeeder)");
 							
@@ -523,9 +524,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 							
 						}
 					}
-				    
-//					items.add(new EntryItem("我的最愛","",""));
-					
+				    				
 					PlaylistListResponse mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 20).execute();
 					List<Playlist> lists = mLists.getItems();
 					for (Playlist item : lists){
@@ -540,62 +539,34 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						items.add(new EntryItem(title,item.getId(),""));
 					}
 					
-					mVideos = ChannelApi.getChannelVideo(mSubscriptionChannels.get(0).getId(), 0, "");
-					
-					/**
-			         * public static final String COLUMN_NAME_DATA1 = "video_title";
-			         * public static final String COLUMN_NAME_DATA2 = "video_link";
-			    	 * public static final String COLUMN_NAME_DATA3 = "video_thumbnail";
-			    	 * public static final String COLUMN_NAME_DATA4 = "video_uploadTime";
-			    	 * public static final String COLUMN_NAME_DATA5 = "video_viewCount";
-			    	 * public static final String COLUMN_NAME_DATA6 = "video_duration";
-			    	 * public static final String COLUMN_NAME_DATA7 = "video_likes";
-			    	 * public static final String COLUMN_NAME_DATA8 = "video_dislikes";
-			         */
-					
 					cr.delete(VideoTable.CONTENT_URI, "", null);
 //					cr.delete(VideoTable.CONTENT_ID_URI_BASE.buildUpon().appendPath("1").build(), null, null);
-					for (int i = 0; i< mVideos.size(); i++){
-						YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
-						ContentValues values = new ContentValues();
-			        	values.put(VideoTable.COLUMN_NAME_DATA1, video.getTitle());
-			        	values.put(VideoTable.COLUMN_NAME_DATA2, video.getLink());
-			        	values.put(VideoTable.COLUMN_NAME_DATA3, video.getThumbnail());
-			        	// date to string 
-			        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
-			            final String dateString = formatter.format(video.getUploadDate()); 
-			        	values.put(VideoTable.COLUMN_NAME_DATA4, dateString);
-			        	
-			        	values.put(VideoTable.COLUMN_NAME_DATA5, video.getViewCount());
-			        	values.put(VideoTable.COLUMN_NAME_DATA6, video.getDuration());
-			        	values.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
-			        	values.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
-			        	cr.insert(VideoTable.CONTENT_URI, values);
+					
+					// every channel add 2 videos
+					for (Channel theChannel: mSubscriptionChannels){
+						mVideos = ChannelApi.getChannelVideo(theChannel.getId(), 0, "", 2);
+									
+						for (int i = 0; i< mVideos.size(); i++){
+							YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
+							ContentValues values = new ContentValues();
+				        	values.put(VideoTable.COLUMN_NAME_DATA1, video.getTitle());
+				        	values.put(VideoTable.COLUMN_NAME_DATA2, parseVideoLink(video.getLink()));
+				        	values.put(VideoTable.COLUMN_NAME_DATA3, video.getThumbnail());
+				        	// date to string 
+				        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
+				            final String dateString = formatter.format(video.getUploadDate()); 
+				        	values.put(VideoTable.COLUMN_NAME_DATA4, dateString);
+				        	
+				        	values.put(VideoTable.COLUMN_NAME_DATA5, video.getViewCount());
+				        	values.put(VideoTable.COLUMN_NAME_DATA6, video.getDuration());
+				        	values.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
+				        	values.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
+				        	values.put(VideoTable.COLUMN_NAME_DATA9, 0);
+				        	values.put(VideoTable.COLUMN_NAME_DATA10, theChannel.getId());
+				        	cr.insert(VideoTable.CONTENT_URI, values);
+						}
 					}
 					
-					// next page token 是要取得下一頁資料時用的
-//					String bbb = mSubscriptions.getNextPageToken();
-
-					/**
-					 * 如果要取得 video, 則 1. 先取得 channel, 則取得 playlist 的 id 2. 透過
-					 * playlist 的 id, 利用 playlistItems(), 可以取得 video 的 id 3. 透過
-					 * video 的 id, 可以取得 video
-					 * 
-					 * 作法1.
-					 * 把 Channel 的影片數記下來,
-					 * 如果影片數超過現有的就 update
-					 * 
-					 * 作法2.
-					 * 1.每當 channel 讀取了多少影片, 直接將影片寫入 DB,
-					 * 讀取影片時如果發現 DB 無此影片, 則顯示出來.
-					 * 2.當訂閱的 channel 移除時, 將屬於該 channel 的影片刪除.
-					 * 要注意的是 SQLite 的 Maxmium Size 是 3000.
-					 * (所以, 如果我的匯入頻道上限是 15, 每個頻道的 video 記錄上限是 100 個, 這樣就不會有超過的問題.
-					 * 每個頻道的讀取上限設為 100 好了!)
-					 * 
-					 * 
-					 */
-
 					return null;
 
 				} catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
@@ -735,7 +706,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		VideoTable.COLUMN_NAME_DATA5,
 		VideoTable.COLUMN_NAME_DATA6,
 		VideoTable.COLUMN_NAME_DATA7,
-		VideoTable.COLUMN_NAME_DATA8
+		VideoTable.COLUMN_NAME_DATA8,
+		VideoTable.COLUMN_NAME_DATA9,
+		VideoTable.COLUMN_NAME_DATA10
     };
 	
 	static final String[] PROJECTION_CHANNEL = new String[] {
@@ -777,5 +750,15 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			
 		}
 	}
+	
+	private String parseVideoLink(String videoUrl) {
+        String id = "";
+        if(videoUrl.indexOf("&feature")!= -1){
+     	   id = videoUrl.substring(videoUrl.indexOf("v=")+2, videoUrl.indexOf("&feature"));
+        }else{
+     	   id = videoUrl.substring(videoUrl.indexOf("videos/")+7, videoUrl.indexOf("?v=2"));
+        }
+ 		return id;
+ 	}
 
 }

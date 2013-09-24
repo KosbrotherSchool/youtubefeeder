@@ -50,14 +50,15 @@ public class VideoTable implements BaseColumns {
      */
     
     public static final String COLUMN_NAME_DATA1 = "video_title";
-    public static final String COLUMN_NAME_DATA2 = "video_link";
+    public static final String COLUMN_NAME_DATA2 = "video_id";
     public static final String COLUMN_NAME_DATA3 = "video_thumbnail";
     public static final String COLUMN_NAME_DATA4 = "video_uploadTime";
     public static final String COLUMN_NAME_DATA5 = "video_viewCount";
     public static final String COLUMN_NAME_DATA6 = "video_duration";
     public static final String COLUMN_NAME_DATA7 = "video_likes";
     public static final String COLUMN_NAME_DATA8 = "video_dislikes";
-    
+    public static final String COLUMN_NAME_DATA9 = "video_is_read"; // 0 for havn't read, 1 for read
+    public static final String COLUMN_NAME_DATA10 = "video_channel_id";
     
     
 }
