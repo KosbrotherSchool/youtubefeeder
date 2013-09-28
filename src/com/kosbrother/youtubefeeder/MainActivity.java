@@ -67,6 +67,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -124,6 +125,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private TextView textName;
 	private ImageView viewAvatar;
 	public ImageLoader imageLoader;
+	private LinearLayout progressLayout;
 	
 	private static VideoCursorAdapter mVideoAdapter;
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
@@ -148,6 +150,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	
 	public static final String Initialized_Key = "Initial_Action";
 	private boolean isInitialized = false;
+	private boolean isListSetted = false;
 	
 	private int sectionListPosition;
 	
@@ -226,6 +229,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		mainListView = (ListView) findViewById(R.id.main_list_view);
 		textName = (TextView) findViewById(R.id.left_name);
 		viewAvatar = (ImageView) findViewById(R.id.left_avatar);
+		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
 		
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
@@ -391,6 +395,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
         }else{
 			switch (item.getItemId()) {
 			case R.id.menu_refresh:
+				progressLayout.setVisibility(View.VISIBLE);
 				loadData();
 				break;
 			case R.id.menu_accounts:
@@ -433,6 +438,14 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		setProgressBarIndeterminateVisibility(true);
 		new AsyncTask<Void, Void, List<VideoData>>() {
 			@Override
+	        protected void onPreExecute() {
+	            // TODO Auto-generated method stub
+	            super.onPreExecute();
+	            
+
+	        }
+			
+			@Override
 			protected List<VideoData> doInBackground(Void... voids) {
 
 				YouTube youtube = new YouTube.Builder(transport, jsonFactory,
@@ -441,21 +454,13 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 
 				try {
 
-					// Use setPageToken to set the page
-					// Therefore,
-					// 1. get the first page,
-					// 2. getNextPageToken(),
-					// 3. get next page data by setPageToken("your token")
-					
-					items.add(new SectionItem("我的訂閱"));
-					items.add(new EntryItem("全部項目","",""));
-					
-					// check table 在不在,  如果不在就讀網路並 insert					
+					if (!isListSetted){
+						items.add(new SectionItem("我的訂閱"));
+						items.add(new EntryItem("全部項目","",""));
+					}
 					ContentResolver cr = getContentResolver();
-					Cursor channelCursor = cr.query(ChannelTable.CONTENT_URI, PROJECTION_CHANNEL, null, null, null);
 					
-					if (channelCursor.getCount() == 0){
-						// read from internet youtube
+					if (!isInitialized){
 						SubscriptionListResponse mSubscriptions = youtube
 								.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();
 						
@@ -477,34 +482,16 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				        	values.put(ChannelTable.COLUMN_NAME_DATA3, theChannel.getThumbnail());
 				        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
 							cr.insert(ChannelTable.CONTENT_URI, values);
+							
+							updateVideos( cr, 2, theChannel.getId());
+														
 						}
-					}else{
-						// read from database
-						int id_index = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA1);
-				        int title_index  = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA2);
-				        int thumbnail_index = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA3);     
-				        int videoNums_index = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA4);
-				        channelCursor.moveToFirst();
-				        Boolean isReading = true;
-				        while (isReading){
-				        	Channel theChannel = new Channel(channelCursor.getString(id_index),
-				        			channelCursor.getString(title_index),
-				        			channelCursor.getString(thumbnail_index),
-				        			channelCursor.getInt(videoNums_index)
-									);
-				        	mSubscriptionChannels.add(theChannel);
-				        	items.add(new EntryItem(theChannel.getTitle(), theChannel.getId(), theChannel.getThumbnail()));
-				        	isReading = channelCursor.moveToNext();
-				        }
-					}
-					
-					// set drawer list 					
-					sectionListPosition = items.size();
-					items.add(new SectionItem("播放清單"));
-					
-					
-					// need add favorite to playlist for first time
-					if (!isInitialized){
+						
+						// set drawer list 					
+						sectionListPosition = items.size();
+						items.add(new SectionItem("播放清單"));
+						
+						// add favorite playlist
 						try{													
 							PlaylistSnippet playlistSnippet = new PlaylistSnippet();
 						    playlistSnippet.setTitle("我的最愛 (YoutubeFeeder)");
@@ -517,54 +504,72 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						    youTubePlaylist.setStatus(playlistStatus);
 						    
 						    youtube.playlists().insert("snippet", youTubePlaylist).execute();
-						    
-						    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-				    		sp.edit().putBoolean(Initialized_Key, true).commit();
+						   
 						}catch(Exception e){
 							
 						}
-					}
-				    				
-					PlaylistListResponse mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 20).execute();
-					List<Playlist> lists = mLists.getItems();
-					for (Playlist item : lists){
-						String title = item.getSnippet().getTitle();
-						if(title.indexOf("(YoutubeFeeder)")!=-1){
-							title = title.subSequence(0, title.indexOf("(YoutubeFeeder)")-1).toString();
-							favoriteListId = item.getId();
-						}else{
-							YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
-							myPlayList.add(thePlayList);
-						}
-						items.add(new EntryItem(title,item.getId(),""));
-					}
-					
-					cr.delete(VideoTable.CONTENT_URI, "", null);
-//					cr.delete(VideoTable.CONTENT_ID_URI_BASE.buildUpon().appendPath("1").build(), null, null);
-					
-					// every channel add 2 videos
-					for (Channel theChannel: mSubscriptionChannels){
-						mVideos = ChannelApi.getChannelVideo(theChannel.getId(), 0, "", 2);
-									
-						for (int i = 0; i< mVideos.size(); i++){
-							YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
-							ContentValues values = new ContentValues();
-				        	values.put(VideoTable.COLUMN_NAME_DATA1, video.getTitle());
-				        	values.put(VideoTable.COLUMN_NAME_DATA2, parseVideoLink(video.getLink()));
-				        	values.put(VideoTable.COLUMN_NAME_DATA3, video.getThumbnail());
-				        	// date to string 
-				        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
-				            final String dateString = formatter.format(video.getUploadDate()); 
-				        	values.put(VideoTable.COLUMN_NAME_DATA4, dateString);
+						
+						setPlayListData(youtube);
+						isInitialized = true;
+						isListSetted = true;
+						
+					}else{
+						cr.delete(VideoTable.CONTENT_URI, VideoTable.COLUMN_NAME_DATA9+" = ?" , new String[] {"1"});
+						
+						SubscriptionListResponse mSubscriptions = youtube.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();				
+						List<Subscription> lists = mSubscriptions.getItems();
+						
+						for (Subscription item : lists){	
+							Channel theChannel = new Channel(item.getSnippet().getResourceId().getChannelId(),
+									item.getSnippet().getTitle(),
+									item.getSnippet().getThumbnails().getDefault().getUrl(),
+									item.getContentDetails().getTotalItemCount().intValue()
+									);
+							if (!isListSetted){
+								mSubscriptionChannels.add(theChannel);
+								items.add(new EntryItem(theChannel.getTitle(), theChannel.getId(), theChannel.getThumbnail()));
+							}
+							
+				        	String channelId = item.getSnippet().getResourceId().getChannelId();			        	
 				        	
-				        	values.put(VideoTable.COLUMN_NAME_DATA5, video.getViewCount());
-				        	values.put(VideoTable.COLUMN_NAME_DATA6, video.getDuration());
-				        	values.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
-				        	values.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
-				        	values.put(VideoTable.COLUMN_NAME_DATA9, 0);
-				        	values.put(VideoTable.COLUMN_NAME_DATA10, theChannel.getId());
-				        	cr.insert(VideoTable.CONTENT_URI, values);
+				        	Cursor theChannelCursor = cr.query(ChannelTable.CONTENT_URI, MainActivity.PROJECTION_CHANNEL, 
+				        			ChannelTable.COLUMN_NAME_DATA1+" = ?", new String[] {channelId}, null);
+				        	theChannelCursor.moveToFirst();
+				        	
+				        	if (theChannelCursor.getCount() != 0){  
+						        int videoNums_index = theChannelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA4);
+						        int dataChannelNums = theChannelCursor.getInt(videoNums_index);
+						        if(dataChannelNums< theChannel.getVideoNums()){
+						        	int updateNums = theChannel.getVideoNums() - dataChannelNums;
+						        	updateVideos(cr,updateNums,theChannel.getId());
+						        	ContentValues values = new ContentValues();
+						        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
+						        	cr.update(ChannelTable.CONTENT_URI, values, ChannelTable.COLUMN_NAME_DATA1+" = ?" , new String[] {channelId});
+						        }else if(dataChannelNums > theChannel.getVideoNums()) {
+						        	ContentValues values = new ContentValues();
+						        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
+						        	cr.update(ChannelTable.CONTENT_URI, values, ChannelTable.COLUMN_NAME_DATA1+" = ?" , new String[] {channelId});
+						        }
+				        	} else {
+				        		ContentValues values = new ContentValues();
+								values.put(ChannelTable.COLUMN_NAME_DATA1, theChannel.getId());
+					        	values.put(ChannelTable.COLUMN_NAME_DATA2, theChannel.getTitle());
+					        	values.put(ChannelTable.COLUMN_NAME_DATA3, theChannel.getThumbnail());
+					        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
+					        	cr.insert(ChannelTable.CONTENT_URI, values);			        	
+					        	updateVideos( cr, 2, theChannel.getId());				        	
+				        	}
+				        	
 						}
+						
+				        
+				        // set drawer list
+						if (!isListSetted){
+							sectionListPosition = items.size();
+							items.add(new SectionItem("播放清單"));
+							setPlayListData(youtube);
+						}
+						isListSetted = true;
 					}
 					
 					return null;
@@ -582,9 +587,12 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				return null;
 			}
 
+			
+
 			@Override
 			protected void onPostExecute(List<VideoData> videos) {
 				setProgressBarIndeterminateVisibility(false);
+				progressLayout.setVisibility(View.GONE);
 				
 				mDrawerAdapter = new EntryAdapter(MainActivity.this, items);
 				mDrawerListView.setAdapter(mDrawerAdapter);
@@ -611,14 +619,33 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					}
 				}));
 				
-				if (videos == null) {
-					return;
-				}
-
-				// mUploadsListFragment.setVideos(videos);
+				
 			}
 
 		}.execute((Void) null);
+	}
+	
+	private void setPlayListData(YouTube youtube) {
+		// TODO Auto-generated method stub
+		PlaylistListResponse mLists;
+		try {
+			mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 20).execute();
+			List<Playlist> lists = mLists.getItems();
+			for (Playlist item : lists){
+				String title = item.getSnippet().getTitle();
+				if(title.indexOf("(YoutubeFeeder)")!=-1){
+					title = title.subSequence(0, title.indexOf("(YoutubeFeeder)")-1).toString();
+					favoriteListId = item.getId();
+				}else{
+					YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
+					myPlayList.add(thePlayList);
+				}
+				items.add(new EntryItem(title,item.getId(),""));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 	private void chooseAccount() {
@@ -711,7 +738,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		VideoTable.COLUMN_NAME_DATA10
     };
 	
-	static final String[] PROJECTION_CHANNEL = new String[] {
+	public static final String[] PROJECTION_CHANNEL = new String[] {
 		ChannelTable._ID,
 		ChannelTable.COLUMN_NAME_DATA1,
 		ChannelTable.COLUMN_NAME_DATA2,
@@ -736,6 +763,11 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		if (loader.getId() == 0){
 			mVideoAdapter.swapCursor(data);
+			if(data.getCount() == 0){
+				mainListView.setVisibility(View.GONE);
+			}else{
+				mainListView.setVisibility(View.VISIBLE);
+			}
 		}else if (loader.getId() == 1){
 			
 		}
@@ -751,7 +783,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		}
 	}
 	
-	private String parseVideoLink(String videoUrl) {
+	public static String parseVideoLink(String videoUrl) {
         String id = "";
         if(videoUrl.indexOf("&feature")!= -1){
      	   id = videoUrl.substring(videoUrl.indexOf("v=")+2, videoUrl.indexOf("&feature"));
@@ -760,5 +792,39 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
         }
  		return id;
  	}
+	
+	private void updateVideos(ContentResolver cr, int updateNums, String id) {
+		// TODO Auto-generated method stub
+		mVideos = ChannelApi.getChannelVideo(id, 0, "", updateNums);
+		for (int i = 0; i< mVideos.size(); i++){
+			YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
+			ContentValues videoValues = new ContentValues();
+			videoValues.put(VideoTable.COLUMN_NAME_DATA1, video.getTitle());
+			videoValues.put(VideoTable.COLUMN_NAME_DATA2, MainActivity.parseVideoLink(video.getLink()));
+			videoValues.put(VideoTable.COLUMN_NAME_DATA3, video.getThumbnail());
+        	// date to string 
+        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
+            final String dateString = formatter.format(video.getUploadDate()); 
+            videoValues.put(VideoTable.COLUMN_NAME_DATA4, dateString);
+        	
+            videoValues.put(VideoTable.COLUMN_NAME_DATA5, video.getViewCount());
+            videoValues.put(VideoTable.COLUMN_NAME_DATA6, video.getDuration());
+            videoValues.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
+            videoValues.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
+            videoValues.put(VideoTable.COLUMN_NAME_DATA9, 0);
+            videoValues.put(VideoTable.COLUMN_NAME_DATA10, id);
+        	cr.insert(VideoTable.CONTENT_URI, videoValues);
+		}	
+	}
 
+	@Override
+	 protected void onStop() {
+	  // TODO Auto-generated method stub
+	  super.onStop();
+	  SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		sp.edit().putBoolean(Initialized_Key, isInitialized).commit();
+	 }
+	
+	 
+	
 }
