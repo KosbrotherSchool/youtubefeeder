@@ -23,7 +23,7 @@ public class ChannelTabs extends FragmentActivity {
     ViewPager  mViewPager;
     TabsAdapter mTabsAdapter;
     private static String channelId;
-    private String channelTitle;
+    private static String channelTitle;
     private Bundle mBundle;
 
     @Override
@@ -136,11 +136,11 @@ public class ChannelTabs extends FragmentActivity {
         public Fragment getItem(int position) {
         	Fragment kk = new Fragment();     	
         	if(position==0){
-        		kk = NewVideosFragment.newInstance(channelId, 0, mContext);
+        		kk = NewVideosFragment.newInstance(channelId, 0, mContext, channelTitle);
         	}else if(position == 1){
-        		kk = PopularFragment.newInstance(channelId, 0);
+        		kk = PopularFragment.newInstance(channelId, 0, channelTitle);
         	}else if(position == 2){
-        		kk = PlaylistFragment.newInstance(channelId, 0);
+        		kk = PlaylistFragment.newInstance(channelId, 0, channelTitle);
         	}
             return kk;
         }

@@ -25,13 +25,14 @@ public class ListPlaylistAdapter extends BaseAdapter {
     private final ArrayList<YoutubePlaylist> data;
     private static LayoutInflater inflater = null;
     public ImageLoader            imageLoader;
+    private String mChannelTitle;
 
-    public ListPlaylistAdapter(Activity a, ArrayList<YoutubePlaylist> d) {
+    public ListPlaylistAdapter(Activity a, ArrayList<YoutubePlaylist> d, String channelTitle) {
         activity = a;
         data = d;
         inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         imageLoader = new ImageLoader(activity.getApplicationContext(), 70);
-        
+        mChannelTitle = channelTitle;
     }
 
     public int getCount() {
@@ -76,6 +77,7 @@ public class ListPlaylistAdapter extends BaseAdapter {
 	 				Bundle bundle = new Bundle();
 	 				bundle.putString("ListId", id); 
 	 				bundle.putString("ListTitle", title);
+	 				bundle.putString("ChannelTitle", mChannelTitle);
 	 				intent.putExtras(bundle);
 	 				activity.startActivity(intent); 
 	                

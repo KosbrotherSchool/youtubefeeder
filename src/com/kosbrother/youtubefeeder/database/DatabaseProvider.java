@@ -63,6 +63,7 @@ public class DatabaseProvider extends ContentProvider {
         mNotesProjectionMap.put(VideoTable.COLUMN_NAME_DATA8, VideoTable.COLUMN_NAME_DATA8);
         mNotesProjectionMap.put(VideoTable.COLUMN_NAME_DATA9, VideoTable.COLUMN_NAME_DATA9);
         mNotesProjectionMap.put(VideoTable.COLUMN_NAME_DATA10, VideoTable.COLUMN_NAME_DATA10);
+        mNotesProjectionMap.put(VideoTable.COLUMN_NAME_DATA11, VideoTable.COLUMN_NAME_DATA11);
         
         mChannelsProjectionMap = new HashMap<String, String>();
         mChannelsProjectionMap.put(ChannelTable._ID, ChannelTable._ID);

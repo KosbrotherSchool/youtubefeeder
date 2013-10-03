@@ -35,6 +35,7 @@ public final class NewVideosFragment extends Fragment {
 	private static int myPage = 0;
 //	private static ArrayList<MyYoutubeVideo> myVideos;
 	private static String mChannelId;
+	private static String mChannelName;
 	private LoadMoreListView  myList;
 	private ArrayList<YoutubeVideo> moreVideos;
 	private Boolean checkLoad = true;
@@ -100,7 +101,7 @@ public final class NewVideosFragment extends Fragment {
 	};
 	
 	
-    public static NewVideosFragment newInstance(String channelId, int page, Context mContext) {     
+    public static NewVideosFragment newInstance(String channelId, int page, Context mContext, String channelName) {     
    	 
   	  myPage = page;
 //  	  mChannelId = channelId;
@@ -110,6 +111,7 @@ public final class NewVideosFragment extends Fragment {
   	  fragment.setArguments(bdl);
   	  mActivity = (Activity) mContext; 
   	  isFirst = true;
+  	  mChannelName = channelName;
       return fragment;
         
     }
@@ -192,7 +194,7 @@ public final class NewVideosFragment extends Fragment {
             
             if(videos !=null){
           	  try{
-          		  myListAdapter = new ListVideoAdapter(getActivity(), videos);
+          		  myListAdapter = new ListVideoAdapter(getActivity(), videos, mChannelName);
   		          myList.setAdapter(myListAdapter);
           	  }catch(Exception e){
           		 

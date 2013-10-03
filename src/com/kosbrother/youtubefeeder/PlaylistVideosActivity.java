@@ -22,6 +22,7 @@ public class PlaylistVideosActivity extends FragmentActivity {
     private Bundle mBundle;
 	private String listTitle;
 	private String listId;
+	 private static String channelTitle;
 	private PlaylistVideosFragment newFragment;
     
     @Override
@@ -34,9 +35,9 @@ public class PlaylistVideosActivity extends FragmentActivity {
         mBundle = this.getIntent().getExtras();
         listTitle = mBundle.getString("ListTitle");
         listId = mBundle.getString("ListId");
+        channelTitle = mBundle.getString("ChannelTitle");
         
-        
-        newFragment =  PlaylistVideosFragment.newInstance(listId, 0, PlaylistVideosActivity.this);
+        newFragment =  PlaylistVideosFragment.newInstance(listId, 0, PlaylistVideosActivity.this, channelTitle);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(CONTENT_VIEW_ID, newFragment).commit();
         

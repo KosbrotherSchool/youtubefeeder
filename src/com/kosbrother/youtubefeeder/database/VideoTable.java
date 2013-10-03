@@ -59,6 +59,7 @@ public class VideoTable implements BaseColumns {
     public static final String COLUMN_NAME_DATA8 = "video_dislikes";
     public static final String COLUMN_NAME_DATA9 = "video_is_read"; // 0 for havn't read, 1 for read
     public static final String COLUMN_NAME_DATA10 = "video_channel_id";
+    public static final String COLUMN_NAME_DATA11 = "video_channel_title";
     
     
 }

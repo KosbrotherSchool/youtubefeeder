@@ -34,6 +34,7 @@ public class PlaylistVideosFragment extends Fragment {
 	private static int myPage = 0;
 //	private static ArrayList<MyYoutubeVideo> myVideos;
 	private static String mListId;
+	private static String mChannelName;
 	private LoadMoreListView  myList;
 	private ArrayList<YoutubeVideo> moreVideos;
 	private Boolean checkLoad = true;
@@ -97,7 +98,7 @@ public class PlaylistVideosFragment extends Fragment {
 	};
 	
 	
-    public static PlaylistVideosFragment newInstance(String listId, int page, Activity theActivity) {     
+    public static PlaylistVideosFragment newInstance(String listId, int page, Activity theActivity,String channelName) {     
    	 
   	  myPage = page;
 //  	  mChannelId = channelId;
@@ -107,6 +108,7 @@ public class PlaylistVideosFragment extends Fragment {
   	  fragment.setArguments(bdl);
   	  mActivity = theActivity;
   	  isFirst = true;
+  	  mChannelName = channelName;
   	  if (videos!=null){
   		  videos.clear();
   	  }
@@ -192,7 +194,7 @@ public class PlaylistVideosFragment extends Fragment {
             
             if(videos !=null){
           	  try{
-          		  myListAdapter = new ListVideoAdapter(getActivity(), videos);
+          		  myListAdapter = new ListVideoAdapter(getActivity(), videos, mChannelName);
   		          myList.setAdapter(myListAdapter);
           	  }catch(Exception e){
           		 

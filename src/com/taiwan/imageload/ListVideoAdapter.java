@@ -35,12 +35,14 @@ public class ListVideoAdapter extends BaseAdapter {
     private static LayoutInflater inflater = null;
     public ImageLoader            imageLoader;
     private static HashMap<String,String> checkMap = new HashMap<String, String>();
-
-    public ListVideoAdapter(Activity context, ArrayList<YoutubeVideo> d) {
+    private String channel_author;
+    
+    public ListVideoAdapter(Activity context, ArrayList<YoutubeVideo> d, String channel_title) {
     	mActivity = context;
         data = d;
         inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         imageLoader = new ImageLoader(mActivity.getApplicationContext(), 70);
+        channel_author = channel_title;
     }
 
     public int getCount() {
@@ -68,10 +70,13 @@ public class ListVideoAdapter extends BaseAdapter {
         TextView textLikes = (TextView) vi.findViewById(R.id.text_list_like);
         TextView textId = (TextView) vi.findViewById(R.id.text_id);
         CheckBox checkBox = (CheckBox) vi.findViewById(R.id.checkbox_video);
+        TextView textAuthor = (TextView) vi.findViewById(R.id.text_author);
         
         // set id
         String mId = parseVideoLink(data.get(position).getLink());      
         textId.setText(mId);
+        
+        textAuthor.setText("by "+ channel_author);
         
         // set title text
         textTitle.setText(data.get(position).getTitle());

@@ -61,6 +61,7 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
         TextView textLikes = (TextView) view.findViewById(R.id.text_list_like);
         TextView textId = (TextView) view.findViewById(R.id.text_id);
         CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkbox_video);
+        TextView textAuthor = (TextView) view.findViewById(R.id.text_author);
        
 	    
         /**
@@ -83,10 +84,12 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
         int likes_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA7);
 //      int dislikes_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA8);
         int is_read_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA9);
+        int channel_title_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA11);
         
         String mId = cursor.getString(id_index);      
         textId.setText(mId);
         
+        textAuthor.setText("by "+cursor.getString(channel_title_index));
         
         int isRead = cursor.getInt(is_read_index);
         if (isRead == 0){

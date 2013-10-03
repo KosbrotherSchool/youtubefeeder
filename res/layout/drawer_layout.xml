@@ -86,7 +86,19 @@
                 android:layout_marginLeft="10dip"
                 android:textSize="25dp" />
         </LinearLayout>
-
+		
+        <LinearLayout
+            android:id="@+id/layout_drawer_progress"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:background="#EBEBEB"
+            android:visibility="gone" >
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        
         <ListView
             android:id="@+id/left_list_view"
             android:layout_width="fill_parent"

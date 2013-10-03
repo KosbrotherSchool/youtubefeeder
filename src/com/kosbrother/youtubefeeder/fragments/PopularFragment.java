@@ -24,13 +24,14 @@ public final class PopularFragment extends Fragment {
 //	private static String myChannelName;
 	private static int myPage;
 	private static String mChannelId;
+	private static String mChannelName;
 	private LoadMoreListView  myList;
 	private ArrayList<YoutubeVideo> moreVideos;
 	private ListVideoAdapter myListAdapter;
 	private Boolean checkLoad = true;
 	private LinearLayout progressLayout;
 	
-    public static PopularFragment newInstance(String channelId, int page) {     
+    public static PopularFragment newInstance(String channelId, int page, String channelName) {     
    	 
   	  myPage = page;
 //    mChannelId = channelId;
@@ -39,6 +40,7 @@ public final class PopularFragment extends Fragment {
   	  Bundle bdl = new Bundle();
 	  bdl.putString("channelId", channelId);
 	  fragment.setArguments(bdl);
+	  mChannelName = channelName;
   	  
       return fragment;
         
@@ -112,7 +114,7 @@ public final class PopularFragment extends Fragment {
             progressLayout.setVisibility(View.GONE);
             if(videos !=null){
           	  try{
-          		  myListAdapter = new ListVideoAdapter(getActivity(), videos);
+          		  myListAdapter = new ListVideoAdapter(getActivity(), videos, mChannelName);
   		          myList.setAdapter(myListAdapter);
           	  }catch(Exception e){
           		 

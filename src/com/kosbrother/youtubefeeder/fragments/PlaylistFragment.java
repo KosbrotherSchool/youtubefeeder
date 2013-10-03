@@ -24,6 +24,7 @@ public class PlaylistFragment extends Fragment {
 
   private ArrayList<YoutubePlaylist> playlists = new ArrayList<YoutubePlaylist>();
   private static String mChannelId;
+  private static String mChannelTitle;
   private static int myPage;
   private ArrayList<YoutubePlaylist> morePlaylist = new ArrayList<YoutubePlaylist>();
   private ListPlaylistAdapter myListAdapter;
@@ -34,7 +35,7 @@ public class PlaylistFragment extends Fragment {
   
   
   
-  public static PlaylistFragment newInstance(String channelId, int page) {     
+  public static PlaylistFragment newInstance(String channelId, int page, String channelTitle) {     
 	 
 //	  myChannelId = channelId;
 	  myPage = page;
@@ -45,6 +46,7 @@ public class PlaylistFragment extends Fragment {
 	  bdl.putString("channelId", channelId);
 	  fragment.setArguments(bdl);
 	  
+	  mChannelTitle = channelTitle;
       return fragment;
   }
 
@@ -113,7 +115,7 @@ public class PlaylistFragment extends Fragment {
           progressLayout.setVisibility(View.GONE);
           if(playlists != null){
         	  try{
-		          myListAdapter = new ListPlaylistAdapter(getActivity(), playlists);
+		          myListAdapter = new ListPlaylistAdapter(getActivity(), playlists, mChannelTitle);
 		          myList.setAdapter(myListAdapter);
         	  }catch(Exception e){
         		  

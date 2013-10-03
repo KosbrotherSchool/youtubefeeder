@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.plus.PlusClient;
@@ -46,6 +47,7 @@ import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -76,39 +78,6 @@ import at.bartinger.list.item.EntryItem;
 import at.bartinger.list.item.Item;
 import at.bartinger.list.item.SectionItem;
 
-/**
- * 這是 Youtube 的訂閱器,方便收看訂閱的項目 功能: 1. 首頁, 訂閱 video 項目列表 2. 訂閱內頁, 顯示"最近上傳", "最受歡迎",
- * "播放清單" 三個 TabFragment 3. 影片內頁, 可以"加入最愛", "加入清單"(使用者原有清單), "前往Youtube" 4. 本
- * App 之重要功能是能夠選擇影片連續播放.
- * 
- * 2013/9/11 完成 youtube 訂閱資料的取得, 接下來應該實作畫面
- * 2013/9/13 做好了 drawer 功能, 接下來先取得一部分 channel video 並 show 在 main_list_view 上
- * 
- * 先寫 database, 將讀取到的 channel 跟 video 存下來
- * 2013/9/14 完成 video database 的部分! 
- * 2013/9/15 設好 channel database 的部分, 並記下 videoNums, 還沒調用
- * 2013/9/16 完成 channel database 的調用, 完成 channel 頁
- * 2013/9/17 完成 video 內頁, 接下來做 playList 頁
- * 2013/9/18 完成 playList 頁, PlayListFragment 有時會讀不出 data => fix
- * player 加入重復播放, 起始, 終了
- * 
- * 之後要把 video 的 insert 寫在 Service, 也要加個欄位用來 check 這個欄位已經讀過了 or not
- * 
- * 1. set player view functions
- * 2. add to playlist
- * 3. add to favorite
- * 
- * 1. add is_read column to video table
- * 2. write a service to run in background to download videos
- * a. for initiate 每個頻道讀2個影片
- * b. 定期檢查影片有新的就加入(Channel 要記下目前的影片數)
- * c. 該頻道 havn't read 留著, read 了的砍掉
- * 
- * 剩 Service!!
- * 
- * @author JasonKo
- */
-
 @SuppressLint({ "NewApi", "SimpleDateFormat" })
 public class MainActivity extends FragmentActivity implements ConnectionCallbacks,
 		OnConnectionFailedListener,LoaderManager.LoaderCallbacks<Cursor> {
@@ -119,6 +88,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private ListView mDrawerListView;
 	private ListView mainListView;
 	private EntryAdapter mDrawerAdapter;
+	private EntryAdapter mInitDrawerAdapter;
 	private ArrayList<Item> items = new ArrayList<Item>();
 	private ArrayList<Channel> mSubscriptionChannels = new ArrayList<Channel>();
 	
@@ -126,6 +96,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private ImageView viewAvatar;
 	public ImageLoader imageLoader;
 	private LinearLayout progressLayout;
+	private LinearLayout progressDrawerLayout;
 	
 	private static VideoCursorAdapter mVideoAdapter;
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
@@ -136,6 +107,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private ActionBarHelper mActionBar;
 	private ActionBarDrawerToggle mDrawerToggle;
 	
+	private static final int REQUEST_GOOGLE_PLAY_SERVICES = 0;
 	private static final int REQUEST_ACCOUNT_PICKER = 2;
 	private static final int REQUEST_AUTHORIZATION = 3;
 
@@ -230,6 +202,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		textName = (TextView) findViewById(R.id.left_name);
 		viewAvatar = (ImageView) findViewById(R.id.left_avatar);
 		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
+		progressDrawerLayout =  (LinearLayout) findViewById(R.id.layout_drawer_progress);
 		
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
@@ -245,9 +218,38 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		mVideoAdapter = new VideoCursorAdapter(this, R.layout.item_video_list, null, PROJECTION, null);
 		mainListView.setAdapter(mVideoAdapter);
 		
-		// set drawer adapter
-//		mChannelAdapter = new ChannelCursorAdapter(this, R.layout.list_item_entry, null, PROJECTION_CHANNEL, null);
-//		mDrawerListView.setAdapter(mDrawerAdapter);
+		// set initial drawer adapter
+//		ContentResolver cr = getContentResolver();
+//		Cursor channelCursor = cr.query(ChannelTable.CONTENT_URI, PROJECTION_CHANNEL, null, null, null);
+//		if (channelCursor.getCount()!=0){
+//			channelCursor.moveToFirst();
+//			int id_index = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA1);
+//	        int title_index  = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA2);
+//	        int thumbnail_index = channelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA3);     
+//	        final ArrayList<Item> itiItems = new ArrayList<Item>();
+//	        itiItems.add(new SectionItem("我的訂閱"));
+//			itiItems.add(new EntryItem("全部項目","",""));
+//			boolean hasNext = true;
+//			while(hasNext){				
+//				itiItems.add(new EntryItem(channelCursor.getString(title_index), channelCursor.getString(id_index), channelCursor.getString(thumbnail_index)));			
+//				hasNext = channelCursor.moveToNext();
+//			}
+//			EntryAdapter mIniDrawerAdapter = new EntryAdapter(MainActivity.this, itiItems);
+//			mDrawerListView.setAdapter(mIniDrawerAdapter);
+//			mDrawerListView.setOnItemClickListener((new OnItemClickListener() {
+//				public void onItemClick(AdapterView<?> parent, View v,
+//						int position, long id) {
+//					if(!itiItems.get(position).isSection()){			    		
+//				    		EntryItem item = (EntryItem)itiItems.get(position);			    		
+////				    		Toast.makeText(MainActivity.this, "id =  " + item.subtitle , Toast.LENGTH_SHORT).show();				    		
+//				    		Intent intent = new Intent(MainActivity.this, ChannelTabs.class);  
+//				    		intent.putExtra("ChannelTitle", item.title);  
+//				    		intent.putExtra("ChannelId", item.subtitle);  
+//				    		startActivity(intent);  			    		
+//			    	}
+//				}
+//			}));
+//		}
 		
 		// Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
@@ -258,24 +260,21 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				getApplicationContext(), Arrays.asList(Auth.SCOPES));
 		// set exponential backoff policy
 		credential.setBackOff(new ExponentialBackOff());
-		if (savedInstanceState != null) {
-			mChosenAccountName = savedInstanceState.getString(ACCOUNT_KEY);
-		} else {
-			loadAccount();
-		}
-		credential.setSelectedAccountName(mChosenAccountName);
 		
-		if (mDisplayName == null){
-			mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
-			.setScopes(Auth.SCOPES)
-			.build();
-			mPlusClient.connect();
-		}else {
+		loadAccount();
+		
+		mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+		.setScopes(Auth.SCOPES)
+		.build();
+		mPlusClient.connect();
+		
+		if (mChosenAccountName !=null){
+			credential.setSelectedAccountName(mChosenAccountName);
 			textName.setText(mDisplayName);
 			imageLoader.DisplayImage(mAccountImage, viewAvatar);
+			loadData();
 		}
 		
-		loadData();
 		
 	}
 	
@@ -441,8 +440,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	        protected void onPreExecute() {
 	            // TODO Auto-generated method stub
 	            super.onPreExecute();
-	            
-
+	            progressDrawerLayout.setVisibility(View.VISIBLE);
 	        }
 			
 			@Override
@@ -483,7 +481,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
 							cr.insert(ChannelTable.CONTENT_URI, values);
 							
-							updateVideos( cr, 2, theChannel.getId());
+							updateVideos( cr, 2, theChannel.getId(), theChannel.getTitle());
 														
 						}
 						
@@ -541,7 +539,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						        int dataChannelNums = theChannelCursor.getInt(videoNums_index);
 						        if(dataChannelNums< theChannel.getVideoNums()){
 						        	int updateNums = theChannel.getVideoNums() - dataChannelNums;
-						        	updateVideos(cr,updateNums,theChannel.getId());
+						        	updateVideos(cr,updateNums,theChannel.getId(), theChannel.getTitle());
 						        	ContentValues values = new ContentValues();
 						        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
 						        	cr.update(ChannelTable.CONTENT_URI, values, ChannelTable.COLUMN_NAME_DATA1+" = ?" , new String[] {channelId});
@@ -557,7 +555,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					        	values.put(ChannelTable.COLUMN_NAME_DATA3, theChannel.getThumbnail());
 					        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
 					        	cr.insert(ChannelTable.CONTENT_URI, values);			        	
-					        	updateVideos( cr, 2, theChannel.getId());				        	
+					        	updateVideos( cr, 2, theChannel.getId(), theChannel.getTitle());				        	
 				        	}
 				        	
 						}
@@ -593,6 +591,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			protected void onPostExecute(List<VideoData> videos) {
 				setProgressBarIndeterminateVisibility(false);
 				progressLayout.setVisibility(View.GONE);
+				progressDrawerLayout.setVisibility(View.GONE);
 				
 				mDrawerAdapter = new EntryAdapter(MainActivity.this, items);
 				mDrawerListView.setAdapter(mDrawerAdapter);
@@ -657,7 +656,14 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
-
+		
+		case REQUEST_GOOGLE_PLAY_SERVICES:
+			if (resultCode == Activity.RESULT_OK) {
+				haveGooglePlayServices();
+			} else {
+				checkGooglePlayServicesAvailable();
+			}
+			break;		
 		case REQUEST_ACCOUNT_PICKER:
 			if (resultCode == Activity.RESULT_OK && data != null
 					&& data.getExtras() != null) {
@@ -667,6 +673,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					mChosenAccountName = accountName;
 					credential.setSelectedAccountName(accountName);
 					saveAccount();
+					loadData();
 				}
 			}
 			break;
@@ -735,7 +742,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		VideoTable.COLUMN_NAME_DATA7,
 		VideoTable.COLUMN_NAME_DATA8,
 		VideoTable.COLUMN_NAME_DATA9,
-		VideoTable.COLUMN_NAME_DATA10
+		VideoTable.COLUMN_NAME_DATA10,
+		VideoTable.COLUMN_NAME_DATA11
     };
 	
 	public static final String[] PROJECTION_CHANNEL = new String[] {
@@ -793,9 +801,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
  		return id;
  	}
 	
-	private void updateVideos(ContentResolver cr, int updateNums, String id) {
+	private void updateVideos(ContentResolver cr, int updateNums, String channel_id, String channel_title) {
 		// TODO Auto-generated method stub
-		mVideos = ChannelApi.getChannelVideo(id, 0, "", updateNums);
+		mVideos = ChannelApi.getChannelVideo(channel_id, 0, "", updateNums);
 		for (int i = 0; i< mVideos.size(); i++){
 			YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
 			ContentValues videoValues = new ContentValues();
@@ -812,7 +820,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
             videoValues.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
             videoValues.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
             videoValues.put(VideoTable.COLUMN_NAME_DATA9, 0);
-            videoValues.put(VideoTable.COLUMN_NAME_DATA10, id);
+            videoValues.put(VideoTable.COLUMN_NAME_DATA10, channel_id);
+            videoValues.put(VideoTable.COLUMN_NAME_DATA11, channel_title);
         	cr.insert(VideoTable.CONTENT_URI, videoValues);
 		}	
 	}
@@ -825,6 +834,35 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		sp.edit().putBoolean(Initialized_Key, isInitialized).commit();
 	 }
 	
-	 
+	private void haveGooglePlayServices() {
+		// check if there is already an account selected
+		if (credential.getSelectedAccountName() == null) {
+			// ask user to choose account
+			chooseAccount();
+		}
+	}
+	
+	/** Check that Google Play services APK is installed and up to date. */
+	private boolean checkGooglePlayServicesAvailable() {
+		final int connectionStatusCode = GooglePlayServicesUtil
+				.isGooglePlayServicesAvailable(this);
+		if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
+			showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+			return false;
+		}
+		return true;
+	}
+	
+	public void showGooglePlayServicesAvailabilityErrorDialog(
+			final int connectionStatusCode) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				Dialog dialog = GooglePlayServicesUtil.getErrorDialog(
+						connectionStatusCode, MainActivity.this,
+						REQUEST_GOOGLE_PLAY_SERVICES);
+				dialog.show();
+			}
+		});
+	}
 	
 }

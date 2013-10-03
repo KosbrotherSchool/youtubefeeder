@@ -54,9 +54,9 @@ public class ChannelCursorAdapter extends SimpleCursorAdapter {
          * public static final String COLUMN_NAME_DATA4 = "channel_videoNums";
          */
         
-        int id_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA1);
+        int id_index = cursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA1);
         int title_index  = cursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA2);
-        int thumbnail_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA3);     
+        int thumbnail_index = cursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA3);     
 //        int videoNums_index = cursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA4);
         
         // set title text
