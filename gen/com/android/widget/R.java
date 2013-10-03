@@ -15,22 +15,22 @@ public final class R {
 	}
 	public static final class drawable {
 		public static final int costum_progress_bar = 0x7f020019;
-		public static final int ic_launcher = 0x7f02001c;
-		public static final int ic_pulltorefresh_arrow = 0x7f02001f;
+		public static final int ic_launcher = 0x7f02001d;
+		public static final int ic_pulltorefresh_arrow = 0x7f020020;
 	}
 	public static final class id {
-		public static final int load_more_footer = 0x7f060025;
-		public static final int load_more_progressBar = 0x7f060027;
-		public static final int pull_to_refresh_header = 0x7f060038;
-		public static final int pull_to_refresh_image = 0x7f06003a;
-		public static final int pull_to_refresh_progress = 0x7f060039;
-		public static final int pull_to_refresh_text = 0x7f06003b;
-		public static final int pull_to_refresh_updated_at = 0x7f06003c;
-		public static final int top_line = 0x7f060026;
+		public static final int load_more_footer = 0x7f060030;
+		public static final int load_more_progressBar = 0x7f060032;
+		public static final int pull_to_refresh_header = 0x7f06003e;
+		public static final int pull_to_refresh_image = 0x7f060040;
+		public static final int pull_to_refresh_progress = 0x7f06003f;
+		public static final int pull_to_refresh_text = 0x7f060041;
+		public static final int pull_to_refresh_updated_at = 0x7f060042;
+		public static final int top_line = 0x7f060031;
 	}
 	public static final class layout {
-		public static final int load_more_footer = 0x7f03000a;
-		public static final int pull_to_refresh_header = 0x7f03000d;
+		public static final int load_more_footer = 0x7f03000c;
+		public static final int pull_to_refresh_header = 0x7f030010;
 	}
 	public static final class string {
 		public static final int hello = 0x7f050000;

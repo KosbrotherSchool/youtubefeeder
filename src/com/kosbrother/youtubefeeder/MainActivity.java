@@ -356,6 +356,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
             return true;
         }else{
 			switch (item.getItemId()) {
+			case R.id.menu_search:
+				Intent intent = new Intent(MainActivity.this, SearchActivity.class);  
+    			startActivity(intent);  
+				break;
 			case R.id.menu_all_read:
 				ContentResolver cr = getContentResolver();
 				cr.delete(VideoTable.CONTENT_URI, null , null);
@@ -366,7 +370,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				break;	
 			case R.id.menu_accounts:
 				chooseAccount();
-				return true;
+				break;
+				
 			}
         }
 		return super.onOptionsItemSelected(item);

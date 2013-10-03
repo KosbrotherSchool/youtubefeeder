@@ -1,4 +1,10 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">   
+   <item
+        android:id="@+id/menu_search"
+        android:title="@string/menu_search"
+        android:showAsAction="always"
+        android:icon="@drawable/icon_search"
+        /> 
    <item
         android:id="@+id/menu_all_read"
         android:title="@string/all_read"/> 

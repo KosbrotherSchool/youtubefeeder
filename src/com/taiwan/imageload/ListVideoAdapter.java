@@ -9,6 +9,7 @@ import java.util.Locale;
 
 import com.kosbrother.youtubefeeder.PlayerViewActivity;
 import com.kosbrother.youtubefeeder.R;
+import com.kosbrother.youtubefeeder.SearchActivity;
 import com.kosbrother.youtubefeeder.fragments.NewVideosFragment;
 import com.kosbrother.youtubefeeder.fragments.PlaylistVideosFragment;
 import com.youtube.music.channels.entity.YoutubeVideo;
@@ -76,8 +77,11 @@ public class ListVideoAdapter extends BaseAdapter {
         String mId = parseVideoLink(data.get(position).getLink());      
         textId.setText(mId);
         
-        textAuthor.setText("by "+ channel_author);
-        
+        if(channel_author.equals("")){
+        	textAuthor.setText("");
+        }else{
+        	textAuthor.setText("by "+ channel_author);
+        }
         // set title text
         textTitle.setText(data.get(position).getTitle());
         
@@ -129,6 +133,8 @@ public class ListVideoAdapter extends BaseAdapter {
             			NewVideosFragment.showActionMode();
             		}else if(aTitle.equals("com.kosbrother.youtubefeeder.PlaylistVideosActivity") ) {
             			PlaylistVideosFragment.showActionMode();
+            		}else if(aTitle.equals("com.kosbrother.youtubefeeder.SearchActivity")){
+            			SearchActivity.showActionMode();
             		}
             	}else{
             		checkMap.remove(id);
