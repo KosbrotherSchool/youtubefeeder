@@ -19,6 +19,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -122,13 +123,23 @@ public class UpdateVideosService extends Service {
 					List<Subscription> lists = mSubscriptions.getItems();
 					
 					for (Subscription item : lists){	
-						Channel theChannel = new Channel(item.getSnippet().getResourceId().getChannelId(),
-								item.getSnippet().getTitle(),
-								item.getSnippet().getThumbnails().getDefault().getUrl(),
-								item.getContentDetails().getTotalItemCount().intValue()
+						String channelId = item.getSnippet().getResourceId().getChannelId();
+						String channelTitle = item.getSnippet().getTitle();
+						String channelPicUrl = item.getSnippet().getThumbnails().getDefault().getUrl();
+						int channelTotalNums = 0;
+						try{
+							channelTotalNums = item.getContentDetails().getTotalItemCount().intValue();
+						}catch(Exception e){
+							Log.e("MainActivity", channelTitle + "no total item count");
+						}
+						
+						Channel theChannel = new Channel(channelId,
+								channelTitle,
+								channelPicUrl,
+								channelTotalNums
 								);
 			        	
-			        	String channelId = item.getSnippet().getResourceId().getChannelId();			        	
+//			        	String channelId = item.getSnippet().getResourceId().getChannelId();			        	
 			        	
 			        	Cursor theChannelCursor = cr.query(ChannelTable.CONTENT_URI, MainActivity.PROJECTION_CHANNEL, 
 			        			ChannelTable.COLUMN_NAME_DATA1+" = ?", new String[] {channelId}, null);
@@ -182,26 +193,28 @@ public class UpdateVideosService extends Service {
 	private void updateVideos(ContentResolver cr, int updateNums, String id, String channel_title) {
 		// TODO Auto-generated method stub
 		mVideos = ChannelApi.getChannelVideo(id, 0, "", updateNums);
-		for (int i = 0; i< mVideos.size(); i++){
-			YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
-			ContentValues videoValues = new ContentValues();
-			videoValues.put(VideoTable.COLUMN_NAME_DATA1, video.getTitle());
-			videoValues.put(VideoTable.COLUMN_NAME_DATA2, MainActivity.parseVideoLink(video.getLink()));
-			videoValues.put(VideoTable.COLUMN_NAME_DATA3, video.getThumbnail());
-        	// date to string 
-        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
-            final String dateString = formatter.format(video.getUploadDate()); 
-            videoValues.put(VideoTable.COLUMN_NAME_DATA4, dateString);
-        	
-            videoValues.put(VideoTable.COLUMN_NAME_DATA5, video.getViewCount());
-            videoValues.put(VideoTable.COLUMN_NAME_DATA6, video.getDuration());
-            videoValues.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
-            videoValues.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
-            videoValues.put(VideoTable.COLUMN_NAME_DATA9, 0);
-            videoValues.put(VideoTable.COLUMN_NAME_DATA10, id);
-            videoValues.put(VideoTable.COLUMN_NAME_DATA11, channel_title);
-        	cr.insert(VideoTable.CONTENT_URI, videoValues);
-		}	
+		if (mVideos != null){
+			for (int i = 0; i< mVideos.size(); i++){
+				YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
+				ContentValues videoValues = new ContentValues();
+				videoValues.put(VideoTable.COLUMN_NAME_DATA1, video.getTitle());
+				videoValues.put(VideoTable.COLUMN_NAME_DATA2, MainActivity.parseVideoLink(video.getLink()));
+				videoValues.put(VideoTable.COLUMN_NAME_DATA3, video.getThumbnail());
+	        	// date to string 
+	        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
+	            final String dateString = formatter.format(video.getUploadDate()); 
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA4, dateString);
+	        	
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA5, video.getViewCount());
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA6, video.getDuration());
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA7, video.getLikes());
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA8, video.getDislikes());
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA9, 0);
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA10, id);
+	            videoValues.put(VideoTable.COLUMN_NAME_DATA11, channel_title);
+	        	cr.insert(VideoTable.CONTENT_URI, videoValues);
+			}	
+		}
 	}
 	
 	@Override

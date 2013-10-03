@@ -7,6 +7,7 @@
     
     <string name="refresh">Refresh</string>
     <string name="accounts">Accounts</string>
+    <string name="all_read">Mark All Viewd</string>
     
     <string name="error">Error</string>
     <string name="error_format">[Error] %s</string>

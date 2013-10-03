@@ -196,8 +196,8 @@ containing a value of this type.
         public static final int ic_pulltorefresh_arrow=0x7f02001f;
     }
     public static final class id {
-        public static final int action1=0x7f06003f;
-        public static final int action_settings=0x7f060040;
+        public static final int action1=0x7f060040;
+        public static final int action_settings=0x7f060041;
         public static final int button_favorite=0x7f06002e;
         public static final int button_playlist=0x7f06002f;
         public static final int button_share=0x7f060030;
@@ -230,14 +230,15 @@ containing a value of this type.
         public static final int load_more_footer=0x7f060025;
         public static final int load_more_progressBar=0x7f060027;
         public static final int main_list_view=0x7f060007;
-        public static final int menu_accounts=0x7f06003d;
+        public static final int menu_accounts=0x7f06003f;
+        public static final int menu_all_read=0x7f06003d;
         public static final int menu_refresh=0x7f06003e;
         public static final int new_fragment=0x7f06000f;
         public static final int news_list=0x7f060028;
         public static final int none=0x7f060000;
         public static final int normal=0x7f060001;
         public static final int pager=0x7f060012;
-        public static final int play_all=0x7f060041;
+        public static final int play_all=0x7f060042;
         public static final int pull_to_refresh_header=0x7f060038;
         public static final int pull_to_refresh_image=0x7f06003a;
         public static final int pull_to_refresh_progress=0x7f060039;
@@ -288,6 +289,7 @@ containing a value of this type.
     public static final class string {
         public static final int accounts=0x7f05001e;
         public static final int action_settings=0x7f05001b;
+        public static final int all_read=0x7f05001f;
         public static final int app_name=0x7f05001a;
         /**   Title for notification shown when GooglePlayServices needs to be
         enabled for a application to work. [CHAR LIMIT=70] 
@@ -367,32 +369,32 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f050013;
-        public static final int drawer_close=0x7f050022;
-        public static final int drawer_open=0x7f050021;
-        public static final int error=0x7f05001f;
-        public static final int error_format=0x7f050020;
+        public static final int drawer_close=0x7f050023;
+        public static final int drawer_open=0x7f050022;
+        public static final int error=0x7f050020;
+        public static final int error_format=0x7f050021;
         /**  Youtube Player 
          */
-        public static final int error_player=0x7f050028;
+        public static final int error_player=0x7f050029;
         public static final int hello=0x7f050000;
         public static final int hello_world=0x7f05001c;
-        public static final int launch=0x7f050027;
+        public static final int launch=0x7f050028;
         /**  video list 
          */
-        public static final int likes=0x7f050024;
-        public static final int no_data=0x7f050023;
-        public static final int not_signed_in=0x7f05002b;
-        public static final int play_all=0x7f05002a;
+        public static final int likes=0x7f050025;
+        public static final int no_data=0x7f050024;
+        public static final int not_signed_in=0x7f05002c;
+        public static final int play_all=0x7f05002b;
         /**  Contexual menu 
          */
-        public static final int play_selected=0x7f050029;
+        public static final int play_selected=0x7f05002a;
         public static final int pull_to_refresh_pull_label=0x7f050001;
         public static final int pull_to_refresh_refreshing_label=0x7f050003;
         public static final int pull_to_refresh_release_label=0x7f050002;
         public static final int pull_to_refresh_tap_label=0x7f050004;
         public static final int refresh=0x7f05001d;
-        public static final int time=0x7f050025;
-        public static final int views=0x7f050026;
+        public static final int time=0x7f050026;
+        public static final int views=0x7f050027;
     }
     public static final class style {
         /** 
