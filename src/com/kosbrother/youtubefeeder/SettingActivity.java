@@ -173,18 +173,20 @@ OnConnectionFailedListener{
 				String accountName = data.getExtras().getString(
 						AccountManager.KEY_ACCOUNT_NAME);
 				if (accountName != null) {
-					mChosenAccountName = accountName;
-					credential.setSelectedAccountName(accountName);
-					saveAccount();
-					
-					textAccount.setText(mChosenAccountName);
-					
-					mPlusClient = new PlusClient.Builder(SettingActivity.this, this, this)
-					.setScopes(Auth.SCOPES)
-					.setAccountName(mChosenAccountName)
-					.build();
-					mPlusClient.connect();
-					
+					if (mChosenAccountName!=accountName){
+						
+						mChosenAccountName = accountName;
+						credential.setSelectedAccountName(accountName);
+						saveAccount();
+						
+						textAccount.setText(mChosenAccountName);
+						
+						mPlusClient = new PlusClient.Builder(SettingActivity.this, this, this)
+						.setScopes(Auth.SCOPES)
+						.setAccountName(mChosenAccountName)
+						.build();
+						mPlusClient.connect();
+					}				
 				}
 			}
 			break;
@@ -195,6 +197,7 @@ OnConnectionFailedListener{
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		sp.edit().putString(MainActivity.ACCOUNT_KEY, mChosenAccountName).commit();
+		sp.edit().putBoolean(MainActivity.Initialized_Key, false).commit(); //for change another account, change the initial boolean
 	}
 	
 	@Override

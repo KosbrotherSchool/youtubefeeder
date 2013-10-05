@@ -909,7 +909,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+		UpdateVideosService.cancelUpdateService(mActivity);
 		if (!isInitialized){
 			loadAccount();		
 			if (mChosenAccountName !=null){
@@ -919,9 +919,15 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				imageLoader.DisplayImage(mAccountImage, viewAvatar);
 				loadVideos();
 			}
-		}
-		
-		
+		}	
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		int notifyTime = sp.getInt(SettingActivity.NOTIFY_TIMER_KEY, 3);
+		UpdateVideosService.setUpdateService(mActivity, notifyTime);
 	}
 	
 	private void haveGooglePlayServices() {
