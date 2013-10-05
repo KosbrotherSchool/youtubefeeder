@@ -6,17 +6,20 @@ import com.kosbrother.youtubefeeder.fragments.NewVideosFragment;
 import com.kosbrother.youtubefeeder.fragments.PlaylistFragment;
 import com.kosbrother.youtubefeeder.fragments.PopularFragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+@SuppressLint("NewApi")
 public class ChannelTabs extends FragmentActivity {
     
 	TabHost mTabHost;
@@ -53,6 +56,11 @@ public class ChannelTabs extends FragmentActivity {
         if (savedInstanceState != null) {
             mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
         }
+        
+        int sdkVersion = android.os.Build.VERSION.SDK_INT; 
+        if(sdkVersion > 10){
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @Override
@@ -60,7 +68,19 @@ public class ChannelTabs extends FragmentActivity {
         super.onSaveInstanceState(outState);
         outState.putString("tab", mTabHost.getCurrentTabTag());
     }
+    
+    @Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
+	    int itemId = item.getItemId();
+	    switch (itemId) {
+	    case android.R.id.home:
+	        finish();
+	        break;
+	    }
+	    return true;
+	}
+    
     /**
      * This is a helper class that implements the management of tabs and all
      * details of connecting a ViewPager with associated TabHost.  It relies on a

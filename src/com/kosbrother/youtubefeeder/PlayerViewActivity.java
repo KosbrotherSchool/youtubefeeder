@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -39,6 +41,7 @@ import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.youtube.music.channels.entity.YoutubePlaylist;
 
+@SuppressLint("NewApi")
 public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 
 	private LinearLayout progressLayout;
@@ -137,7 +140,24 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		playerStateChangeListener = new MyPlayerStateChangeListener();
 
 		new DownloadDescriptionTask().execute();
+		
+		int sdkVersion = android.os.Build.VERSION.SDK_INT; 
+        if(sdkVersion > 10){
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+		
+	}
+	
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
+	    int itemId = item.getItemId();
+	    switch (itemId) {
+	    case android.R.id.home:
+	        finish();
+	        break;
+	    }
+	    return true;
 	}
 
 	private void findViews() {

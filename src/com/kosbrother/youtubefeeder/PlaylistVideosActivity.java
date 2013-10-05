@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.kosbrother.youtubefeeder.fragments.PlaylistVideosFragment;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -15,6 +16,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+@SuppressLint("NewApi")
 public class PlaylistVideosActivity extends FragmentActivity {
 	
     private static final int CONTENT_VIEW_ID = 10101010;
@@ -41,6 +43,11 @@ public class PlaylistVideosActivity extends FragmentActivity {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(CONTENT_VIEW_ID, newFragment).commit();
         
+        int sdkVersion = android.os.Build.VERSION.SDK_INT; 
+        if(sdkVersion > 10){
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        
     }
     
     @Override
@@ -54,6 +61,9 @@ public class PlaylistVideosActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		switch (item.getItemId()) {
+		   case android.R.id.home:
+			   	finish();
+	        break;
 		   case R.id.play_all:
 				playAll();
 			break;

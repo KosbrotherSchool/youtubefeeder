@@ -6,7 +6,6 @@ import java.util.HashMap;
 import com.costum.android.widget.LoadMoreListView;
 import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
-import com.taiwan.imageload.ListNothingAdapter;
 import com.taiwan.imageload.ListVideoAdapter;
 import com.youtube.music.channels.entity.YoutubeVideo;
 
@@ -176,8 +175,23 @@ public class SearchActivity extends Activity{
             }
         });
 		
+		int sdkVersion = android.os.Build.VERSION.SDK_INT; 
+        if(sdkVersion > 10){
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 		
-		
+	}
+	
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+
+	    int itemId = item.getItemId();
+	    switch (itemId) {
+	    case android.R.id.home:
+	        finish();
+	        break;
+	    }
+	    return true;
 	}
 	
 	public static void showActionMode() {

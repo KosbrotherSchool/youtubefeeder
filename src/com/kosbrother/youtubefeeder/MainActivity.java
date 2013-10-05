@@ -368,8 +368,12 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				progressLayout.setVisibility(View.VISIBLE);
 				loadData();
 				break;	
-			case R.id.menu_accounts:
-				chooseAccount();
+//			case R.id.menu_accounts:
+//				chooseAccount();
+//				break;
+			case R.id.menu_setting:
+				Intent intentSetting = new Intent(MainActivity.this, SettingActivity.class);  
+    			startActivity(intentSetting);  
 				break;
 				
 			}
