@@ -31,11 +31,33 @@
         android:orientation="vertical" >
 
         <LinearLayout
+            android:id="@+id/layout_login"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+             >
+
+            <Button android:id="@+id/button_log_in"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Log in Youtube"
+                android:textColor="@color/text_gray"
+                android:textSize="20dp" />
+            
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/layout_progress"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
             android:visibility="gone" >
+			<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Iinitializing..."
+            android:textColor="@color/text_gray"
+            android:textSize="30dp" />
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -52,10 +74,8 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="All Viewed!"
-            android:textSize="30dp"
             android:textColor="@color/text_gray"
-             />
-        
+            android:textSize="30dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -86,19 +106,20 @@
                 android:layout_marginLeft="10dip"
                 android:textSize="25dp" />
         </LinearLayout>
-		
+
         <LinearLayout
             android:id="@+id/layout_drawer_progress"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:gravity="center"
             android:background="#EBEBEB"
+            android:gravity="center"
             android:visibility="gone" >
+
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-        
+
         <ListView
             android:id="@+id/left_list_view"
             android:layout_width="fill_parent"

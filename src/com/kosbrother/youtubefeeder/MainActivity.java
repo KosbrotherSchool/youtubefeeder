@@ -7,10 +7,50 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+import at.bartinger.list.item.EntryAdapter;
+import at.bartinger.list.item.EntryItem;
+import at.bartinger.list.item.Item;
+import at.bartinger.list.item.SectionItem;
+
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.plus.PlusClient;
 import com.google.android.gms.plus.model.people.Person;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -39,45 +79,6 @@ import com.youtube.music.channels.entity.Channel;
 import com.youtube.music.channels.entity.YoutubePlaylist;
 import com.youtube.music.channels.entity.YoutubeVideo;
 
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.accounts.AccountManager;
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-import at.bartinger.list.item.EntryAdapter;
-import at.bartinger.list.item.EntryItem;
-import at.bartinger.list.item.Item;
-import at.bartinger.list.item.SectionItem;
-
 @SuppressLint({ "NewApi", "SimpleDateFormat" })
 public class MainActivity extends FragmentActivity implements ConnectionCallbacks,
 		OnConnectionFailedListener,LoaderManager.LoaderCallbacks<Cursor> {
@@ -96,6 +97,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public ImageLoader imageLoader;
 	private LinearLayout progressLayout;
 	private LinearLayout progressDrawerLayout;
+	private LinearLayout loginLayout;
+	private Button buttonLogIn;
 	
 	private static VideoCursorAdapter mVideoAdapter;
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
@@ -202,6 +205,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		viewAvatar = (ImageView) findViewById(R.id.left_avatar);
 		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
 		progressDrawerLayout =  (LinearLayout) findViewById(R.id.layout_drawer_progress);
+		loginLayout = (LinearLayout) findViewById(R.id.layout_login);
+		buttonLogIn = (Button) findViewById(R.id.button_log_in);
 		
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
@@ -227,17 +232,23 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		// set exponential backoff policy
 		credential.setBackOff(new ExponentialBackOff());
 		
-		loadAccount();
-		
+		loadAccount();		
 		if (mChosenAccountName !=null){
+			loginLayout.setVisibility(View.GONE);
 			credential.setSelectedAccountName(mChosenAccountName);
 			textName.setText(mDisplayName);
 			imageLoader.DisplayImage(mAccountImage, viewAvatar);
-			loadData();
+			loadVideos();
 		}else{
-			chooseAccount();
+			/// show choose account layout
+			loginLayout.setVisibility(View.VISIBLE);			
+			buttonLogIn.setOnClickListener(new Button.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					chooseAccount();
+				}
+			});		
 		}
-		
 		
 	}
 	
@@ -400,6 +411,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		if (mChosenAccountName == null) {
 			return;
 		}
+		loginLayout.setVisibility(View.GONE);
+		progressLayout.setVisibility(View.VISIBLE);
 		loadVideos();
 		
 	}
@@ -830,6 +843,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				mainListView.setVisibility(View.GONE);
 			}else{
 				mainListView.setVisibility(View.VISIBLE);
+				progressLayout.setVisibility(View.GONE);
 			}
 		}else if (loader.getId() == 1){
 			
@@ -891,6 +905,24 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	  SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		sp.edit().putBoolean(Initialized_Key, isInitialized).commit();
 	 }
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		if (!isInitialized){
+			loadAccount();		
+			if (mChosenAccountName !=null){
+				loginLayout.setVisibility(View.GONE);
+				credential.setSelectedAccountName(mChosenAccountName);
+				textName.setText(mDisplayName);
+				imageLoader.DisplayImage(mAccountImage, viewAvatar);
+				loadVideos();
+			}
+		}
+		
+		
+	}
 	
 	private void haveGooglePlayServices() {
 		// check if there is already an account selected
