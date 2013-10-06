@@ -19,14 +19,14 @@ public final class R {
 		public static final int ic_pulltorefresh_arrow = 0x7f020020;
 	}
 	public static final class id {
-		public static final int load_more_footer = 0x7f060036;
-		public static final int load_more_progressBar = 0x7f060038;
-		public static final int pull_to_refresh_header = 0x7f060044;
-		public static final int pull_to_refresh_image = 0x7f060046;
-		public static final int pull_to_refresh_progress = 0x7f060045;
-		public static final int pull_to_refresh_text = 0x7f060047;
-		public static final int pull_to_refresh_updated_at = 0x7f060048;
-		public static final int top_line = 0x7f060037;
+		public static final int load_more_footer = 0x7f060037;
+		public static final int load_more_progressBar = 0x7f060039;
+		public static final int pull_to_refresh_header = 0x7f060045;
+		public static final int pull_to_refresh_image = 0x7f060047;
+		public static final int pull_to_refresh_progress = 0x7f060046;
+		public static final int pull_to_refresh_text = 0x7f060048;
+		public static final int pull_to_refresh_updated_at = 0x7f060049;
+		public static final int top_line = 0x7f060038;
 	}
 	public static final class layout {
 		public static final int load_more_footer = 0x7f03000d;

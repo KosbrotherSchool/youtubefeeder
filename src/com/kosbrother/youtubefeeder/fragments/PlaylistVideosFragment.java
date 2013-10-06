@@ -253,8 +253,10 @@ public class PlaylistVideosFragment extends Fragment {
     
     public static HashMap<String, String> getAllVideos() {
     	HashMap<String,String> videoMap = new HashMap<String, String>();
-    	for(YoutubeVideo item : videos){
-    		videoMap.put(parseVideoLink(item.getLink()), item.getTitle());
+    	if (videos!=null){
+	    	for(YoutubeVideo item : videos){
+	    		videoMap.put(parseVideoLink(item.getLink()), item.getTitle());
+	    	}
     	}
 		return videoMap;
 	}

@@ -13,10 +13,13 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.ExponentialBackOff;
+import com.kosbrother.youtubefeeder.database.ChannelTable;
+import com.kosbrother.youtubefeeder.database.VideoTable;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -25,8 +28,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -68,6 +73,23 @@ OnConnectionFailedListener{
 
 		getDatas();
 		setDatas();
+		
+		int sdkVersion = android.os.Build.VERSION.SDK_INT; 
+        if(sdkVersion > 10){
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+	}
+	
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+
+	    int itemId = item.getItemId();
+	    switch (itemId) {
+	    case android.R.id.home:
+	        finish();
+	        break;
+	    }
+	    return true;
 	}
 
 	private void setDatas() {
@@ -141,6 +163,13 @@ OnConnectionFailedListener{
 	@Override
 	public void onStop() {
 		super.onStop();
+		Log.i("SettingActivity", "onStop");
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.i("SettingActivity", "onDestroy");
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		if (radioNotify.isChecked()) {
@@ -174,12 +203,17 @@ OnConnectionFailedListener{
 						AccountManager.KEY_ACCOUNT_NAME);
 				if (accountName != null) {
 					if (mChosenAccountName!=accountName){
+						// delete channels and videos
+						ContentResolver cr = getContentResolver();
+						cr.delete(VideoTable.CONTENT_URI, null , null);
+						cr.delete(ChannelTable.CONTENT_URI, null, null);
 						
 						mChosenAccountName = accountName;
 						credential.setSelectedAccountName(accountName);
-						saveAccount();
-						
 						textAccount.setText(mChosenAccountName);
+						
+						// save initialize key and account
+						saveAccount();
 						
 						mPlusClient = new PlusClient.Builder(SettingActivity.this, this, this)
 						.setScopes(Auth.SCOPES)
@@ -197,25 +231,37 @@ OnConnectionFailedListener{
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		sp.edit().putString(MainActivity.ACCOUNT_KEY, mChosenAccountName).commit();
-		sp.edit().putBoolean(MainActivity.Initialized_Key, false).commit(); //for change another account, change the initial boolean
+		sp.edit().putBoolean(MainActivity.Initialized_Key, false).commit(); 
 	}
 	
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		// TODO Auto-generated method stub
 		if (connectionResult.hasResolution()) {
-			Toast.makeText(this, "connect fail", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, "connect fail", Toast.LENGTH_SHORT).show();
 
 			Log.e(TAG,
 					String.format(
 							"Connection to Play Services Failed, error: %d, reason: %s",
 							connectionResult.getErrorCode(),
 							connectionResult.toString()));
-			try {
-				connectionResult.startResolutionForResult(this, 0);
-			} catch (IntentSender.SendIntentException e) {
-				Log.e(TAG, e.toString(), e);
+			if (connectionResult.getErrorCode() == 8){
+				mPlusClient = new PlusClient.Builder(SettingActivity.this, this, this)
+				.setScopes(Auth.SCOPES)
+				.setAccountName(mChosenAccountName)
+				.build();
+				mPlusClient.connect();
 			}
+			
+			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+			sp.edit().putBoolean(MainActivity.HAS_ACCOUNT_PLUS_DATA_KEY, false).commit();
+			
+			
+//			try {
+//				connectionResult.startResolutionForResult(this, 0);
+//			} catch (IntentSender.SendIntentException e) {
+//				Log.e(TAG, e.toString(), e);
+//			}
 		}
 
 	}
@@ -235,13 +281,14 @@ OnConnectionFailedListener{
 	
 	public void setProfileInfo() {	
         if (!mPlusClient.isConnected() || mPlusClient.getCurrentPerson() == null) {            
-        	Toast.makeText(SettingActivity.this, "plus sign in failed", Toast.LENGTH_SHORT).show();
+//        	Toast.makeText(SettingActivity.this, "plus sign in failed", Toast.LENGTH_SHORT).show();
         } else {
         	Person currentPerson = mPlusClient.getCurrentPerson();
             SharedPreferences sp = PreferenceManager
     				.getDefaultSharedPreferences(this);
     		sp.edit().putString(MainActivity.ACCOUNT_DISPLAY_NAME_KEY, currentPerson.getDisplayName()).commit();
     		sp.edit().putString(MainActivity.ACCOUNT_IMAGE_KEY, currentPerson.getImage().getUrl()).commit();
+    		sp.edit().putBoolean(MainActivity.HAS_ACCOUNT_PLUS_DATA_KEY, true).commit();
         }
     }
 	

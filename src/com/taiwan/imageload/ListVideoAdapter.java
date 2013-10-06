@@ -78,7 +78,7 @@ public class ListVideoAdapter extends BaseAdapter {
         textId.setText(mId);
         
         if(channel_author.equals("")){
-        	textAuthor.setText("");
+        	textAuthor.setVisibility(View.GONE);
         }else{
         	textAuthor.setText("by "+ channel_author);
         }

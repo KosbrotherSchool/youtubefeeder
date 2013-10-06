@@ -85,7 +85,8 @@
         android:layout_gravity="left"
         android:orientation="vertical" >
 
-        <LinearLayout
+        <LinearLayout 
+            android:id="@+id/layout_draw_account_info"
             android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:background="#D6D6D6"

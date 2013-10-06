@@ -295,16 +295,19 @@ public class UpdateVideosService extends Service {
 	}
 
 	public static void setUpdateService(Context theContext, int hours) {
+		Log.i("UpdateVideosService", "Setup Update AlarmClock:"+ hours +" hours");
 		AlarmManager am = (AlarmManager) theContext
 				.getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(theContext, UpdateVideosService.class);
 		PendingIntent mAlarmSender = PendingIntent.getService(theContext, 0,
 				intent, PendingIntent.FLAG_CANCEL_CURRENT);
-		am.setRepeating(AlarmManager.RTC, System.currentTimeMillis(),1000 * 60 * 60 * hours, mAlarmSender);
-//		am.setRepeating(AlarmManager.RTC, System.currentTimeMillis(),1000*10, mAlarmSender); // repeat every 10 seconds
+		int timeInteval = 1000 * 60 * 60 * hours;
+		am.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+timeInteval ,timeInteval, mAlarmSender);
+//		am.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+1000*10,1000*10, mAlarmSender); // repeat every 10 seconds
 	}
 	
 	public static void cancelUpdateService(Context theContext) {
+		Log.i("UpdateVideosService", "Cancel Update AlarmClock");
 		AlarmManager alarmManager = (AlarmManager) theContext.getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(theContext, UpdateVideosService.class);
 		PendingIntent mAlarmSender = PendingIntent.getService(theContext, 0,

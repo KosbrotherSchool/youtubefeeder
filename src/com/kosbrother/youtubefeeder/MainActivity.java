@@ -116,6 +116,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public static final String ACCOUNT_KEY = "accountName";
 	public static final String ACCOUNT_DISPLAY_NAME_KEY = "accountDisplayName";
 	public static final String ACCOUNT_IMAGE_KEY = "accountImage";
+	public static final String HAS_ACCOUNT_PLUS_DATA_KEY = "IsHasPlusData";
 	private String mChosenAccountName;
 	private String mDisplayName;
 	private String mAccountImage;
@@ -125,6 +126,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public static final String Initialized_Key = "Initial_Action";
 	private boolean isInitialized = false;
 	private boolean isListSetted = false;
+	private boolean isHasPlusData = false;
 	
 	private int sectionListPosition;
 	
@@ -267,6 +269,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
     				.getDefaultSharedPreferences(this);
     		sp.edit().putString(ACCOUNT_DISPLAY_NAME_KEY, currentPerson.getDisplayName()).commit();
     		sp.edit().putString(ACCOUNT_IMAGE_KEY, currentPerson.getImage().getUrl()).commit();
+    		sp.edit().putBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, true).commit();
+    		LinearLayout drawerAccountInfoLayout = (LinearLayout) findViewById (R.id.layout_draw_account_info);
+			drawerAccountInfoLayout.setVisibility(View.VISIBLE);
         }
     }
 	
@@ -427,7 +432,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		new AsyncTask<Void, Void, List<VideoData>>() {
 			@Override
 	        protected void onPreExecute() {
-	            // TODO Auto-generated method stub
 	            super.onPreExecute();
 	            progressDrawerLayout.setVisibility(View.VISIBLE);
 	        }
@@ -439,14 +443,12 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						credential).setApplicationName(Constants.APP_NAME)
 						.build();
 
-				try {
-
-					if (!isListSetted){
-						items.add(new SectionItem("我的訂閱"));
-					}
+				try {					
 					ContentResolver cr = getContentResolver();
 					
 					if (!isInitialized){
+						items.add(new SectionItem("我的訂閱"));
+						
 						SubscriptionListResponse mSubscriptions = youtube
 								.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();
 									
@@ -474,9 +476,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 							}
 						}
 						
-						for (Subscription item : lists){
-							
-							
+						for (Subscription item : lists){							
 							String channelId = item.getSnippet().getResourceId().getChannelId();
 							String channelTitle = item.getSnippet().getTitle();
 							String channelPicUrl = item.getSnippet().getThumbnails().getDefault().getUrl();
@@ -493,11 +493,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 									channelTotalNums
 									);
 							
-//							Channel theChannel = new Channel(item.getSnippet().getResourceId().getChannelId(),
-//									item.getSnippet().getTitle(),
-//									item.getSnippet().getThumbnails().getDefault().getUrl(),
-//									item.getContentDetails().getTotalItemCount().intValue()
-//									); // 88x88, 240x240 if get high	
 							mSubscriptionChannels.add(theChannel);
 							
 							items.add(new EntryItem(theChannel.getTitle(), theChannel.getId(), theChannel.getThumbnail()));
@@ -517,29 +512,16 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						sectionListPosition = items.size();
 						items.add(new SectionItem("播放清單"));
 						
-						// add favorite playlist
-						try{													
-							PlaylistSnippet playlistSnippet = new PlaylistSnippet();
-						    playlistSnippet.setTitle("我的最愛 (YoutubeFeeder)");
-							
-						    PlaylistStatus playlistStatus = new PlaylistStatus();
-						    playlistStatus.setPrivacyStatus("public");
-						    
-							Playlist youTubePlaylist = new Playlist();
-						    youTubePlaylist.setSnippet(playlistSnippet);
-						    youTubePlaylist.setStatus(playlistStatus);
-						    
-						    youtube.playlists().insert("snippet", youTubePlaylist).execute();
-						   
-						}catch(Exception e){
-							
-						}
 						
 						setPlayListData(youtube);
 						isInitialized = true;
 						isListSetted = true;
 						
 					}else{
+						if (!isListSetted){
+							items.add(new SectionItem("我的訂閱"));
+						}
+						
 						cr.delete(VideoTable.CONTENT_URI, VideoTable.COLUMN_NAME_DATA9+" = ?" , new String[] {"1"});
 						
 						SubscriptionListResponse mSubscriptions = youtube.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();				
@@ -686,26 +668,77 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	}
 	
 	private void setPlayListData(YouTube youtube) {
-		// TODO Auto-generated method stub
+		boolean isHasYoutubeFeederFavorite = false;
+		myPlayList.clear();
 		PlaylistListResponse mLists;
 		try {
-			mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 20).execute();
+			mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 30).execute();
 			List<Playlist> lists = mLists.getItems();
+			
 			for (Playlist item : lists){
 				String title = item.getSnippet().getTitle();
 				if(title.indexOf("(YoutubeFeeder)")!=-1){
-					title = title.subSequence(0, title.indexOf("(YoutubeFeeder)")-1).toString();
-					favoriteListId = item.getId();
-				}else{
-					YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
-					myPlayList.add(thePlayList);
+					isHasYoutubeFeederFavorite = true;
 				}
-				items.add(new EntryItem(title,item.getId(),""));
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
+			if (isHasYoutubeFeederFavorite){
+				for (Playlist item : lists){
+					String title = item.getSnippet().getTitle();
+					if(title.indexOf("(YoutubeFeeder)")!=-1){
+						title = title.subSequence(0, title.indexOf("(YoutubeFeeder)")-1).toString();
+						favoriteListId = item.getId();
+						YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
+						myPlayList.add(thePlayList);
+					}else{
+						YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
+						myPlayList.add(thePlayList);
+					}
+					items.add(new EntryItem(title,item.getId(),""));
+				}
+			}else{
+				// add playlist
+				try{													
+					PlaylistSnippet playlistSnippet = new PlaylistSnippet();
+				    playlistSnippet.setTitle("我的最愛 (YoutubeFeeder)");
+					
+				    PlaylistStatus playlistStatus = new PlaylistStatus();
+				    playlistStatus.setPrivacyStatus("public");
+				    
+					Playlist youTubePlaylist = new Playlist();
+				    youTubePlaylist.setSnippet(playlistSnippet);
+				    youTubePlaylist.setStatus(playlistStatus);
+				    
+				    youtube.playlists().insert("snippet, status", youTubePlaylist).execute();
+				   
+				}catch(Exception e){
+					Log.e(TAG, e.toString());
+				}
+				
+				mLists = youtube.playlists().list("snippet").setMine(true).setMaxResults((long) 30).execute();
+				List<Playlist> newlists = mLists.getItems();
+				
+				for (Playlist item : newlists){
+					String title = item.getSnippet().getTitle();
+					if(title.indexOf("(YoutubeFeeder)")!=-1){
+						title = title.subSequence(0, title.indexOf("(YoutubeFeeder)")-1).toString();
+						favoriteListId = item.getId();
+						YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
+						myPlayList.add(thePlayList);
+					}else{
+						YoutubePlaylist thePlayList = new YoutubePlaylist(item.getSnippet().getTitle(),item.getId(),"");
+						myPlayList.add(thePlayList);
+					}
+					items.add(new EntryItem(title,item.getId(),""));
+				}
+				
+			}
+			
+			
+		} catch (IOException e) {			
 			e.printStackTrace();
-		}		
+		}
+		
 	}
 
 	private void chooseAccount() {
@@ -762,7 +795,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
-		// TODO Auto-generated method stub
 		if (connectionResult.hasResolution()) {
 			Toast.makeText(this, "connect fail", Toast.LENGTH_SHORT).show();
 
@@ -770,27 +802,39 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					String.format(
 							"Connection to Play Services Failed, error: %d, reason: %s",
 							connectionResult.getErrorCode(),
-							connectionResult.toString()));
-			try {
-				connectionResult.startResolutionForResult(this, 0);
-			} catch (IntentSender.SendIntentException e) {
-				Log.e(TAG, e.toString(), e);
+							connectionResult.toString()));		
+			
+			if (connectionResult.getErrorCode() == 8){
+				mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+				.setScopes(Auth.SCOPES)
+				.setAccountName(mChosenAccountName)
+				.build();
+				mPlusClient.connect();
+			}else{
+				SharedPreferences sp = PreferenceManager
+						.getDefaultSharedPreferences(this);
+				sp.edit().putBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, false).commit();
+				LinearLayout drawerAccountInfoLayout = (LinearLayout) findViewById (R.id.layout_draw_account_info);
+				drawerAccountInfoLayout.setVisibility(View.GONE);
 			}
+			
+//			try {
+//				connectionResult.startResolutionForResult(this, REQUEST_GOOGLE_PLAY_SERVICES);
+//			} catch (IntentSender.SendIntentException e) {
+//				Log.e(TAG, e.toString(), e);
+//			}
 		}
 
 	}
 
 	@Override
 	public void onConnected(Bundle arg0) {
-		// TODO Auto-generated method stub
-//		loadData();
 		setProfileInfo();
 	}
 
 	@Override
 	public void onDisconnected() {
-		// TODO Auto-generated method stub
-
+		
 	}
 	
 	@Override
@@ -871,9 +915,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
  	}
 	
 	private void updateVideos(ContentResolver cr, int updateNums, String channel_id, String channel_title) {
-		// TODO Auto-generated method stub
 		mVideos = ChannelApi.getChannelVideo(channel_id, 0, "", updateNums);
-//		Log.i("MainActivity", "the video size = " + mVideos.size() + ", the update Nums =" + updateNums);
 		if (mVideos != null){
 			for (int i = 0; i< mVideos.size(); i++){
 				YoutubeVideo video = mVideos.get(mVideos.size()-1-i);
@@ -900,7 +942,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 
 	@Override
 	 protected void onStop() {
-	  // TODO Auto-generated method stub
 	  super.onStop();
 	  SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		sp.edit().putBoolean(Initialized_Key, isInitialized).commit();
@@ -910,16 +951,34 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public void onResume() {
 		super.onResume();
 		UpdateVideosService.cancelUpdateService(mActivity);
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		isInitialized = sp.getBoolean(Initialized_Key, false);
+		isHasPlusData = sp.getBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, true);
 		if (!isInitialized){
+			items.clear();
 			loadAccount();		
 			if (mChosenAccountName !=null){
 				loginLayout.setVisibility(View.GONE);
 				credential.setSelectedAccountName(mChosenAccountName);
-				textName.setText(mDisplayName);
-				imageLoader.DisplayImage(mAccountImage, viewAvatar);
+				if (isHasPlusData){
+					textName.setText(mDisplayName);
+					imageLoader.DisplayImage(mAccountImage, viewAvatar);
+				}
 				loadVideos();
 			}
-		}	
+		}
+		
+		if(!isHasPlusData){
+			loadAccount();
+			if (mChosenAccountName !=null){
+				mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+				.setScopes(Auth.SCOPES)
+				.setAccountName(mChosenAccountName)
+				.build();
+				mPlusClient.connect();
+			}
+		}
+		
 	}
 	
 	@Override

@@ -38,6 +38,9 @@ public class PlaylistVideosActivity extends FragmentActivity {
         listTitle = mBundle.getString("ListTitle");
         listId = mBundle.getString("ListId");
         channelTitle = mBundle.getString("ChannelTitle");
+        if(channelTitle == null){
+        	channelTitle = "";
+        }
         
         newFragment =  PlaylistVideosFragment.newInstance(listId, 0, PlaylistVideosActivity.this, channelTitle);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -76,15 +79,19 @@ public class PlaylistVideosActivity extends FragmentActivity {
 		ArrayList<String> videoKeys = new ArrayList<String>();
 		ArrayList<String> videoValues = new ArrayList<String>();
 		HashMap<String, String> map = newFragment.getAllVideos();
-		for (HashMap.Entry<String, String> entry : map.entrySet()) {
-		    // use "entry.getKey()" and "entry.getValue()"
-			videoKeys.add(entry.getKey());
-			videoValues.add(entry.getValue());						
+		if(map.size()!=0){
+			for (HashMap.Entry<String, String> entry : map.entrySet()) {
+			    // use "entry.getKey()" and "entry.getValue()"
+				videoKeys.add(entry.getKey());
+				videoValues.add(entry.getValue());						
+			}
+			Intent intent = new Intent(PlaylistVideosActivity.this, PlayerViewActivity.class);  
+			intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
+			intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
+			startActivity(intent);
+		}else{
+			Toast.makeText(PlaylistVideosActivity.this, "No Videos", Toast.LENGTH_SHORT).show();
 		}
-		Intent intent = new Intent(PlaylistVideosActivity.this, PlayerViewActivity.class);  
-		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
-		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
-		startActivity(intent);  
 	}
     
 }
