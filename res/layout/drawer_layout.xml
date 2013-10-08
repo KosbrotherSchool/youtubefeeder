@@ -62,12 +62,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-
-        <ListView
+		
+        <RelativeLayout
+	        android:id="@+id/adLayout"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" >
+    	</RelativeLayout>
+        
+        <GridView 
+            android:id="@+id/main_grid_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="1"
+            android:verticalSpacing="2dp"
+        	android:horizontalSpacing="2dp"
+            >
+        </GridView>
+        
+        <!-- <ListView
             android:id="@+id/main_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clickable="true" />
+            android:clickable="true" /> -->
 
         <TextView
             android:layout_width="match_parent"

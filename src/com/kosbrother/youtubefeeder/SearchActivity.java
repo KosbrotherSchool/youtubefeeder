@@ -3,10 +3,12 @@ package com.kosbrother.youtubefeeder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.costum.android.widget.LoadMoreListView;
-import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
+//import com.costum.android.widget.LoadMoreListView;
+//import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
 import com.taiwan.imageload.ListVideoAdapter;
+import com.taiwan.imageload.LoadMoreGridView;
+import com.taiwan.imageload.LoadMoreGridView.OnLoadMoreListener;
 import com.youtube.music.channels.entity.YoutubeVideo;
 
 import android.annotation.SuppressLint;
@@ -32,18 +34,21 @@ import android.widget.Toast;
 @SuppressLint("NewApi")
 public class SearchActivity extends Activity{
 	
-	private ProgressBar mProgressBar;
-	private TextView mTextView;
-	private LinearLayout layoutProgress;
-	private LoadMoreListView  myList;
 	private EditText mEditText;
 	private ImageView mImageButton;
 	private ArrayList<YoutubeVideo> videos = new ArrayList<YoutubeVideo>();
 	private ArrayList<YoutubeVideo> moreVideos = new ArrayList<YoutubeVideo>() ;
 	private String mKeyword = "";
-	private static ListVideoAdapter myListAdapter;
 	private Boolean checkLoad = true;
 	private int myPage =  0;
+	
+	
+	private LoadMoreGridView myGrid;
+//  private GridViewAdapter  myGridViewAdapter;
+	private static ListVideoAdapter myListAdapter;
+	private LinearLayout    loadmoreLayout;
+	private LinearLayout 	progressLayout;
+	private LinearLayout 	nodataLayout;
 	
 	private static Activity mActivity;
 	private static boolean mModeIsShowing = false;
@@ -105,21 +110,21 @@ public class SearchActivity extends Activity{
 		setContentView(R.layout.layout_search);
 		mActivity = this;
 		
-		mProgressBar = (ProgressBar) findViewById (R.id.progress_progressbar);
-		mTextView = (TextView) findViewById (R.id.progress_no_data);
-		layoutProgress = (LinearLayout) findViewById (R.id.layout_progress);
-		myList = (LoadMoreListView) findViewById(R.id.news_list);
+		progressLayout = (LinearLayout) findViewById (R.id.layout_progress);
+		loadmoreLayout = (LinearLayout) findViewById(R.id.load_more_grid);
+    	nodataLayout = (LinearLayout) findViewById(R.id.layout_no_data);
+		myGrid = (LoadMoreGridView) findViewById(R.id.news_list);
 		mEditText = (EditText) findViewById (R.id.edittext_search);
         mImageButton = (ImageView) findViewById (R.id.imageview_search);
 		
-		myList.setOnLoadMoreListener(new OnLoadMoreListener() {
+        myGrid.setOnLoadMoreListener(new OnLoadMoreListener() {
 			public void onLoadMore() {
 				// Do the work to load more items at the end of list
 				if(checkLoad){
 					myPage = myPage +1;
 					new LoadMoreTask().execute();
 				}else{
-					myList.onLoadMoreComplete();
+					myGrid.onLoadMoreComplete();
 				}
 			}
 		});
@@ -133,9 +138,8 @@ public class SearchActivity extends Activity{
 	                	if(mEditText.getText().toString().equals("") || mEditText.getText().toString().equals(0) ){
 	                		Toast.makeText(SearchActivity.this, "請輸入搜索文字", Toast.LENGTH_SHORT).show();
 	                	}else{
-	                		layoutProgress.setVisibility(View.VISIBLE);
-	                		mProgressBar.setVisibility(View.VISIBLE);
-	                		mTextView.setVisibility(View.GONE);
+	                		progressLayout.setVisibility(View.VISIBLE);
+	                		nodataLayout.setVisibility(View.GONE);
 	                		
 	                		InputMethodManager imm =  (InputMethodManager)getSystemService(mActivity.INPUT_METHOD_SERVICE);
 	                		imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
@@ -161,9 +165,8 @@ public class SearchActivity extends Activity{
             	if(mEditText.getText().toString().equals("") || mEditText.getText().toString().equals(0) ){
             		Toast.makeText(SearchActivity.this, "請輸入搜索文字", Toast.LENGTH_SHORT).show();
             	}else{
-            		layoutProgress.setVisibility(View.VISIBLE);
-            		mProgressBar.setVisibility(View.VISIBLE);
-            		mTextView.setVisibility(View.GONE);
+            		progressLayout.setVisibility(View.VISIBLE);
+            		nodataLayout.setVisibility(View.GONE);
             		
             		InputMethodManager imm =  (InputMethodManager)getSystemService(mActivity.INPUT_METHOD_SERVICE);
             		imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
@@ -224,20 +227,17 @@ public class SearchActivity extends Activity{
         protected void onPostExecute(Object result) {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
-            mProgressBar.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
             
-            
-            if(videos !=null){
-              layoutProgress.setVisibility(View.GONE);
+            if(videos !=null){           	
           	  try{
           		  myListAdapter = new ListVideoAdapter(SearchActivity.this, videos, "");
-  		          myList.setAdapter(myListAdapter);
+          		  myGrid.setAdapter(myListAdapter);
           	  }catch(Exception e){
           		 
           	  }
             }else{
-              layoutProgress.setVisibility(View.VISIBLE);
-              mTextView.setVisibility(View.VISIBLE);
+              nodataLayout.setVisibility(View.VISIBLE);
             }
 
         }
@@ -249,7 +249,7 @@ public class SearchActivity extends Activity{
         protected void onPreExecute() {
             // TODO Auto-generated method stub
             super.onPreExecute();
-            
+            loadmoreLayout.setVisibility(View.VISIBLE);
 
         }
 
@@ -272,6 +272,7 @@ public class SearchActivity extends Activity{
         protected void onPostExecute(Object result) {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
+            loadmoreLayout.setVisibility(View.GONE);
             
             if(moreVideos!= null){
             	myListAdapter.notifyDataSetChanged();	                
@@ -279,7 +280,7 @@ public class SearchActivity extends Activity{
                 checkLoad= false;
                 Toast.makeText(SearchActivity.this, "no more data", Toast.LENGTH_SHORT).show();            	
             }       
-          	myList.onLoadMoreComplete();
+            myGrid.onLoadMoreComplete();
           	
           	
         }

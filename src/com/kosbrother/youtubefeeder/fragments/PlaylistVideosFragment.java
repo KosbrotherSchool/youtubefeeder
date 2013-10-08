@@ -18,13 +18,12 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.costum.android.widget.LoadMoreListView;
-import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
 import com.kosbrother.youtubefeeder.PlayerViewActivity;
 import com.kosbrother.youtubefeeder.R;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
 import com.taiwan.imageload.ListNothingAdapter;
 import com.taiwan.imageload.ListVideoAdapter;
+import com.taiwan.imageload.LoadMoreGridView;
 import com.youtube.music.channels.entity.YoutubeVideo;
 
 public class PlaylistVideosFragment extends Fragment {
@@ -35,13 +34,16 @@ public class PlaylistVideosFragment extends Fragment {
 //	private static ArrayList<MyYoutubeVideo> myVideos;
 	private static String mListId;
 	private static String mChannelName;
-	private LoadMoreListView  myList;
 	private ArrayList<YoutubeVideo> moreVideos;
 	private Boolean checkLoad = true;
-	private LinearLayout progressLayout;
 	private static ListVideoAdapter myListAdapter;
 	private static Activity mActivity;
 	private static Boolean isFirst = true;
+	
+	private LoadMoreGridView  myGrid;
+	private LinearLayout progressLayout;
+	private LinearLayout    loadmoreLayout;
+	private LinearLayout 	nodataLayout;
 	
 	private static boolean mModeIsShowing = false;
 	private static ActionMode mMode;
@@ -126,10 +128,12 @@ public class PlaylistVideosFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         
-    	View myFragmentView = inflater.inflate(R.layout.loadmore, container, false);
+    	View myFragmentView = inflater.inflate(R.layout.loadmore_grid, container, false);
     	progressLayout = (LinearLayout) myFragmentView.findViewById(R.id.layout_progress);
-    	myList = (LoadMoreListView) myFragmentView.findViewById(R.id.news_list);
-        myList.setOnLoadMoreListener(new OnLoadMoreListener() {
+    	myGrid = (LoadMoreGridView) myFragmentView.findViewById(R.id.news_list);
+    	loadmoreLayout = (LinearLayout) myFragmentView.findViewById(R.id.load_more_grid);
+    	nodataLayout = (LinearLayout) myFragmentView.findViewById(R.id.layout_no_data);
+    	myGrid.setOnLoadMoreListener(new LoadMoreGridView.OnLoadMoreListener() {
 			public void onLoadMore() {
 				// Do the work to load more items at the end of list
 				
@@ -137,14 +141,15 @@ public class PlaylistVideosFragment extends Fragment {
 					myPage = myPage +1;
 					new LoadMoreTask().execute();
 				}else{
-					myList.onLoadMoreComplete();
+					myGrid.onLoadMoreComplete();
 				}
 			}
 		});
         
         if (myListAdapter != null && !isFirst) {
             progressLayout.setVisibility(View.GONE);
-            myList.setAdapter(myListAdapter);
+            loadmoreLayout.setVisibility(View.GONE);
+            myGrid.setAdapter(myListAdapter);
         } else {
             new DownloadChannelsTask().execute();
         }
@@ -190,18 +195,19 @@ public class PlaylistVideosFragment extends Fragment {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
             progressLayout.setVisibility(View.GONE);
+            loadmoreLayout.setVisibility(View.GONE);
             isFirst = false;
             
             if(videos !=null){
           	  try{
           		  myListAdapter = new ListVideoAdapter(getActivity(), videos, mChannelName);
-  		          myList.setAdapter(myListAdapter);
+          		  myGrid.setAdapter(myListAdapter);
           	  }catch(Exception e){
           		 
           	  }
             }else{
-          	  ListNothingAdapter nothingAdapter = new ListNothingAdapter(getActivity());
-          	  myList.setAdapter(nothingAdapter);
+            	nodataLayout.setVisibility(View.VISIBLE);
+          	  	myGrid.setVisibility(View.GONE);
             }
 
         }
@@ -214,7 +220,7 @@ public class PlaylistVideosFragment extends Fragment {
         protected void onPreExecute() {
             // TODO Auto-generated method stub
             super.onPreExecute();
-            
+            loadmoreLayout.setVisibility(View.VISIBLE);
 
         }
 
@@ -237,6 +243,7 @@ public class PlaylistVideosFragment extends Fragment {
         protected void onPostExecute(Object result) {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
+            loadmoreLayout.setVisibility(View.GONE);
             
             if(moreVideos!= null){
             	myListAdapter.notifyDataSetChanged();	                
@@ -244,7 +251,7 @@ public class PlaylistVideosFragment extends Fragment {
                 checkLoad= false;
                 Toast.makeText(getActivity(), "no more data", Toast.LENGTH_SHORT).show();            	
             }       
-          	myList.onLoadMoreComplete();
+            myGrid.onLoadMoreComplete();
         }
 
 		

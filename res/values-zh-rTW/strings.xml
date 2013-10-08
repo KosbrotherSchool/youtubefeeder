@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">YoutubeFeeder</string>
+    <string name="action_settings">設定</string>
+    <string name="hello_world">Hello world!</string>
+    
+    <string name="refresh">重新整理</string>
+    <string name="accounts">選擇帳號</string>
+    <string name="all_read">標示全閱讀</string>
+    <string name="menu_search">搜索</string>
+    <string name="setting">設定</string>
+    
+    <string name="error">Error</string>
+    <string name="error_format">[Error] %s</string>
+    
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    
+    <string name="no_data">無資料!</string>
+    
+    <!-- video list -->
+    <string name="likes">喜歡</string>
+    <string name="time">長度</string>
+    <string name="views">觀看次數</string>
+    <string name="launch">發佈時間</string>
+    
+    <!-- Youtube Player -->
+    <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
+	
+    <!-- Contexual menu -->
+    <string name="play_selected">播放選取項目</string>
+    <string name="play_all">全部播放</string>
+    
+    <string name="not_signed_in">未登入</string>
+    
+    <!-- Setting -->
+    <string name="setting_account">帳號</string>
+    <string name="setting_update_video">影片更新</string>
+    <string name="setting_update_time">更新時間</string>
+    <string name="setting_update_inform">更新通知</string>
+    <string name="setting_update_inform_yes">通知</string>
+    <string name="setting_update_inform_no">不通知</string>
+    <string name="setting_select_time">選擇更新時間</string>
+    <string name="dialog_yes">確定</string>
+    <string name="dialog_no">取消</string>
+    <string name="hours">小時</string>
+    <string name="every">每</string>
+    <string name="click_to_set_account">點擊設置帳號</string>
+	
+    <!-- Channel Tab  -->
+    <string name="tab_recent">最近上傳</string>
+    <string name="tab_favorite">最受歡迎</string>
+    <string name="tab_list">播放清單</string>
+    
+    <string name="downloading">下載中...</string>
+    <string name="no_data">目前無資料</string>
+    
+    <string name="search_hint">輸入搜索文字</string>
+    
+    <!-- MainActivity -->
+    <string name="my_subscriptions">我的訂閱</string>
+    <string name="my_lists">播放清單</string>
+    <string name="add_favorte_list">我的最愛 (YoutubeFeeder)</string>
+    
+    <!-- PlayerViewActivity -->
+    <string name="intro">簡介:</string>
+    <string name="add_to_favorite_list">+最愛</string>
+    <string name="add_to_list">+清單</string>
+    <string name="share">分享</string>
+    <string name="to_youtube">Youtube</string>
+    <string name="the_play_list">播放清單</string>
+    <string name="auto_play">自動播放</string>
+    <string name="re_play">重復播放</string>
+    
+</resources>

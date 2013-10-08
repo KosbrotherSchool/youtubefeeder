@@ -94,7 +94,7 @@ OnConnectionFailedListener{
 
 	private void setDatas() {
 		textAccount.setText(mChosenAccountName);
-		buttonTimer.setText("每"+notifyTime+"小時");
+		buttonTimer.setText(getResources().getString(R.string.every)+notifyTime+getResources().getString(R.string.hours));
 		
 		textAccount.setOnClickListener(new Button.OnClickListener() {
 			@Override
@@ -113,16 +113,16 @@ OnConnectionFailedListener{
                 mPicker.setMinValue(1);
                 mPicker.setValue(notifyTime);
 				
-				new AlertDialog.Builder(SettingActivity.this).setTitle("選擇更新時間")
+				new AlertDialog.Builder(SettingActivity.this).setTitle(getResources().getString(R.string.setting_select_time))
 				.setView(dialogView)
-                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getResources().getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
                     	NumberPicker mPicker = (NumberPicker) dialogView.findViewById(R.id.number_picker);
                     	notifyTime = mPicker.getValue();
-                    	buttonTimer.setText("每"+notifyTime+"小時");
+                    	buttonTimer.setText(getResources().getString(R.string.every)+notifyTime+getResources().getString(R.string.hours));
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(getResources().getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
@@ -156,7 +156,7 @@ OnConnectionFailedListener{
 		if (mChosenAccountName !=null){
 			credential.setSelectedAccountName(mChosenAccountName);
 		}else{
-			textAccount.setText("點擊設置帳號");
+			textAccount.setText(getResources().getString(R.string.click_to_set_account));
 		}
 	}
 
@@ -245,13 +245,13 @@ OnConnectionFailedListener{
 							"Connection to Play Services Failed, error: %d, reason: %s",
 							connectionResult.getErrorCode(),
 							connectionResult.toString()));
-			if (connectionResult.getErrorCode() == 8){
-				mPlusClient = new PlusClient.Builder(SettingActivity.this, this, this)
-				.setScopes(Auth.SCOPES)
-				.setAccountName(mChosenAccountName)
-				.build();
-				mPlusClient.connect();
-			}
+//			if (connectionResult.getErrorCode() == 8){
+//				mPlusClient = new PlusClient.Builder(SettingActivity.this, this, this)
+//				.setScopes(Auth.SCOPES)
+//				.setAccountName(mChosenAccountName)
+//				.build();
+//				mPlusClient.connect();
+//			}
 			
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			sp.edit().putBoolean(MainActivity.HAS_ACCOUNT_PLUS_DATA_KEY, false).commit();

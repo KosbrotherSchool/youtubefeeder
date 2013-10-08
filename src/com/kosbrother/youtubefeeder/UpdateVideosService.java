@@ -126,7 +126,8 @@ public class UpdateVideosService extends Service {
 						.setMaxResults((long) 20).execute();
 
 				List<Subscription> lists = mSubscriptions.getItems();
-
+				Log.i("UpdateVideosService", "the gotten lists size:"+ lists.size());
+				
 				for (Subscription item : lists) {
 					String channelId = item.getSnippet().getResourceId()
 							.getChannelId();
@@ -201,6 +202,8 @@ public class UpdateVideosService extends Service {
 						setUpAsForeground("更新" + num_update_videos + "新影片");
 					}
 				}
+				
+				Log.i("UpdateVideosService", "finish updte videos");
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -303,7 +306,7 @@ public class UpdateVideosService extends Service {
 				intent, PendingIntent.FLAG_CANCEL_CURRENT);
 		int timeInteval = 1000 * 60 * 60 * hours;
 		am.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+timeInteval ,timeInteval, mAlarmSender);
-//		am.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+1000*10,1000*10, mAlarmSender); // repeat every 10 seconds
+//		am.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+1000*30,1000*30, mAlarmSender); // repeat every 30 seconds
 	}
 	
 	public static void cancelUpdateService(Context theContext) {

@@ -34,4 +34,43 @@
     
     <string name="not_signed_in">Not signed in</string>
     
+    <!-- Setting -->
+    <string name="setting_account">Account</string>
+    <string name="setting_update_video">Video Update</string>
+    <string name="setting_update_time">Update Time Interval</string>
+    <string name="setting_update_inform">Update Inform</string>
+    <string name="setting_update_inform_yes">Inform</string>
+    <string name="setting_update_inform_no">Not Inform</string>
+    <string name="setting_select_time">Select Update Time Interval</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">Cancel</string>
+    <string name="hours"> Hours</string>
+    <string name="every">Every </string>
+    <string name="click_to_set_account">Click Here Set Account</string>
+    
+    <!-- Channel Tab  -->
+    <string name="tab_recent">RECENT</string>
+    <string name="tab_favorite">FAVORITE</string>
+    <string name="tab_list">LISTS</string>
+    
+    <string name="downloading">Downloading...</string>
+    <string name="no_data">No Data Found</string>
+    
+    <string name="search_hint">Enter Search Text</string>
+    
+    <!-- MainActivity -->
+    <string name="my_subscriptions">My SUBSBRIPTIONS</string>
+    <string name="my_lists">MY LISTS</string>
+    <string name="add_favorte_list">FAVORITE (YoutubeFeeder)</string>
+    
+    <!-- PlayerViewActivity -->
+    <string name="intro">INTRO:</string>
+    <string name="add_to_favorite_list">+FAVO</string>
+    <string name="add_to_list">+LIST</string>
+    <string name="share">SHARE</string>
+    <string name="to_youtube">YOUTUBE</string>
+    <string name="the_play_list">PLAY LISTS</string>
+    <string name="auto_play">AUTO PLAY</string>
+    <string name="re_play">REPLAY</string>
+    
 </resources>

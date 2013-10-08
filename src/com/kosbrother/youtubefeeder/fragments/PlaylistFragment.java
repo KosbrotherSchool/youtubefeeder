@@ -2,12 +2,11 @@ package com.kosbrother.youtubefeeder.fragments;
 
 
 import java.util.ArrayList;
-import com.costum.android.widget.LoadMoreListView;
-import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
 import com.kosbrother.youtubefeeder.R;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
 import com.taiwan.imageload.ListNothingAdapter;
 import com.taiwan.imageload.ListPlaylistAdapter;
+import com.taiwan.imageload.LoadMoreGridView;
 import com.youtube.music.channels.entity.YoutubePlaylist;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,8 +28,10 @@ public class PlaylistFragment extends Fragment {
   private ArrayList<YoutubePlaylist> morePlaylist = new ArrayList<YoutubePlaylist>();
   private ListPlaylistAdapter myListAdapter;
   private Boolean checkLoad = true;
-  private LoadMoreListView  myList;
+  private LoadMoreGridView  myGrid;
   private LinearLayout progressLayout;
+  private LinearLayout    loadmoreLayout;
+  private LinearLayout 	nodataLayout;
   
   
   
@@ -61,10 +62,12 @@ public class PlaylistFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       
-  	View myFragmentView = inflater.inflate(R.layout.loadmore, container, false);
+  	View myFragmentView = inflater.inflate(R.layout.loadmore_grid, container, false);
   	progressLayout = (LinearLayout) myFragmentView.findViewById(R.id.layout_progress);
-  	myList = (LoadMoreListView) myFragmentView.findViewById(R.id.news_list);
-    myList.setOnLoadMoreListener(new OnLoadMoreListener() {
+  	loadmoreLayout = (LinearLayout) myFragmentView.findViewById(R.id.load_more_grid);
+	nodataLayout = (LinearLayout) myFragmentView.findViewById(R.id.layout_no_data);
+  	myGrid = (LoadMoreGridView) myFragmentView.findViewById(R.id.news_list);
+  	myGrid.setOnLoadMoreListener(new LoadMoreGridView.OnLoadMoreListener() {
 			public void onLoadMore() {
 				// Do the work to load more items at the end of list
 				
@@ -72,14 +75,15 @@ public class PlaylistFragment extends Fragment {
 					myPage = myPage +1;
 					new LoadMoreTask().execute();
 				}else{
-					myList.onLoadMoreComplete();
+					myGrid.onLoadMoreComplete();
 				}
 			}
 		});
     
     if (myListAdapter != null) {
         progressLayout.setVisibility(View.GONE);
-        myList.setAdapter(myListAdapter);
+        loadmoreLayout.setVisibility(View.GONE);
+        myGrid.setAdapter(myListAdapter);
     } else {
         new DownloadChannelsTask().execute();
     }
@@ -113,16 +117,17 @@ public class PlaylistFragment extends Fragment {
           // TODO Auto-generated method stub
           super.onPostExecute(result);
           progressLayout.setVisibility(View.GONE);
+          loadmoreLayout.setVisibility(View.GONE);
           if(playlists != null){
         	  try{
 		          myListAdapter = new ListPlaylistAdapter(getActivity(), playlists, mChannelTitle);
-		          myList.setAdapter(myListAdapter);
+		          myGrid.setAdapter(myListAdapter);
         	  }catch(Exception e){
         		  
         	  }
           }else{
-        	  ListNothingAdapter nothingAdapter = new ListNothingAdapter(getActivity());
-        	  myList.setAdapter(nothingAdapter);
+        	  nodataLayout.setVisibility(View.VISIBLE);
+        	  myGrid.setVisibility(View.GONE);
           }
 
       }
@@ -134,7 +139,7 @@ public class PlaylistFragment extends Fragment {
       protected void onPreExecute() {
           // TODO Auto-generated method stub
           super.onPreExecute();
-          
+          loadmoreLayout.setVisibility(View.VISIBLE);
 
       }
 
@@ -157,6 +162,7 @@ public class PlaylistFragment extends Fragment {
       protected void onPostExecute(Object result) {
           // TODO Auto-generated method stub
           super.onPostExecute(result);
+          loadmoreLayout.setVisibility(View.GONE);
           
           if(morePlaylist!= null){
           	myListAdapter.notifyDataSetChanged();	                
@@ -164,7 +170,7 @@ public class PlaylistFragment extends Fragment {
               checkLoad= false;
               Toast.makeText(getActivity(), "no more data", Toast.LENGTH_SHORT).show();            	
           }       
-          myList.onLoadMoreComplete();
+          myGrid.onLoadMoreComplete();
         	
         	
       }

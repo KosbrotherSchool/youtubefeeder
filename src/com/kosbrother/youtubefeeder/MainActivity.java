@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
@@ -37,9 +38,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import at.bartinger.list.item.EntryAdapter;
@@ -47,6 +50,12 @@ import at.bartinger.list.item.EntryItem;
 import at.bartinger.list.item.Item;
 import at.bartinger.list.item.SectionItem;
 
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
+import com.google.ads.AdRequest.ErrorCode;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -87,7 +96,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerListView;
-	private ListView mainListView;
+//	private ListView mainListView;
+	private GridView mainGridView;
 	private EntryAdapter mDrawerAdapter;
 	private ArrayList<Item> items = new ArrayList<Item>();
 	private ArrayList<Channel> mSubscriptionChannels = new ArrayList<Channel>();
@@ -137,6 +147,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	final JsonFactory jsonFactory = new GsonFactory();
 
 	private static final String TAG = "MainActivity";
+	
+	private RelativeLayout adBannerLayout;
+	private AdView adMobAdView;
 	
 	private static Activity mActivity;
 	private static boolean mModeIsShowing = false;
@@ -202,7 +215,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
-		mainListView = (ListView) findViewById(R.id.main_list_view);
+		mainGridView = (GridView) findViewById(R.id.main_grid_view);
 		textName = (TextView) findViewById(R.id.left_name);
 		viewAvatar = (ImageView) findViewById(R.id.left_avatar);
 		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
@@ -222,7 +235,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				R.string.drawer_close);
 		//(Context context,int layout, Cursor c,String[] from,int[] to)
 		mVideoAdapter = new VideoCursorAdapter(this, R.layout.item_video_list, null, PROJECTION, null);
-		mainListView.setAdapter(mVideoAdapter);
+		mainGridView.setAdapter(mVideoAdapter);
 		
 		// Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
@@ -252,10 +265,46 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			});		
 		}
 		
+		// Call ads
+		adBannerLayout = (RelativeLayout) findViewById(R.id.adLayout);	
+		final AdRequest adReq = new AdRequest();
+		
+		adMobAdView = new AdView(this, AdSize.SMART_BANNER, DeveloperKey.MEDIATION_KEY);
+		adMobAdView.setAdListener(new AdListener() {
+			@Override
+			public void onDismissScreen(Ad arg0) {
+				Log.d("admob_banner", "onDismissScreen");
+			}
+
+			@Override
+			public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+				Log.d("admob_banner", "onFailedToReceiveAd");
+			}
+
+			@Override
+			public void onLeaveApplication(Ad arg0) {
+				Log.d("admob_banner", "onLeaveApplication");
+			}
+
+			@Override
+			public void onPresentScreen(Ad arg0) {
+				Log.d("admob_banner", "onPresentScreen");
+			}
+
+			@Override
+			public void onReceiveAd(Ad ad) {
+				Log.d("admob_banner", "onReceiveAd ad:" + ad.getClass());
+			}
+
+		});
+		adMobAdView.loadAd(adReq);
+		adBannerLayout.addView(adMobAdView);
 	}
 	
-	public void setProfileInfo() {	
-        if (!mPlusClient.isConnected() || mPlusClient.getCurrentPerson() == null) {            
+	public void setProfileInfo() {
+		LinearLayout drawerAccountInfoLayout = (LinearLayout) findViewById (R.id.layout_draw_account_info);
+        if (!mPlusClient.isConnected() || mPlusClient.getCurrentPerson() == null) {    
+        	drawerAccountInfoLayout.setVisibility(View.GONE);
         	textName.setText(R.string.not_signed_in);
         } else {
             Person currentPerson = mPlusClient.getCurrentPerson();
@@ -269,8 +318,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
     				.getDefaultSharedPreferences(this);
     		sp.edit().putString(ACCOUNT_DISPLAY_NAME_KEY, currentPerson.getDisplayName()).commit();
     		sp.edit().putString(ACCOUNT_IMAGE_KEY, currentPerson.getImage().getUrl()).commit();
-    		sp.edit().putBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, true).commit();
-    		LinearLayout drawerAccountInfoLayout = (LinearLayout) findViewById (R.id.layout_draw_account_info);
+    		sp.edit().putBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, true).commit(); 		
 			drawerAccountInfoLayout.setVisibility(View.VISIBLE);
         }
     }
@@ -447,7 +495,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					ContentResolver cr = getContentResolver();
 					
 					if (!isInitialized){
-						items.add(new SectionItem("我的訂閱"));
+						items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
 						
 						SubscriptionListResponse mSubscriptions = youtube
 								.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();
@@ -510,7 +558,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						
 						// set drawer list 					
 						sectionListPosition = items.size();
-						items.add(new SectionItem("播放清單"));
+						items.add(new SectionItem(getResources().getString(R.string.my_lists)));
 						
 						
 						setPlayListData(youtube);
@@ -519,7 +567,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						
 					}else{
 						if (!isListSetted){
-							items.add(new SectionItem("我的訂閱"));
+							items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
 						}
 						
 						cr.delete(VideoTable.CONTENT_URI, VideoTable.COLUMN_NAME_DATA9+" = ?" , new String[] {"1"});
@@ -607,9 +655,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				        // set drawer list
 						if (!isListSetted){
 							sectionListPosition = items.size();
-							items.add(new SectionItem("播放清單"));
-							setPlayListData(youtube);
+							items.add(new SectionItem(getResources().getString(R.string.my_lists)));						
 						}
+						setPlayListData(youtube);
 						isListSetted = true;
 					}
 					
@@ -698,10 +746,11 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				}
 			}else{
 				// add playlist
-				try{													
-					PlaylistSnippet playlistSnippet = new PlaylistSnippet();
-				    playlistSnippet.setTitle("我的最愛 (YoutubeFeeder)");
+				try{
 					
+					PlaylistSnippet playlistSnippet = new PlaylistSnippet();
+					playlistSnippet.setTitle(getResources().getString(R.string.add_favorte_list));
+			
 				    PlaylistStatus playlistStatus = new PlaylistStatus();
 				    playlistStatus.setPrivacyStatus("public");
 				    
@@ -796,7 +845,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		if (connectionResult.hasResolution()) {
-			Toast.makeText(this, "connect fail", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, "connect fail", Toast.LENGTH_SHORT).show();
 
 			Log.e(TAG,
 					String.format(
@@ -804,19 +853,20 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 							connectionResult.getErrorCode(),
 							connectionResult.toString()));		
 			
-			if (connectionResult.getErrorCode() == 8){
-				mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
-				.setScopes(Auth.SCOPES)
-				.setAccountName(mChosenAccountName)
-				.build();
-				mPlusClient.connect();
-			}else{
-				SharedPreferences sp = PreferenceManager
+//			if (connectionResult.getErrorCode() == 8){
+//				mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+//				.setScopes(Auth.SCOPES)
+//				.setAccountName(mChosenAccountName)
+//				.build();
+//				mPlusClient.connect();
+//			}
+				
+			SharedPreferences sp = PreferenceManager
 						.getDefaultSharedPreferences(this);
-				sp.edit().putBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, false).commit();
-				LinearLayout drawerAccountInfoLayout = (LinearLayout) findViewById (R.id.layout_draw_account_info);
-				drawerAccountInfoLayout.setVisibility(View.GONE);
-			}
+			sp.edit().putBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, false).commit();
+			LinearLayout drawerAccountInfoLayout = (LinearLayout) findViewById (R.id.layout_draw_account_info);
+			drawerAccountInfoLayout.setVisibility(View.GONE);
+			
 			
 //			try {
 //				connectionResult.startResolutionForResult(this, REQUEST_GOOGLE_PLAY_SERVICES);
@@ -884,9 +934,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		if (loader.getId() == 0){
 			mVideoAdapter.swapCursor(data);
 			if(data.getCount() == 0){
-				mainListView.setVisibility(View.GONE);
+				mainGridView.setVisibility(View.GONE);
 			}else{
-				mainListView.setVisibility(View.VISIBLE);
+				mainGridView.setVisibility(View.VISIBLE);
 				progressLayout.setVisibility(View.GONE);
 			}
 		}else if (loader.getId() == 1){
@@ -943,8 +993,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	@Override
 	 protected void onStop() {
 	  super.onStop();
-	  SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+	  	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		sp.edit().putBoolean(Initialized_Key, isInitialized).commit();
+		int notifyTime = sp.getInt(SettingActivity.NOTIFY_TIMER_KEY, 3);
+		UpdateVideosService.setUpdateService(mActivity, notifyTime);
 	 }
 	
 	@Override
@@ -964,7 +1016,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					textName.setText(mDisplayName);
 					imageLoader.DisplayImage(mAccountImage, viewAvatar);
 				}
-				loadVideos();
+				loadData();
 			}
 		}
 		
@@ -983,10 +1035,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-		int notifyTime = sp.getInt(SettingActivity.NOTIFY_TIMER_KEY, 3);
-		UpdateVideosService.setUpdateService(mActivity, notifyTime);
+		super.onDestroy();		
 	}
 	
 	private void haveGooglePlayServices() {

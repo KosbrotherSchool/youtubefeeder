@@ -35,6 +35,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"/>
+        
+        <RelativeLayout
+	        android:id="@+id/adLayout"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" >
+    	</RelativeLayout>
 
         <FrameLayout
             android:id="@android:id/tabcontent"

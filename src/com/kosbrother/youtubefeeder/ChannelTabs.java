@@ -2,6 +2,12 @@ package com.kosbrother.youtubefeeder;
 
 import java.util.ArrayList;
 
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
+import com.google.ads.AdRequest.ErrorCode;
 import com.kosbrother.youtubefeeder.fragments.NewVideosFragment;
 import com.kosbrother.youtubefeeder.fragments.PlaylistFragment;
 import com.kosbrother.youtubefeeder.fragments.PopularFragment;
@@ -13,9 +19,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
@@ -28,7 +36,10 @@ public class ChannelTabs extends FragmentActivity {
     private static String channelId;
     private static String channelTitle;
     private Bundle mBundle;
-
+    
+    private RelativeLayout adBannerLayout;
+	private AdView adMobAdView;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,11 +56,11 @@ public class ChannelTabs extends FragmentActivity {
 
         mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);
 
-        mTabsAdapter.addTab(mTabHost.newTabSpec("new").setIndicator("最近上傳"),
+        mTabsAdapter.addTab(mTabHost.newTabSpec("new").setIndicator(getResources().getString(R.string.tab_recent)),
                 NewVideosFragment.class, null);
-        mTabsAdapter.addTab(mTabHost.newTabSpec("popular").setIndicator("最受歡迎"),
+        mTabsAdapter.addTab(mTabHost.newTabSpec("popular").setIndicator(getResources().getString(R.string.tab_favorite)),
         		PopularFragment.class, null);
-        mTabsAdapter.addTab(mTabHost.newTabSpec("playlist").setIndicator("播放清單"),
+        mTabsAdapter.addTab(mTabHost.newTabSpec("playlist").setIndicator(getResources().getString(R.string.tab_list)),
         		PlaylistFragment.class, null);
 
 
@@ -61,6 +72,42 @@ public class ChannelTabs extends FragmentActivity {
         if(sdkVersion > 10){
         	getActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        
+        // Call ads
+     		adBannerLayout = (RelativeLayout) findViewById(R.id.adLayout);	
+     		final AdRequest adReq = new AdRequest();
+     		
+     		adMobAdView = new AdView(this, AdSize.SMART_BANNER, DeveloperKey.MEDIATION_KEY);
+     		adMobAdView.setAdListener(new AdListener() {
+     			@Override
+     			public void onDismissScreen(Ad arg0) {
+     				Log.d("admob_banner", "onDismissScreen");
+     			}
+
+     			@Override
+     			public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+     				Log.d("admob_banner", "onFailedToReceiveAd");
+     			}
+
+     			@Override
+     			public void onLeaveApplication(Ad arg0) {
+     				Log.d("admob_banner", "onLeaveApplication");
+     			}
+
+     			@Override
+     			public void onPresentScreen(Ad arg0) {
+     				Log.d("admob_banner", "onPresentScreen");
+     			}
+
+     			@Override
+     			public void onReceiveAd(Ad ad) {
+     				Log.d("admob_banner", "onReceiveAd ad:" + ad.getClass());
+     			}
+
+     		});
+     		adMobAdView.loadAd(adReq);
+     		adBannerLayout.addView(adMobAdView);
+        
     }
 
     @Override

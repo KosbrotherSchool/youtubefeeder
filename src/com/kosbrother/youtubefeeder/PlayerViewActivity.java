@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
+import com.google.android.youtube.player.YouTubePlayer.OnFullscreenListener;
 import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayerView;
@@ -90,6 +91,7 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	private int hilightTorch = 0;
 	
 	private Boolean isVideos = false;
+//	private Boolean fullScreen = false;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -251,6 +253,12 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		mPlayer = player;
 		mPlayer.setPlayerStateChangeListener(playerStateChangeListener);
 		mPlayer.setPlaylistEventListener(playlistEventListener);
+		mPlayer.setOnFullscreenListener(new OnFullscreenListener() {
+            @Override
+            public void onFullscreen(boolean _isFullScreen) {
+               
+            }
+        });
 		if (!wasRestored) {
 			if(isVideos){
 				for(String item: videosTitle){
@@ -272,6 +280,11 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	@Override
 	protected YouTubePlayer.Provider getYouTubePlayerProvider() {
 		return (YouTubePlayerView) findViewById(R.id.youtube_view);
+	}
+	
+	@Override
+	public void onBackPressed() {
+	    super.onBackPressed();
 	}
 	
 	
