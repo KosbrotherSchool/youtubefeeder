@@ -95,7 +95,7 @@ public class ListVideoAdapter extends BaseAdapter {
         // set date text
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");  
         final String dateString = formatter.format(data.get(position).getUploadDate()); 
-        textDate.setText(mActivity.getResources().getString(R.string.launch)+": "+dateString);
+        textDate.setText(mActivity.getResources().getString(R.string.launch_time)+": "+dateString);
         
         // set duration text
         int[] intTime = splitToComponentTimes(data.get(position).getDuration());

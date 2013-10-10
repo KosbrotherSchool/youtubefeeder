@@ -4,6 +4,7 @@
     <string name="app_name">YoutubeFeeder</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="phone_language">En</string>
     
     <string name="refresh">Refresh</string>
     <string name="accounts">Accounts</string>
@@ -17,13 +18,12 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     
-    <string name="no_data">No Data</string>
     
     <!-- video list -->
     <string name="likes">Likes</string>
     <string name="time">Time</string>
     <string name="views">Views</string>
-    <string name="launch">Launch</string>
+    <string name="launch_time">Launch</string>
     
     <!-- Youtube Player -->
     <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
@@ -31,6 +31,7 @@
     <!-- Contexual menu -->
     <string name="play_selected">Play Selected</string>
     <string name="play_all">Play All</string>
+    <string name="mark_as_read">Mark Viewed</string>
     
     <string name="not_signed_in">Not signed in</string>
     
@@ -46,7 +47,7 @@
     <string name="dialog_no">Cancel</string>
     <string name="hours"> Hours</string>
     <string name="every">Every </string>
-    <string name="click_to_set_account">Click Here Set Account</string>
+    <string name="click_to_set_account">Click to Set Youtube Account</string>
     
     <!-- Channel Tab  -->
     <string name="tab_recent">RECENT</string>
@@ -62,6 +63,11 @@
     <string name="my_subscriptions">My SUBSBRIPTIONS</string>
     <string name="my_lists">MY LISTS</string>
     <string name="add_favorte_list">FAVORITE (YoutubeFeeder)</string>
+    <string name="to_log_in">Log In</string>
+    <string name="log_in_youtube">Log In Youtube</string>
+    <string name="try_as_guest">Try As Guest</string>
+    <string name="loading_data">Initializing...</string>
+    
     
     <!-- PlayerViewActivity -->
     <string name="intro">INTRO:</string>
@@ -72,5 +78,6 @@
     <string name="the_play_list">PLAY LISTS</string>
     <string name="auto_play">AUTO PLAY</string>
     <string name="re_play">REPLAY</string>
+    <string name="login_first">Need Log In Youtube First!</string>
     
 </resources>

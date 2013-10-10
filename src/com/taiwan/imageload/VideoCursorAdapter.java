@@ -109,7 +109,7 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
         textLikes.setText(Integer.toString(cursor.getInt(likes_index))+" "+mContext.getResources().getString(R.string.likes));
         
         // set date text
-        textDate.setText(mContext.getResources().getString(R.string.launch)+": "+cursor.getString(uploadTime_index));
+        textDate.setText(mContext.getResources().getString(R.string.launch_time)+": "+cursor.getString(uploadTime_index));
         
         // set duration text
         int[] intTime = splitToComponentTimes(cursor.getInt(duration_index));

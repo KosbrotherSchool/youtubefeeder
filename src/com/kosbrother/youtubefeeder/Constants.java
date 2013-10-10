@@ -14,6 +14,9 @@
 
 package com.kosbrother.youtubefeeder;
 
+import com.kosbrother.youtubefeeder.database.ChannelTable;
+import com.kosbrother.youtubefeeder.database.VideoTable;
+
 /**
  * @author Ibrahim Ulukaya <ulukaya@google.com>
  *         <p/>
@@ -23,5 +26,28 @@ public class Constants {
 
     public static final String APP_NAME = "Youtube Feeder";
     public static final String YOUTUBE_WATCH_URL_PREFIX = "http://www.youtube.com/watch?v=";
+    
+    public static final String[] PROJECTION_VIDEO = new String[] {
+		VideoTable._ID,
+		VideoTable.COLUMN_NAME_DATA1,
+		VideoTable.COLUMN_NAME_DATA2,
+		VideoTable.COLUMN_NAME_DATA3,
+		VideoTable.COLUMN_NAME_DATA4,
+		VideoTable.COLUMN_NAME_DATA5,
+		VideoTable.COLUMN_NAME_DATA6,
+		VideoTable.COLUMN_NAME_DATA7,
+		VideoTable.COLUMN_NAME_DATA8,
+		VideoTable.COLUMN_NAME_DATA9,
+		VideoTable.COLUMN_NAME_DATA10,
+		VideoTable.COLUMN_NAME_DATA11
+    };
+	
+	public static final String[] PROJECTION_CHANNEL = new String[] {
+		ChannelTable._ID,
+		ChannelTable.COLUMN_NAME_DATA1,
+		ChannelTable.COLUMN_NAME_DATA2,
+		ChannelTable.COLUMN_NAME_DATA3,
+		ChannelTable.COLUMN_NAME_DATA4,
+    };
     
 }

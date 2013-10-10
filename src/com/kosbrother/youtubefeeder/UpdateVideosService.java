@@ -59,7 +59,7 @@ public class UpdateVideosService extends Service {
 	Notification mNotification = null;
 	final int NOTIFICATION_ID = 1;
 
-	private int num_update_videos = 0;
+//	private int num_update_videos = 0;
 	private boolean isNotify;
 
 	@Override
@@ -109,7 +109,8 @@ public class UpdateVideosService extends Service {
 		@Override
 		public void run() {
 			Log.i("UpdateVideosService", "StartService Video Update");
-
+			int num_update_videos = 0;
+			
 			YouTube youtube = new YouTube.Builder(transport, jsonFactory,
 					credential).setApplicationName(Constants.APP_NAME).build();
 
@@ -151,7 +152,7 @@ public class UpdateVideosService extends Service {
 
 					Cursor theChannelCursor = cr.query(
 							ChannelTable.CONTENT_URI,
-							MainActivity.PROJECTION_CHANNEL,
+							Constants.PROJECTION_CHANNEL,
 							ChannelTable.COLUMN_NAME_DATA1 + " = ?",
 							new String[] { channelId }, null);
 					theChannelCursor.moveToFirst();
@@ -269,7 +270,7 @@ public class UpdateVideosService extends Service {
 		// 建立待處理意圖
 		PendingIntent pIntent = PendingIntent.getActivity(this, 0, call, 0);
 		// 指定通知欄位要顯示的圖示
-		int icon = R.drawable.ic_launcher;
+		int icon = R.drawable.app_icon;
 		// 指定通知出現時要顯示的文字,幾秒後會消失只剩圖示
 		String ticket = "YoutubeFeeder更新";
 		// 何時送出通知,傳入當前時間則立即發出通知

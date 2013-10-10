@@ -198,31 +198,37 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		buttonFavorite.setOnClickListener(new Button.OnClickListener(){ 
             @Override
             public void onClick(View v) {
-            	new AddToFavoriteList().execute();
+            	if (mChosenAccountName!=null && mChosenAccountName!=""){
+            		new AddToFavoriteList().execute();
+            	}else{
+            		Toast.makeText(PlayerViewActivity.this, PlayerViewActivity.this.getResources().getString(R.string.login_first), Toast.LENGTH_SHORT).show();
+            	}
             }         
 
         });
 		buttonPlayList.setOnClickListener(new Button.OnClickListener(){ 
             @Override
             public void onClick(View v) {
-            	
-            	final ArrayList<YoutubePlaylist> myList = MainActivity.getMyList();
-            	
-            	final String[] ListStr = new String[myList.size()];
-            	for (int i=0;i< myList.size();i++){
-            		ListStr[i] = myList.get(i).getTitle();
-            	}
-            	
-                AlertDialog.Builder builder = new AlertDialog.Builder(PlayerViewActivity.this);
-                builder.setTitle("Select List");
-                builder.setItems(ListStr, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int item) {                   
-                        	new AddToList().execute(myList.get(item));     
-                    }
-                });
-                AlertDialog alert = builder.create();
-                alert.show();
-
+            	if (mChosenAccountName!=null && mChosenAccountName!=""){
+	            	final ArrayList<YoutubePlaylist> myList = MainActivity.getMyList();
+	            	
+	            	final String[] ListStr = new String[myList.size()];
+	            	for (int i=0;i< myList.size();i++){
+	            		ListStr[i] = myList.get(i).getTitle();
+	            	}
+	            	
+	                AlertDialog.Builder builder = new AlertDialog.Builder(PlayerViewActivity.this);
+	                builder.setTitle("Select List");
+	                builder.setItems(ListStr, new DialogInterface.OnClickListener() {
+	                    public void onClick(DialogInterface dialog, int item) {                   
+	                        	new AddToList().execute(myList.get(item));     
+	                    }
+	                });
+	                AlertDialog alert = builder.create();
+	                alert.show();
+	            }else{
+	            	Toast.makeText(PlayerViewActivity.this, PlayerViewActivity.this.getResources().getString(R.string.login_first), Toast.LENGTH_SHORT).show();
+	            }
             }         
 
         });

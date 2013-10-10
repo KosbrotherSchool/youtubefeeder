@@ -47,6 +47,7 @@ OnConnectionFailedListener{
 
 	private String mChosenAccountName;
 	private boolean isNotify;
+	private boolean isGuest;
 	private int notifyTime; // hours
 
 	public static final String NOTIFY_KEY = "IsNotify";
@@ -93,7 +94,12 @@ OnConnectionFailedListener{
 	}
 
 	private void setDatas() {
-		textAccount.setText(mChosenAccountName);
+		
+		if (isGuest){
+			textAccount.setText(getResources().getString(R.string.click_to_set_account));
+		}else{
+			textAccount.setText(mChosenAccountName);
+		}		
 		buttonTimer.setText(getResources().getString(R.string.every)+notifyTime+getResources().getString(R.string.hours));
 		
 		textAccount.setOnClickListener(new Button.OnClickListener() {
@@ -143,11 +149,11 @@ OnConnectionFailedListener{
 	}
 
 	private void getDatas() {
-		SharedPreferences sp = PreferenceManager
-				.getDefaultSharedPreferences(this);
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		mChosenAccountName = sp.getString(MainActivity.ACCOUNT_KEY, null);
 		isNotify = sp.getBoolean(NOTIFY_KEY, true);
 		notifyTime = sp.getInt(NOTIFY_TIMER_KEY, 3);
+		isGuest = sp.getBoolean(MainActivity.TRY_AS_GUEST_KEY, false);	
 		// get GoogleAccount OAuth
 		credential = GoogleAccountCredential.usingOAuth2(
 				getApplicationContext(), Arrays.asList(Auth.SCOPES));
@@ -231,7 +237,8 @@ OnConnectionFailedListener{
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		sp.edit().putString(MainActivity.ACCOUNT_KEY, mChosenAccountName).commit();
-		sp.edit().putBoolean(MainActivity.Initialized_Key, false).commit(); 
+		sp.edit().putBoolean(MainActivity.Initialized_Key, false).commit();
+		sp.edit().putBoolean(MainActivity.TRY_AS_GUEST_KEY, false).commit(); 
 	}
 	
 	@Override

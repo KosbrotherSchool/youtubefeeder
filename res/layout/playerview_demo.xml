@@ -67,7 +67,7 @@
           android:textColor="#1986E6"
           />
       <ScrollView
-          android:layout_width="wrap_content"
+          android:layout_width="fill_parent"
 	      android:layout_height="wrap_content"
 	      android:layout_marginLeft="2dp"
            >

@@ -99,18 +99,19 @@
    	 	android:layout_width="fill_parent"
    	 	android:layout_height="fill_parent"
      	android:gravity="center"
-     	android:visibility="gone"
+     	android:orientation="horizontal"
+     	android:background="@color/white"
      	>
 	    <ImageView 
-	       android:layout_width="80dp"
-   	 	   android:layout_height="80dp"
-   	 	   android:src="@drawable/app_icon" 
+	       android:layout_width="60dp"
+   	 	   android:layout_height="60dp"
+   	 	   android:background="@drawable/app_icon" 
 	        />
 	    <TextView 
 	        android:layout_width="wrap_content"
    	 		android:layout_height="wrap_content"
    	 		android:text="@string/no_data"
-   	 		android:textSize="23dp"
+   	 		android:textSize="20dp"
    	 		android:layout_marginLeft="5dp"
    	 		android:textColor="#6E6E6E"
 	        />

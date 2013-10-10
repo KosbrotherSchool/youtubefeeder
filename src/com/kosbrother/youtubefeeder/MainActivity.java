@@ -1,12 +1,22 @@
 package com.kosbrother.youtubefeeder;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.regex.Pattern;
 
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
@@ -16,12 +26,12 @@ import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
@@ -44,7 +54,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import at.bartinger.list.item.EntryAdapter;
 import at.bartinger.list.item.EntryItem;
 import at.bartinger.list.item.Item;
@@ -53,9 +62,9 @@ import at.bartinger.list.item.SectionItem;
 import com.google.ads.Ad;
 import com.google.ads.AdListener;
 import com.google.ads.AdRequest;
+import com.google.ads.AdRequest.ErrorCode;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
-import com.google.ads.AdRequest.ErrorCode;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -109,6 +118,11 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private LinearLayout progressDrawerLayout;
 	private LinearLayout loginLayout;
 	private Button buttonLogIn;
+	private Button buttonTryAsGuest;
+	private Button buttonLeftLogIn;
+	
+	String channel_URL="https://docs.google.com/spreadsheet/pub?key=0AuZ1UBSQ9xtTdExGV3pKdkdrZ29hdEoyckNFbEZnUFE&output=csv";
+	String channel_name="channels.csv";
 	
 	private static VideoCursorAdapter mVideoAdapter;
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
@@ -122,11 +136,14 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private static final int REQUEST_GOOGLE_PLAY_SERVICES = 0;
 	private static final int REQUEST_ACCOUNT_PICKER = 2;
 	private static final int REQUEST_AUTHORIZATION = 3;
-
+	
+	private static final int MENU_ID_MARK_READ = 111;
+	
 	public static final String ACCOUNT_KEY = "accountName";
 	public static final String ACCOUNT_DISPLAY_NAME_KEY = "accountDisplayName";
 	public static final String ACCOUNT_IMAGE_KEY = "accountImage";
 	public static final String HAS_ACCOUNT_PLUS_DATA_KEY = "IsHasPlusData";
+	public static final String TRY_AS_GUEST_KEY = "TryAsGuest";
 	private String mChosenAccountName;
 	private String mDisplayName;
 	private String mAccountImage;
@@ -173,16 +190,18 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		/** This is called when the action mode is created. This is called by startActionMode() */
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-//			mode.setTitle("Demo");				
+//			mode.setTitle("Demo");
+			menu.add(0, MENU_ID_MARK_READ, 0, mActivity.getResources().getString(R.string.mark_as_read)).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 			mActivity.getMenuInflater().inflate(R.menu.context_menu, menu);
 			return true;
 		}
 		
 		/** This is called when an item in the context menu is selected */
 		@Override
+		@SuppressWarnings("static-access")
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			switch(item.getItemId()){
-				case R.id.action1:
+				case R.id.action1:					
 					HashMap<String, String> map = mVideoAdapter.getMap();
 					if (map.size()!=0){
 						ArrayList<String> videoKeys = new ArrayList<String>();
@@ -198,7 +217,20 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			    		mActivity.startActivity(intent);  
 					}
 					mode.finish();	// Automatically exists the action mode, when the user selects this action
-					break;						
+					break;
+				case MENU_ID_MARK_READ:
+					HashMap<String, String> map2 = mVideoAdapter.getMap();
+					if (map2.size()!=0){
+						ContentResolver cr = mActivity.getContentResolver();
+//						ArrayList<String> videoKeys = new ArrayList<String>();
+						for (HashMap.Entry<String, String> entry : map2.entrySet()) {
+						    // use "entry.getKey()" and "entry.getValue()"
+//							videoKeys.add(entry.getKey());	
+							cr.delete(VideoTable.CONTENT_URI, VideoTable.COLUMN_NAME_DATA2+" = ?" , new String[] {entry.getKey()});
+						}			
+					}
+					mode.finish();	
+					break;
 			}
 			return false;
 		}
@@ -222,6 +254,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		progressDrawerLayout =  (LinearLayout) findViewById(R.id.layout_drawer_progress);
 		loginLayout = (LinearLayout) findViewById(R.id.layout_login);
 		buttonLogIn = (Button) findViewById(R.id.button_log_in);
+		buttonTryAsGuest = (Button) findViewById(R.id.button_try_as_guest);
+		buttonLeftLogIn = (Button) findViewById(R.id.left_log_in);
 		
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
@@ -234,7 +268,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				R.drawable.ic_drawer, R.string.drawer_open,
 				R.string.drawer_close);
 		//(Context context,int layout, Cursor c,String[] from,int[] to)
-		mVideoAdapter = new VideoCursorAdapter(this, R.layout.item_video_list, null, PROJECTION, null);
+		mVideoAdapter = new VideoCursorAdapter(this, R.layout.item_video_list, null, Constants.PROJECTION_VIDEO, null);
 		mainGridView.setAdapter(mVideoAdapter);
 		
 		// Prepare the loader.  Either re-connect with an existing one,
@@ -262,8 +296,25 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				public void onClick(View v) {
 					chooseAccount();
 				}
-			});		
+			});	
+			buttonTryAsGuest.setOnClickListener(new Button.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+					sp.edit().putBoolean(TRY_AS_GUEST_KEY, true).commit();
+					buttonLeftLogIn.setVisibility(View.VISIBLE);
+					loadData();
+				}
+			});
+			buttonLeftLogIn.setOnClickListener(new Button.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					chooseAccount();
+				}
+			});
 		}
+		
+	
 		
 		// Call ads
 		adBannerLayout = (RelativeLayout) findViewById(R.id.adLayout);	
@@ -461,9 +512,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	}
 
 	private void loadData() {
-		if (mChosenAccountName == null) {
-			return;
-		}
+//		if (mChosenAccountName == null) {
+//			return;
+//		}
 		loginLayout.setVisibility(View.GONE);
 		progressLayout.setVisibility(View.VISIBLE);
 		loadVideos();
@@ -472,250 +523,273 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 
 	// Load Videos
 	private void loadVideos() {
-		if (mChosenAccountName == null) {
-			return;
-		}
-
+		
 		setProgressBarIndeterminateVisibility(true);
-		new AsyncTask<Void, Void, List<VideoData>>() {
-			@Override
-	        protected void onPreExecute() {
-	            super.onPreExecute();
+		
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		boolean isGuest = sp.getBoolean(TRY_AS_GUEST_KEY, false);
+		if (isGuest){
+			// Task as guest
+			if (getResources().getString(R.string.phone_language).equals("En")){
+				new DownloadGuestChannelsTask().execute(1);
+			}else if (getResources().getString(R.string.phone_language).equals("TW")){
+				new DownloadGuestChannelsTask().execute(2);
+			}
+		}else{
+			if (mChosenAccountName == null) {
+				return;
+			}
+			new SetChannelsAndVideosTask().execute((Void) null);
+		}
+		
+	}
+	
+	
+	private class SetChannelsAndVideosTask extends AsyncTask<Void, Void, List<VideoData>> {
+
+        @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+        	 super.onPreExecute();
 	            progressDrawerLayout.setVisibility(View.VISIBLE);
-	        }
-			
-			@Override
-			protected List<VideoData> doInBackground(Void... voids) {
 
-				YouTube youtube = new YouTube.Builder(transport, jsonFactory,
-						credential).setApplicationName(Constants.APP_NAME)
-						.build();
+        }
 
-				try {					
-					ContentResolver cr = getContentResolver();
+        @Override
+        protected List<VideoData> doInBackground(Void... voids) {
+            // TODO Auto-generated method stub
+        	YouTube youtube = new YouTube.Builder(transport, jsonFactory,
+					credential).setApplicationName(Constants.APP_NAME)
+					.build();
+
+			try {					
+				ContentResolver cr = getContentResolver();
+				
+				if (!isInitialized){
+					items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
 					
-					if (!isInitialized){
-						items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
-						
-						SubscriptionListResponse mSubscriptions = youtube
-								.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();
-									
-						List<Subscription> lists = mSubscriptions.getItems();
-						
-						// if channel size more than 20, keep loading
-						boolean isKeepLoadChannel = false;
-						String nextToken = "";
-						if (lists.size()==20){
+					SubscriptionListResponse mSubscriptions = youtube
+							.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();
+								
+					List<Subscription> lists = mSubscriptions.getItems();
+					
+					// if channel size more than 20, keep loading
+					boolean isKeepLoadChannel = false;
+					String nextToken = "";
+					if (lists.size()==20){
+						isKeepLoadChannel = true;
+						nextToken = mSubscriptions.getNextPageToken();
+					}						
+					while (isKeepLoadChannel){						
+						SubscriptionListResponse moreSubscriptions = youtube
+								.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).setPageToken(nextToken).execute();
+						List<Subscription> moreList = moreSubscriptions.getItems();
+						for(Subscription item: moreList){
+							lists.add(item);
+						}
+						if (moreList.size()==20){
 							isKeepLoadChannel = true;
-							nextToken = mSubscriptions.getNextPageToken();
-						}						
-						while (isKeepLoadChannel){						
-							SubscriptionListResponse moreSubscriptions = youtube
-									.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).setPageToken(nextToken).execute();
-							List<Subscription> moreList = moreSubscriptions.getItems();
-							for(Subscription item: moreList){
-								lists.add(item);
-							}
-							if (moreList.size()==20){
-								isKeepLoadChannel = true;
-								nextToken = moreSubscriptions.getNextPageToken();
-							}else{
-								isKeepLoadChannel = false;
-							}
+							nextToken = moreSubscriptions.getNextPageToken();
+						}else{
+							isKeepLoadChannel = false;
+						}
+					}
+					
+					for (Subscription item : lists){							
+						String channelId = item.getSnippet().getResourceId().getChannelId();
+						String channelTitle = item.getSnippet().getTitle();
+						String channelPicUrl = item.getSnippet().getThumbnails().getDefault().getUrl();
+						int channelTotalNums = 0;
+						try{
+							channelTotalNums = item.getContentDetails().getTotalItemCount().intValue();
+						}catch(Exception e){
+							Log.e("MainActivity", channelTitle + "no total item count");
 						}
 						
-						for (Subscription item : lists){							
-							String channelId = item.getSnippet().getResourceId().getChannelId();
-							String channelTitle = item.getSnippet().getTitle();
-							String channelPicUrl = item.getSnippet().getThumbnails().getDefault().getUrl();
-							int channelTotalNums = 0;
-							try{
-								channelTotalNums = item.getContentDetails().getTotalItemCount().intValue();
-							}catch(Exception e){
-								Log.e("MainActivity", channelTitle + "no total item count");
-							}
-							
-							Channel theChannel = new Channel(channelId,
-									channelTitle,
-									channelPicUrl,
-									channelTotalNums
-									);
-							
+						Channel theChannel = new Channel(channelId,
+								channelTitle,
+								channelPicUrl,
+								channelTotalNums
+								);
+						
+						mSubscriptionChannels.add(theChannel);
+						
+						items.add(new EntryItem(theChannel.getTitle(), theChannel.getId(), theChannel.getThumbnail()));
+						
+						ContentValues values = new ContentValues();
+						values.put(ChannelTable.COLUMN_NAME_DATA1, theChannel.getId());
+			        	values.put(ChannelTable.COLUMN_NAME_DATA2, theChannel.getTitle());
+			        	values.put(ChannelTable.COLUMN_NAME_DATA3, theChannel.getThumbnail());
+			        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
+						cr.insert(ChannelTable.CONTENT_URI, values);
+						
+						updateVideos( cr, 2, theChannel.getId(), theChannel.getTitle());
+													
+					}
+					
+					// set drawer list 					
+					sectionListPosition = items.size();
+					items.add(new SectionItem(getResources().getString(R.string.my_lists)));
+					
+					Log.i(TAG, "SetPlayListData for first initial");
+					setPlayListData(youtube);
+					isInitialized = true;
+					isListSetted = true;
+					
+				}else{
+					if (!isListSetted){
+						items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
+					}
+					
+					cr.delete(VideoTable.CONTENT_URI, VideoTable.COLUMN_NAME_DATA9+" = ?" , new String[] {"1"});
+					
+					SubscriptionListResponse mSubscriptions = youtube.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();				
+					List<Subscription> lists = mSubscriptions.getItems();
+					
+					// if channel size more than 20, keep loading
+					boolean isKeepLoadChannel = false;
+					String nextToken = "";
+					if (lists.size()==20){
+						isKeepLoadChannel = true;
+						nextToken = mSubscriptions.getNextPageToken();
+					}						
+					while (isKeepLoadChannel){						
+						SubscriptionListResponse moreSubscriptions = youtube
+								.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).setPageToken(nextToken).execute();
+						List<Subscription> moreList = moreSubscriptions.getItems();
+						for(Subscription item: moreList){
+							lists.add(item);
+						}
+						if (moreList.size()==20){
+							isKeepLoadChannel = true;
+							nextToken = moreSubscriptions.getNextPageToken();
+						}else{
+							isKeepLoadChannel = false;
+						}
+					}
+					
+					
+					for (Subscription item : lists){
+						String channelId = item.getSnippet().getResourceId().getChannelId();
+						String channelTitle = item.getSnippet().getTitle();
+						String channelPicUrl = item.getSnippet().getThumbnails().getDefault().getUrl();
+						int channelTotalNums = 0;
+						try{
+							channelTotalNums = item.getContentDetails().getTotalItemCount().intValue();
+						}catch(Exception e){
+							Log.e("MainActivity", channelTitle + "no total item count");
+						}
+						
+						Channel theChannel = new Channel(channelId,
+								channelTitle,
+								channelPicUrl,
+								channelTotalNums
+								);
+						if (!isListSetted){
 							mSubscriptionChannels.add(theChannel);
-							
 							items.add(new EntryItem(theChannel.getTitle(), theChannel.getId(), theChannel.getThumbnail()));
-							
-							ContentValues values = new ContentValues();
+						}
+						
+			        				        	
+			        	
+			        	Cursor theChannelCursor = cr.query(ChannelTable.CONTENT_URI, Constants.PROJECTION_CHANNEL, 
+			        			ChannelTable.COLUMN_NAME_DATA1+" = ?", new String[] {channelId}, null);
+			        	theChannelCursor.moveToFirst();
+			        	
+			        	if (theChannelCursor.getCount() != 0){  
+					        int videoNums_index = theChannelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA4);
+					        int dataChannelNums = theChannelCursor.getInt(videoNums_index);
+					        if(dataChannelNums< theChannel.getVideoNums()){
+					        	int updateNums = theChannel.getVideoNums() - dataChannelNums;
+					        	updateVideos(cr,updateNums,theChannel.getId(), theChannel.getTitle());
+					        	ContentValues values = new ContentValues();
+					        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
+					        	cr.update(ChannelTable.CONTENT_URI, values, ChannelTable.COLUMN_NAME_DATA1+" = ?" , new String[] {channelId});
+					        }else if(dataChannelNums > theChannel.getVideoNums()) {
+					        	ContentValues values = new ContentValues();
+					        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
+					        	cr.update(ChannelTable.CONTENT_URI, values, ChannelTable.COLUMN_NAME_DATA1+" = ?" , new String[] {channelId});
+					        }
+			        	} else {
+			        		ContentValues values = new ContentValues();
 							values.put(ChannelTable.COLUMN_NAME_DATA1, theChannel.getId());
 				        	values.put(ChannelTable.COLUMN_NAME_DATA2, theChannel.getTitle());
 				        	values.put(ChannelTable.COLUMN_NAME_DATA3, theChannel.getThumbnail());
 				        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
-							cr.insert(ChannelTable.CONTENT_URI, values);
-							
-							updateVideos( cr, 2, theChannel.getId(), theChannel.getTitle());
-														
-						}
-						
-						// set drawer list 					
+				        	cr.insert(ChannelTable.CONTENT_URI, values);			        	
+				        	updateVideos( cr, 2, theChannel.getId(), theChannel.getTitle());				        	
+			        	}
+			        	
+					}
+					
+			        
+			        // set drawer list
+					if (!isListSetted){
 						sectionListPosition = items.size();
 						items.add(new SectionItem(getResources().getString(R.string.my_lists)));
-						
-						
-						setPlayListData(youtube);
-						isInitialized = true;
-						isListSetted = true;
-						
-					}else{
-						if (!isListSetted){
-							items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
-						}
-						
-						cr.delete(VideoTable.CONTENT_URI, VideoTable.COLUMN_NAME_DATA9+" = ?" , new String[] {"1"});
-						
-						SubscriptionListResponse mSubscriptions = youtube.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).execute();				
-						List<Subscription> lists = mSubscriptions.getItems();
-						
-						// if channel size more than 20, keep loading
-						boolean isKeepLoadChannel = false;
-						String nextToken = "";
-						if (lists.size()==20){
-							isKeepLoadChannel = true;
-							nextToken = mSubscriptions.getNextPageToken();
-						}						
-						while (isKeepLoadChannel){						
-							SubscriptionListResponse moreSubscriptions = youtube
-									.subscriptions().list("snippet,contentDetails").setMine(true).setMaxResults((long) 20).setPageToken(nextToken).execute();
-							List<Subscription> moreList = moreSubscriptions.getItems();
-							for(Subscription item: moreList){
-								lists.add(item);
-							}
-							if (moreList.size()==20){
-								isKeepLoadChannel = true;
-								nextToken = moreSubscriptions.getNextPageToken();
-							}else{
-								isKeepLoadChannel = false;
-							}
-						}
-						
-						
-						for (Subscription item : lists){
-							String channelId = item.getSnippet().getResourceId().getChannelId();
-							String channelTitle = item.getSnippet().getTitle();
-							String channelPicUrl = item.getSnippet().getThumbnails().getDefault().getUrl();
-							int channelTotalNums = 0;
-							try{
-								channelTotalNums = item.getContentDetails().getTotalItemCount().intValue();
-							}catch(Exception e){
-								Log.e("MainActivity", channelTitle + "no total item count");
-							}
-							
-							Channel theChannel = new Channel(channelId,
-									channelTitle,
-									channelPicUrl,
-									channelTotalNums
-									);
-							if (!isListSetted){
-								mSubscriptionChannels.add(theChannel);
-								items.add(new EntryItem(theChannel.getTitle(), theChannel.getId(), theChannel.getThumbnail()));
-							}
-							
-				        				        	
-				        	
-				        	Cursor theChannelCursor = cr.query(ChannelTable.CONTENT_URI, MainActivity.PROJECTION_CHANNEL, 
-				        			ChannelTable.COLUMN_NAME_DATA1+" = ?", new String[] {channelId}, null);
-				        	theChannelCursor.moveToFirst();
-				        	
-				        	if (theChannelCursor.getCount() != 0){  
-						        int videoNums_index = theChannelCursor.getColumnIndex(ChannelTable.COLUMN_NAME_DATA4);
-						        int dataChannelNums = theChannelCursor.getInt(videoNums_index);
-						        if(dataChannelNums< theChannel.getVideoNums()){
-						        	int updateNums = theChannel.getVideoNums() - dataChannelNums;
-						        	updateVideos(cr,updateNums,theChannel.getId(), theChannel.getTitle());
-						        	ContentValues values = new ContentValues();
-						        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
-						        	cr.update(ChannelTable.CONTENT_URI, values, ChannelTable.COLUMN_NAME_DATA1+" = ?" , new String[] {channelId});
-						        }else if(dataChannelNums > theChannel.getVideoNums()) {
-						        	ContentValues values = new ContentValues();
-						        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
-						        	cr.update(ChannelTable.CONTENT_URI, values, ChannelTable.COLUMN_NAME_DATA1+" = ?" , new String[] {channelId});
-						        }
-				        	} else {
-				        		ContentValues values = new ContentValues();
-								values.put(ChannelTable.COLUMN_NAME_DATA1, theChannel.getId());
-					        	values.put(ChannelTable.COLUMN_NAME_DATA2, theChannel.getTitle());
-					        	values.put(ChannelTable.COLUMN_NAME_DATA3, theChannel.getThumbnail());
-					        	values.put(ChannelTable.COLUMN_NAME_DATA4, theChannel.getVideoNums());
-					        	cr.insert(ChannelTable.CONTENT_URI, values);			        	
-					        	updateVideos( cr, 2, theChannel.getId(), theChannel.getTitle());				        	
-				        	}
-				        	
-						}
-						
-				        
-				        // set drawer list
-						if (!isListSetted){
-							sectionListPosition = items.size();
-							items.add(new SectionItem(getResources().getString(R.string.my_lists)));						
-						}
+						Log.i(TAG, "SetPlayListData for not initial");
 						setPlayListData(youtube);
 						isListSetted = true;
 					}
 					
-					return null;
-
-				} catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
-					// showGooglePlayServicesAvailabilityErrorDialog(availabilityException
-					// .getConnectionStatusCode());
-				} catch (UserRecoverableAuthIOException userRecoverableException) {
-					startActivityForResult(
-							userRecoverableException.getIntent(),
-							REQUEST_AUTHORIZATION);
-				} catch (IOException e) {
-					Utils.logAndShow(MainActivity.this, Constants.APP_NAME, e);
+					
+					
 				}
+				
 				return null;
-			}
 
+			} catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
+				// showGooglePlayServicesAvailabilityErrorDialog(availabilityException
+				// .getConnectionStatusCode());
+			} catch (UserRecoverableAuthIOException userRecoverableException) {
+				startActivityForResult(
+						userRecoverableException.getIntent(),
+						REQUEST_AUTHORIZATION);
+			} catch (IOException e) {
+				Utils.logAndShow(MainActivity.this, Constants.APP_NAME, e);
+			}
+			return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(List<VideoData> videos) {
+            // TODO Auto-generated method stub
+            setProgressBarIndeterminateVisibility(false);
+			progressLayout.setVisibility(View.GONE);
+			progressDrawerLayout.setVisibility(View.GONE);
 			
+			mDrawerAdapter = new EntryAdapter(MainActivity.this, items);
+			mDrawerListView.setAdapter(mDrawerAdapter);
+			mDrawerListView.setOnItemClickListener((new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> parent, View v,
+						int position, long id) {
+					if(!items.get(position).isSection()){
+			    		if (position < sectionListPosition){
+				    		EntryItem item = (EntryItem)items.get(position);			    		
+//				    		Toast.makeText(MainActivity.this, "id =  " + item.subtitle , Toast.LENGTH_SHORT).show();				    		
+				    		Intent intent = new Intent(MainActivity.this, ChannelTabs.class);  
+				    		intent.putExtra("ChannelTitle", item.title);  
+				    		intent.putExtra("ChannelId", item.subtitle);  
+				    		startActivity(intent);  
+			    		}else{
+			    			EntryItem item = (EntryItem)items.get(position);			    					    		
+			    			Intent intent = new Intent(MainActivity.this, PlaylistVideosActivity.class);  
+			    			intent.putExtra("ListTitle", item.title);  
+			    			intent.putExtra("ListId", item.subtitle);  
+			    			startActivity(intent);  
+			    		}
+			    		
+			    	}
+				}
+			}));
 
-			@Override
-			protected void onPostExecute(List<VideoData> videos) {
-				setProgressBarIndeterminateVisibility(false);
-				progressLayout.setVisibility(View.GONE);
-				progressDrawerLayout.setVisibility(View.GONE);
-				
-				mDrawerAdapter = new EntryAdapter(MainActivity.this, items);
-				mDrawerListView.setAdapter(mDrawerAdapter);
-				mDrawerListView.setOnItemClickListener((new OnItemClickListener() {
-					public void onItemClick(AdapterView<?> parent, View v,
-							int position, long id) {
-						if(!items.get(position).isSection()){
-				    		if (position < sectionListPosition){
-					    		EntryItem item = (EntryItem)items.get(position);			    		
-	//				    		Toast.makeText(MainActivity.this, "id =  " + item.subtitle , Toast.LENGTH_SHORT).show();				    		
-					    		Intent intent = new Intent(MainActivity.this, ChannelTabs.class);  
-					    		intent.putExtra("ChannelTitle", item.title);  
-					    		intent.putExtra("ChannelId", item.subtitle);  
-					    		startActivity(intent);  
-				    		}else{
-				    			EntryItem item = (EntryItem)items.get(position);			    					    		
-				    			Intent intent = new Intent(MainActivity.this, PlaylistVideosActivity.class);  
-				    			intent.putExtra("ListTitle", item.title);  
-				    			intent.putExtra("ListId", item.subtitle);  
-				    			startActivity(intent);  
-				    		}
-				    		
-				    	}
-					}
-				}));
-				
-				
-			}
-
-		}.execute((Void) null);
-	}
+        }
+    }
+	
 	
 	private void setPlayListData(YouTube youtube) {
+		Log.i(TAG, "setPlayListData");
 		boolean isHasYoutubeFeederFavorite = false;
 		myPlayList.clear();
 		PlaylistListResponse mLists;
@@ -789,7 +863,142 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		}
 		
 	}
+	
+	private class DownloadGuestChannelsTask extends AsyncTask<Integer, Void, Integer> {
 
+        @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+            super.onPreExecute();
+            
+        }
+
+        @Override
+		protected Integer doInBackground(Integer... ints) {
+			// TODO Auto-generated method stub
+        	String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+			File Directory = new File(extStorageDirectory+"/Android_Music_Channel/");
+			Directory.mkdirs();
+			File file = new File(Directory, channel_name);
+			try {
+				URL url = new URL(channel_URL);
+				URLConnection connection = url.openConnection();
+				connection.connect();
+				InputStream input = new BufferedInputStream(url.openStream());
+//				OutputStream output = new FileOutputStream("/sdcard/file_name.extension");
+				OutputStream output = new FileOutputStream(file);
+				byte data[] = new byte[1];
+				while ((input.read(data)) != -1) {
+	               
+	                output.write(data);
+	            }			
+				output.flush();
+	            output.close();
+	            input.close();
+			}catch (Exception e) {
+				e.toString();
+	        }
+			
+			
+			// add my subscription layout
+			items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
+			
+			setChannels(channel_name, ints[0]);
+			
+			ContentResolver cr = getContentResolver();			
+			// update videos
+			for (Channel item : mSubscriptionChannels){		        	
+	        	updateVideos( cr, 2, item.getId(), item.getTitle());	        	        	
+			}
+			
+			if (mSubscriptionChannels.size() > 0){
+				isListSetted = true;
+			}
+			
+			return null;
+		}
+
+        @Override
+        protected void onPostExecute(Integer areaId) {
+            super.onPostExecute(areaId);
+            // set drawer
+            progressDrawerLayout.setVisibility(View.GONE);
+			
+            // set as Guest
+         	textName.setText("Guest");           
+         	setDrawerListView();
+
+        }
+
+		
+    }
+	
+	
+	private void setDrawerListView() {
+		mDrawerAdapter = new EntryAdapter(MainActivity.this, items);
+		mDrawerListView.setAdapter(mDrawerAdapter);
+		mDrawerListView.setOnItemClickListener((new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View v,
+					int position, long id) {
+				if(!items.get(position).isSection()){
+			    		EntryItem item = (EntryItem)items.get(position);			    		
+//			    		Toast.makeText(MainActivity.this, "id =  " + item.subtitle , Toast.LENGTH_SHORT).show();				    		
+			    		Intent intent = new Intent(MainActivity.this, ChannelTabs.class);  
+			    		intent.putExtra("ChannelTitle", item.title);  
+			    		intent.putExtra("ChannelId", item.subtitle);  
+			    		startActivity(intent);  		    		
+		    	}
+			}
+		}));
+		
+	}
+	
+	@SuppressWarnings("resource")
+	private boolean setChannels(String file, int area_id) {
+		
+		try {
+			mSubscriptionChannels.clear();
+		 	//read the file and save to Array
+			String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+	    	String strFile =  extStorageDirectory +"/Android_Music_Channel/"+file;
+			BufferedReader reader = new BufferedReader( new FileReader(strFile));
+			LineNumberReader lineReader = new LineNumberReader(reader);
+	        String line;
+	        while ((line = lineReader.readLine()) != null) {
+	        	if(lineReader.getLineNumber()!=1){
+	        		String[] RowData = parseCsvLine(line.toString());
+	        		if(RowData.length == 4){     			
+	        			int theChannelAreaId = Integer.valueOf(RowData[0]);
+	        			if(theChannelAreaId == area_id){
+	        				// Rowdata:  area_id, name, channel_id, thumbnail
+	        				// Channel: id, title, thumbnail, video_nums
+		        			Channel aChannel = new Channel(RowData[2],RowData[1],RowData[3],0);
+		        			mSubscriptionChannels.add(aChannel);
+		        			items.add(new EntryItem(aChannel.getTitle(), aChannel.getId(), aChannel.getThumbnail()));
+	        			}
+	        		}
+	        	}	        	
+	        }
+//	        isFileExist = true;
+	        return true;
+		}catch (IOException ex) {
+//			 isFileExist = false;
+			return false;
+		}		
+	}
+	
+	public static String[] parseCsvLine(String line) {
+        // Create a pattern to match breaks
+        Pattern p = Pattern.compile(",(?=([^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+        // Split input with the pattern
+        String[] fields = p.split(line);
+        for (int i = 0; i < fields.length; i++) {
+            // Get rid of residual double quotes
+            fields[i] = fields[i].replace("\"", "");
+        }
+        return fields;
+    }
+	
 	private void chooseAccount() {
 		startActivityForResult(credential.newChooseAccountIntent(),
 				REQUEST_ACCOUNT_PICKER);
@@ -813,17 +1022,26 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				String accountName = data.getExtras().getString(
 						AccountManager.KEY_ACCOUNT_NAME);
 				if (accountName != null) {
-					mChosenAccountName = accountName;
-					credential.setSelectedAccountName(accountName);
-					saveAccount();
-					
-					mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
-					.setScopes(Auth.SCOPES)
-					.setAccountName(mChosenAccountName)
-					.build();
-					mPlusClient.connect();
-					
-					loadData();
+					if (mChosenAccountName!=accountName){
+						// delete channels and videos
+						ContentResolver cr = getContentResolver();
+						cr.delete(VideoTable.CONTENT_URI, null , null);
+						cr.delete(ChannelTable.CONTENT_URI, null, null);
+						
+						mChosenAccountName = accountName;
+						credential.setSelectedAccountName(accountName);
+						
+						// save initialize key and account
+						saveAccount();
+						
+						mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+						.setScopes(Auth.SCOPES)
+						.setAccountName(mChosenAccountName)
+						.build();
+						mPlusClient.connect();
+						
+						loadData();
+					}				
 				}
 			}
 			break;
@@ -840,6 +1058,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		sp.edit().putString(ACCOUNT_KEY, mChosenAccountName).commit();
+		sp.edit().putBoolean(TRY_AS_GUEST_KEY, false).commit(); 
+		buttonLeftLogIn.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -893,38 +1113,17 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
         mDrawerToggle.syncState();
     }
 
-	public static final String[] PROJECTION = new String[] {
-		VideoTable._ID,
-		VideoTable.COLUMN_NAME_DATA1,
-		VideoTable.COLUMN_NAME_DATA2,
-		VideoTable.COLUMN_NAME_DATA3,
-		VideoTable.COLUMN_NAME_DATA4,
-		VideoTable.COLUMN_NAME_DATA5,
-		VideoTable.COLUMN_NAME_DATA6,
-		VideoTable.COLUMN_NAME_DATA7,
-		VideoTable.COLUMN_NAME_DATA8,
-		VideoTable.COLUMN_NAME_DATA9,
-		VideoTable.COLUMN_NAME_DATA10,
-		VideoTable.COLUMN_NAME_DATA11
-    };
 	
-	public static final String[] PROJECTION_CHANNEL = new String[] {
-		ChannelTable._ID,
-		ChannelTable.COLUMN_NAME_DATA1,
-		ChannelTable.COLUMN_NAME_DATA2,
-		ChannelTable.COLUMN_NAME_DATA3,
-		ChannelTable.COLUMN_NAME_DATA4,
-    };
 	
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle arg1) {
 		CursorLoader cl = null;
 		if (id == 0){
 			 cl = new CursorLoader(this, VideoTable.CONTENT_URI,
-                PROJECTION, null, null, null);
+                Constants.PROJECTION_VIDEO, null, null, null);
 		}else if ( id == 1){
 			 cl = new CursorLoader(this, ChannelTable.CONTENT_URI,
-					 PROJECTION_CHANNEL, null, null, null);		
+			    Constants.PROJECTION_CHANNEL, null, null, null);		
 		}
         return cl;
 	}
@@ -995,41 +1194,75 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	  super.onStop();
 	  	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		sp.edit().putBoolean(Initialized_Key, isInitialized).commit();
-		int notifyTime = sp.getInt(SettingActivity.NOTIFY_TIMER_KEY, 3);
-		UpdateVideosService.setUpdateService(mActivity, notifyTime);
+		
+		boolean isGuest = sp.getBoolean(TRY_AS_GUEST_KEY, false);	
+		if(isGuest){
+			// do nothing
+		}else{		
+			int notifyTime = sp.getInt(SettingActivity.NOTIFY_TIMER_KEY, 3);
+			UpdateVideosService.setUpdateService(mActivity, notifyTime);
+		}
 	 }
 	
 	@Override
 	public void onResume() {
 		super.onResume();
 		UpdateVideosService.cancelUpdateService(mActivity);
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-		isInitialized = sp.getBoolean(Initialized_Key, false);
-		isHasPlusData = sp.getBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, true);
-		if (!isInitialized){
-			items.clear();
-			loadAccount();		
-			if (mChosenAccountName !=null){
-				loginLayout.setVisibility(View.GONE);
-				credential.setSelectedAccountName(mChosenAccountName);
-				if (isHasPlusData){
-					textName.setText(mDisplayName);
-					imageLoader.DisplayImage(mAccountImage, viewAvatar);
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);	
+		boolean isGuest = sp.getBoolean(TRY_AS_GUEST_KEY, false);	
+		if(isGuest){
+			buttonLeftLogIn.setVisibility(View.VISIBLE);
+			// check 有沒有表, 有表則 loginLayout gone
+			if (isListSetted){
+				
+			}else{
+				items.add(new SectionItem(getResources().getString(R.string.my_subscriptions)));
+				boolean setChannels = false;
+				if (getResources().getString(R.string.phone_language).equals("En")){
+					setChannels = setChannels(channel_name, 1);
+				}else if (getResources().getString(R.string.phone_language).equals("TW")){
+					setChannels = setChannels(channel_name, 2);
 				}
-				loadData();
+				if (setChannels){
+					ContentResolver cr = getContentResolver();
+					cr.delete(VideoTable.CONTENT_URI, VideoTable.COLUMN_NAME_DATA9+" = ?" , new String[] {"1"});
+					loginLayout.setVisibility(View.GONE);
+		         	textName.setText("Guest");           
+		         	setDrawerListView();
+		         	isListSetted = true;
+				}else{
+					loginLayout.setVisibility(View.VISIBLE);
+				}
 			}
-		}
-		
-		if(!isHasPlusData){
-			loadAccount();
-			if (mChosenAccountName !=null){
-				mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
-				.setScopes(Auth.SCOPES)
-				.setAccountName(mChosenAccountName)
-				.build();
-				mPlusClient.connect();
+		}else{
+			buttonLeftLogIn.setVisibility(View.GONE);
+			isInitialized = sp.getBoolean(Initialized_Key, false);
+			isHasPlusData = sp.getBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, true);
+			if (!isInitialized){
+				items.clear();
+				loadAccount();		
+				if (mChosenAccountName !=null){
+					loginLayout.setVisibility(View.GONE);
+					credential.setSelectedAccountName(mChosenAccountName);
+					if (isHasPlusData){
+						textName.setText(mDisplayName);
+						imageLoader.DisplayImage(mAccountImage, viewAvatar);
+					}
+					loadData();
+				}
 			}
-		}
+			
+			if(!isHasPlusData){
+				loadAccount();
+				if (mChosenAccountName !=null){
+					mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+					.setScopes(Auth.SCOPES)
+					.setAccountName(mChosenAccountName)
+					.build();
+					mPlusClient.connect();
+				}
+			}
+		}	
 		
 	}
 	
