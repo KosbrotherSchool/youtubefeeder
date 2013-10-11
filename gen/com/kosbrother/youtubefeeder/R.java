@@ -129,7 +129,7 @@ containing a value of this type.
         public static final int zOrderOnTop=0x7f01000d;
     }
     public static final class color {
-        public static final int black=0x7f040012;
+        public static final int black=0x7f040013;
         public static final int common_action_bar_splitter=0x7f040009;
         /**  Sign-in Button Colors 
          */
@@ -142,12 +142,13 @@ containing a value of this type.
         public static final int common_signin_btn_light_text_disabled=0x7f040006;
         public static final int common_signin_btn_light_text_focused=0x7f040007;
         public static final int common_signin_btn_light_text_pressed=0x7f040005;
-        public static final int common_signin_btn_text_dark=0x7f040014;
-        public static final int common_signin_btn_text_light=0x7f040015;
-        public static final int dark_slate_gray=0x7f04000f;
-        public static final int gray_1=0x7f040011;
-        public static final int gray_2=0x7f040010;
-        public static final int light_black=0x7f040013;
+        public static final int common_signin_btn_text_dark=0x7f040015;
+        public static final int common_signin_btn_text_light=0x7f040016;
+        public static final int dark_slate_gray=0x7f040010;
+        public static final int gray_1=0x7f040012;
+        public static final int gray_2=0x7f040011;
+        public static final int gray_background=0x7f04000f;
+        public static final int light_black=0x7f040014;
         public static final int light_blue=0x7f04000b;
         public static final int line_gray=0x7f04000d;
         public static final int text_gray=0x7f04000c;

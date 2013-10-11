@@ -117,6 +117,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private LinearLayout progressLayout;
 	private LinearLayout progressDrawerLayout;
 	private LinearLayout loginLayout;
+	private LinearLayout leftDrawer;
 	private Button buttonLogIn;
 	private Button buttonTryAsGuest;
 	private Button buttonLeftLogIn;
@@ -253,6 +254,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
 		progressDrawerLayout =  (LinearLayout) findViewById(R.id.layout_drawer_progress);
 		loginLayout = (LinearLayout) findViewById(R.id.layout_login);
+		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
 		buttonLogIn = (Button) findViewById(R.id.button_log_in);
 		buttonTryAsGuest = (Button) findViewById(R.id.button_try_as_guest);
 		buttonLeftLogIn = (Button) findViewById(R.id.left_log_in);
@@ -260,7 +262,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
 				GravityCompat.START);
-
+			
 		mActionBar = createActionBarHelper();
 		mActionBar.init();
 
@@ -1021,8 +1023,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					&& data.getExtras() != null) {
 				String accountName = data.getExtras().getString(
 						AccountManager.KEY_ACCOUNT_NAME);
-				if (accountName != null) {
+				if (accountName != null) {					
 					if (mChosenAccountName!=accountName){
+						mDrawerLayout.closeDrawer(leftDrawer);
+						
 						// delete channels and videos
 						ContentResolver cr = getContentResolver();
 						cr.delete(VideoTable.CONTENT_URI, null , null);
