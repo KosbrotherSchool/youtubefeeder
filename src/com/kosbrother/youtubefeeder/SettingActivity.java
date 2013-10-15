@@ -218,6 +218,8 @@ OnConnectionFailedListener{
 						credential.setSelectedAccountName(accountName);
 						textAccount.setText(mChosenAccountName);
 						
+						MainActivity.setIsLoadingVideos(false);
+						
 						// save initialize key and account
 						saveAccount();
 						

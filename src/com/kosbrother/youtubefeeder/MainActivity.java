@@ -127,6 +127,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	
 	private static VideoCursorAdapter mVideoAdapter;
 	private ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
+	private static boolean isLoadingVideos = false;
 	
 //	private ChannelCursorAdapter mChannelAdapter;
 	private static ArrayList<YoutubePlaylist>  myPlayList =  new ArrayList<YoutubePlaylist>();
@@ -289,7 +290,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			credential.setSelectedAccountName(mChosenAccountName);
 			textName.setText(mDisplayName);
 			imageLoader.DisplayImage(mAccountImage, viewAvatar);
-			loadVideos();
+			if(!isLoadingVideos){
+				loadVideos();
+			}
 		}else{
 			/// show choose account layout
 			loginLayout.setVisibility(View.VISIBLE);			
@@ -553,6 +556,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
         protected void onPreExecute() {
             // TODO Auto-generated method stub
         	 super.onPreExecute();
+        	 	isLoadingVideos = true;
 	            progressDrawerLayout.setVisibility(View.VISIBLE);
 
         }
@@ -785,6 +789,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			    	}
 				}
 			}));
+			
+			isLoadingVideos = false;
 
         }
     }
@@ -872,6 +878,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
         protected void onPreExecute() {
             // TODO Auto-generated method stub
             super.onPreExecute();
+            isLoadingVideos = true;
             
         }
 
@@ -929,9 +936,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
             // set as Guest
          	textName.setText("Guest");           
          	setDrawerListView();
+         	
+         	isLoadingVideos = false;
 
         }
-
 		
     }
 	
@@ -1026,24 +1034,22 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				if (accountName != null) {					
 					if (mChosenAccountName!=accountName){
 						mDrawerLayout.closeDrawer(leftDrawer);
-						
-						// delete channels and videos
-						ContentResolver cr = getContentResolver();
-						cr.delete(VideoTable.CONTENT_URI, null , null);
-						cr.delete(ChannelTable.CONTENT_URI, null, null);
-						
+												
 						mChosenAccountName = accountName;
 						credential.setSelectedAccountName(accountName);
 						
 						// save initialize key and account
 						saveAccount();
 						
-						mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
-						.setScopes(Auth.SCOPES)
-						.setAccountName(mChosenAccountName)
-						.build();
-						mPlusClient.connect();
-						
+						connectPlusClient(mChosenAccountName);
+											
+						// initialize the data base
+						ContentResolver cr = getContentResolver();
+						cr.delete(VideoTable.CONTENT_URI, null , null);
+						cr.delete(ChannelTable.CONTENT_URI, null, null);
+						if (items != null){
+							items.clear();
+						}
 						loadData();
 					}				
 				}
@@ -1056,6 +1062,14 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			break;
 
 		}
+	}
+
+	private void connectPlusClient(String accountName) {
+		mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
+		.setScopes(Auth.SCOPES)
+		.setAccountName(accountName)
+		.build();
+		mPlusClient.connect();	
 	}
 
 	private void saveAccount() {
@@ -1077,13 +1091,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 							connectionResult.getErrorCode(),
 							connectionResult.toString()));		
 			
-//			if (connectionResult.getErrorCode() == 8){
-//				mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
-//				.setScopes(Auth.SCOPES)
-//				.setAccountName(mChosenAccountName)
-//				.build();
-//				mPlusClient.connect();
-//			}
 				
 			SharedPreferences sp = PreferenceManager
 						.getDefaultSharedPreferences(this);
@@ -1241,9 +1248,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		}else{
 			buttonLeftLogIn.setVisibility(View.GONE);
 			isInitialized = sp.getBoolean(Initialized_Key, false);
-			isHasPlusData = sp.getBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, true);
-			if (!isInitialized){
-				items.clear();
+			isHasPlusData = sp.getBoolean(HAS_ACCOUNT_PLUS_DATA_KEY, false);
+			if (!isInitialized){			
 				loadAccount();		
 				if (mChosenAccountName !=null){
 					loginLayout.setVisibility(View.GONE);
@@ -1252,18 +1258,17 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						textName.setText(mDisplayName);
 						imageLoader.DisplayImage(mAccountImage, viewAvatar);
 					}
-					loadData();
+					if(!isLoadingVideos){
+						items.clear();
+						loadData();
+					}
 				}
 			}
 			
 			if(!isHasPlusData){
 				loadAccount();
 				if (mChosenAccountName !=null){
-					mPlusClient = new PlusClient.Builder(MainActivity.this, this, this)
-					.setScopes(Auth.SCOPES)
-					.setAccountName(mChosenAccountName)
-					.build();
-					mPlusClient.connect();
+					connectPlusClient(mChosenAccountName);
 				}
 			}
 		}	
@@ -1305,5 +1310,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			}
 		});
 	}
+	
+	public static void setIsLoadingVideos(boolean isLoading){
+		isLoadingVideos = isLoading;
+	} 
 	
 }

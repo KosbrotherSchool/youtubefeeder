@@ -347,6 +347,7 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		@Override
 		public void onVideoEnded() {
 			playerState = "VIDEO_ENDED";
+			isRepeat = checkRepeat.isChecked();
 			if (isRepeat) {
 				mPlayer.play();
 			}
