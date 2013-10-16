@@ -17,8 +17,10 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kosbrother.youtubefeeder.MainActivity;
+import com.kosbrother.youtubefeeder.NetworkUtil;
 import com.kosbrother.youtubefeeder.PlayerViewActivity;
 import com.kosbrother.youtubefeeder.R;
 import com.kosbrother.youtubefeeder.database.VideoTable;
@@ -145,20 +147,24 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
     	view.setOnClickListener(new OnClickListener() {
 			@Override
             public void onClick(View v) {
-				TextView idView = (TextView) v.findViewById(R.id.text_id);
-				String id = idView.getText().toString();			
-				TextView titleView = (TextView) v.findViewById(R.id.text_news_list);
-				String title = titleView.getText().toString();
-				
-            	Intent intent = new Intent(mContext, PlayerViewActivity.class);
-            	intent.putExtra("VideoId", id);
-            	intent.putExtra("VideoTitle", title);
-            	mContext.startActivity(intent);
-            	
-            	ContentResolver cr = mContext.getContentResolver();
-            	ContentValues values = new ContentValues();
-            	values.put(VideoTable.COLUMN_NAME_DATA9, 1);
-            	cr.update(VideoTable.CONTENT_URI, values, VideoTable.COLUMN_NAME_DATA2+" = ?", new String[] {id});
+				if (NetworkUtil.getConnectivityStatus(mContext)==0){
+					Toast.makeText(mContext, mContext.getResources().getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+				}else{
+					TextView idView = (TextView) v.findViewById(R.id.text_id);
+					String id = idView.getText().toString();			
+					TextView titleView = (TextView) v.findViewById(R.id.text_news_list);
+					String title = titleView.getText().toString();
+					
+	            	Intent intent = new Intent(mContext, PlayerViewActivity.class);
+	            	intent.putExtra("VideoId", id);
+	            	intent.putExtra("VideoTitle", title);
+	            	mContext.startActivity(intent);
+	            	
+	            	ContentResolver cr = mContext.getContentResolver();
+	            	ContentValues values = new ContentValues();
+	            	values.put(VideoTable.COLUMN_NAME_DATA9, 1);
+	            	cr.update(VideoTable.CONTENT_URI, values, VideoTable.COLUMN_NAME_DATA2+" = ?", new String[] {id});
+				}	
             }
 
         });

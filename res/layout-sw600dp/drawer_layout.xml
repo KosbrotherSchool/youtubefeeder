@@ -35,24 +35,69 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/login_background"
              >
-
-            <Button android:id="@+id/button_log_in"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Log in Youtube"
-                android:textColor="@color/text_gray"
-                android:textSize="20dp" />
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                 >
+                 <ImageView 
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp" 
+                    android:src="@drawable/logo"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                 >
+	            <Button android:id="@+id/button_log_in"
+	                android:layout_width="200dp"
+	                android:layout_height="wrap_content"
+	                android:text="@string/log_in_youtube"
+	                android:textColor="@color/text_red"
+	                android:textSize="20dp" />
+	            
+	            <Button android:id="@+id/button_try_as_guest"
+	                android:layout_width="200dp"
+	                android:layout_height="wrap_content"
+	                android:text="@string/try_as_guest"
+	                android:textColor="@color/text_gray"
+	                android:textSize="20dp" />
+            </LinearLayout>
             
-            <Button android:id="@+id/button_try_as_guest"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Try as Guest"
-                android:textColor="@color/text_gray"
-                android:textSize="20dp" />
-            
-        </LinearLayout>
-
+  		</LinearLayout>
+		
+        <LinearLayout 
+	   	 	android:id="@+id/layout_main_reload"
+	   	 	android:layout_width="fill_parent"
+	   	 	android:layout_height="fill_parent"
+	     	android:gravity="center"
+	     	android:visibility="gone"
+	     	>
+		    <TextView 
+		        android:layout_width="wrap_content"
+	   	 		android:layout_height="wrap_content"
+	   	 		android:text="@string/no_net_connection"
+	   	 		android:textSize="23dp"
+	   	 		android:layout_marginLeft="5dp"
+	   	 		android:textColor="#6E6E6E"
+		        />
+		    <Button  android:id="@+id/button_main_reload"
+		       android:layout_width="wrap_content"
+	   	 	   android:layout_height="wrap_content"
+	   	 	   android:layout_marginLeft="5dp"
+	   	 	   android:text="@string/retry"
+		        />
+		</LinearLayout>
+        
         <LinearLayout
             android:id="@+id/layout_progress"
             android:layout_width="fill_parent"
@@ -140,7 +185,31 @@
                 />
             
         </LinearLayout>
-
+		
+        <LinearLayout 
+	   	 	android:id="@+id/layout_drawer_reload"
+	   	 	android:layout_width="fill_parent"
+	   	 	android:layout_height="fill_parent"
+	     	android:gravity="center"
+	     	android:background="@color/gray_background"
+	     	android:visibility="gone"
+	     	>
+		    <TextView 
+		        android:layout_width="wrap_content"
+	   	 		android:layout_height="wrap_content"
+	   	 		android:text="@string/no_net_connection"
+	   	 		android:textSize="23dp"
+	   	 		android:layout_marginLeft="5dp"
+	   	 		android:textColor="#6E6E6E"
+		        />
+		    <Button  android:id="@+id/button_drawer_reload"
+		       android:layout_width="wrap_content"
+	   	 	   android:layout_height="wrap_content"
+	   	 	   android:layout_marginLeft="5dp"
+	   	 	   android:text="@string/retry"
+		        />
+		</LinearLayout>
+        
         <LinearLayout
             android:id="@+id/layout_drawer_progress"
             android:layout_width="fill_parent"

@@ -44,7 +44,7 @@ public class ImageLoader {
         REQUIRED_SIZE = size;
     }
     
-    final int stub_id= R.drawable.app_icon_balck;
+    final int stub_id= R.drawable.app_icon_black;
     public void DisplayImage(String url, ImageView imageView)
     {
     	imageViews.put(imageView, url);

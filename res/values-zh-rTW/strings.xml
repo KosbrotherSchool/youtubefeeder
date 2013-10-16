@@ -17,6 +17,9 @@
     
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="no_net_connection">無法連線</string>
+    <string name="retry">重試</string>
+    <string name="all_viewed">All Viewed!</string>
     
     <!-- video list -->
     <string name="likes">喜歡</string>
@@ -66,6 +69,7 @@
     <string name="log_in_youtube">Youtube登入</string>
     <string name="try_as_guest">訪客登入</string>
     <string name="loading_data">資料整理中...</string>
+    <string name="no_network">無網路連線...</string>
     
     <!-- PlayerViewActivity -->
     <string name="intro">簡介:</string>

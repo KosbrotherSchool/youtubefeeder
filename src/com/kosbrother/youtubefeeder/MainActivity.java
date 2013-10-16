@@ -54,6 +54,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import at.bartinger.list.item.EntryAdapter;
 import at.bartinger.list.item.EntryItem;
 import at.bartinger.list.item.Item;
@@ -118,6 +119,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private LinearLayout progressDrawerLayout;
 	private LinearLayout loginLayout;
 	private LinearLayout leftDrawer;
+	private LinearLayout layoutMainReload;
+	private LinearLayout layoutDrawerReload;
+	private Button buttonMainReload;
+	private Button buttonDrawerReload;
 	private Button buttonLogIn;
 	private Button buttonTryAsGuest;
 	private Button buttonLeftLogIn;
@@ -247,29 +252,12 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		isInitialized = sp.getBoolean(Initialized_Key, false);
 		
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
-		mainGridView = (GridView) findViewById(R.id.main_grid_view);
-		textName = (TextView) findViewById(R.id.left_name);
-		viewAvatar = (ImageView) findViewById(R.id.left_avatar);
-		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
-		progressDrawerLayout =  (LinearLayout) findViewById(R.id.layout_drawer_progress);
-		loginLayout = (LinearLayout) findViewById(R.id.layout_login);
-		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
-		buttonLogIn = (Button) findViewById(R.id.button_log_in);
-		buttonTryAsGuest = (Button) findViewById(R.id.button_try_as_guest);
-		buttonLeftLogIn = (Button) findViewById(R.id.left_log_in);
-		
-		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
-				GravityCompat.START);
+		findViews();
 			
 		mActionBar = createActionBarHelper();
 		mActionBar.init();
 
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-				R.drawable.ic_drawer, R.string.drawer_open,
-				R.string.drawer_close);
+		
 		//(Context context,int layout, Cursor c,String[] from,int[] to)
 		mVideoAdapter = new VideoCursorAdapter(this, R.layout.item_video_list, null, Constants.PROJECTION_VIDEO, null);
 		mainGridView.setAdapter(mVideoAdapter);
@@ -284,6 +272,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		// set exponential backoff policy
 		credential.setBackOff(new ExponentialBackOff());
 		
+		isLoadingVideos = false;
 		loadAccount();		
 		if (mChosenAccountName !=null){
 			loginLayout.setVisibility(View.GONE);
@@ -291,7 +280,13 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			textName.setText(mDisplayName);
 			imageLoader.DisplayImage(mAccountImage, viewAvatar);
 			if(!isLoadingVideos){
-				loadVideos();
+				if (NetworkUtil.getConnectivityStatus(mActivity)==0){
+					layoutMainReload.setVisibility(View.VISIBLE);
+					layoutDrawerReload.setVisibility(View.VISIBLE);
+					Toast.makeText(mActivity, getResources().getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+				}else{
+					loadVideos();
+				}
 			}
 		}else{
 			/// show choose account layout
@@ -319,44 +314,93 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			});
 		}
 		
-	
+		CallAds();
 		
-		// Call ads
+		
+	}
+	
+	private void CallAds() {
+		
 		adBannerLayout = (RelativeLayout) findViewById(R.id.adLayout);	
 		final AdRequest adReq = new AdRequest();
-		
+				
 		adMobAdView = new AdView(this, AdSize.SMART_BANNER, DeveloperKey.MEDIATION_KEY);
 		adMobAdView.setAdListener(new AdListener() {
-			@Override
-			public void onDismissScreen(Ad arg0) {
-				Log.d("admob_banner", "onDismissScreen");
-			}
+		@Override
+		public void onDismissScreen(Ad arg0) {
+			Log.d("admob_banner", "onDismissScreen");
+		}
 
-			@Override
-			public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
-				Log.d("admob_banner", "onFailedToReceiveAd");
-			}
+		@Override
+		public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+			Log.d("admob_banner", "onFailedToReceiveAd");
+		}
 
-			@Override
-			public void onLeaveApplication(Ad arg0) {
-				Log.d("admob_banner", "onLeaveApplication");
-			}
+		@Override
+		public void onLeaveApplication(Ad arg0) {
+			Log.d("admob_banner", "onLeaveApplication");
+		}
 
-			@Override
-			public void onPresentScreen(Ad arg0) {
+		@Override
+		public void onPresentScreen(Ad arg0) {
 				Log.d("admob_banner", "onPresentScreen");
-			}
+		}
 
-			@Override
-			public void onReceiveAd(Ad ad) {
+		@Override
+		public void onReceiveAd(Ad ad) {
 				Log.d("admob_banner", "onReceiveAd ad:" + ad.getClass());
-			}
+		}
 
 		});
 		adMobAdView.loadAd(adReq);
 		adBannerLayout.addView(adMobAdView);
 	}
-	
+
+	private void findViews() {
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
+		mainGridView = (GridView) findViewById(R.id.main_grid_view);
+		textName = (TextView) findViewById(R.id.left_name);
+		viewAvatar = (ImageView) findViewById(R.id.left_avatar);
+		progressLayout = (LinearLayout) findViewById(R.id.layout_progress);
+		progressDrawerLayout =  (LinearLayout) findViewById(R.id.layout_drawer_progress);
+		loginLayout = (LinearLayout) findViewById(R.id.layout_login);
+		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
+		buttonLogIn = (Button) findViewById(R.id.button_log_in);
+		buttonTryAsGuest = (Button) findViewById(R.id.button_try_as_guest);
+		buttonLeftLogIn = (Button) findViewById(R.id.left_log_in);
+		layoutMainReload = (LinearLayout) findViewById (R.id.layout_main_reload);
+		layoutDrawerReload = (LinearLayout) findViewById (R.id.layout_drawer_reload);
+		buttonMainReload = (Button) findViewById (R.id.button_main_reload);
+		buttonDrawerReload = (Button) findViewById (R.id.button_drawer_reload);
+		
+		buttonMainReload.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				layoutMainReload.setVisibility(View.GONE);
+				layoutDrawerReload.setVisibility(View.GONE);
+				loadData();
+			}
+		});
+		
+		buttonDrawerReload.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				layoutMainReload.setVisibility(View.GONE);
+				layoutDrawerReload.setVisibility(View.GONE);
+				loadData();
+			}
+		});
+		
+		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
+				GravityCompat.START);
+		
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+				R.drawable.ic_drawer, R.string.drawer_open,
+				R.string.drawer_close);	
+	}
+
 	public void setProfileInfo() {
 		LinearLayout drawerAccountInfoLayout = (LinearLayout) findViewById (R.id.layout_draw_account_info);
         if (!mPlusClient.isConnected() || mPlusClient.getCurrentPerson() == null) {    
@@ -522,7 +566,13 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 //		}
 		loginLayout.setVisibility(View.GONE);
 		progressLayout.setVisibility(View.VISIBLE);
-		loadVideos();
+		if (NetworkUtil.getConnectivityStatus(mActivity)==0){
+			layoutMainReload.setVisibility(View.VISIBLE);
+			layoutDrawerReload.setVisibility(View.VISIBLE);
+			Toast.makeText(mActivity, getResources().getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+		}else{
+			loadVideos();
+		}
 		
 	}
 

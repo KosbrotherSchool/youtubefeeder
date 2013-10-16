@@ -17,6 +17,9 @@
     
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="no_net_connection">No Network</string>
+    <string name="retry">Retry</string>
+    <string name="all_viewed">All Viewed!</string>
     
     
     <!-- video list -->
@@ -67,6 +70,7 @@
     <string name="log_in_youtube">Log In Youtube</string>
     <string name="try_as_guest">Try As Guest</string>
     <string name="loading_data">Initializing...</string>
+    <string name="no_network">No NetWork Connection...</string>
     
     
     <!-- PlayerViewActivity -->

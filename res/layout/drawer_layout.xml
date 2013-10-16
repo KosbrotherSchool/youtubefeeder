@@ -39,12 +39,20 @@
             android:layout_height="fill_parent"
             android:gravity="center"
             android:orientation="vertical"
+            android:background="@drawable/login_background"
              >
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:gravity="center"
                  >
+                <ImageView 
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp" 
+                    android:src="@drawable/logo"
+                    />
             </LinearLayout>
             <LinearLayout
                 android:layout_width="fill_parent"
@@ -69,6 +77,29 @@
             </LinearLayout>
             
   		</LinearLayout>
+  		
+	    <LinearLayout 
+	   	 	android:id="@+id/layout_main_reload"
+	   	 	android:layout_width="fill_parent"
+	   	 	android:layout_height="fill_parent"
+	     	android:gravity="center"
+	     	android:visibility="gone"
+	     	>
+		    <TextView 
+		        android:layout_width="wrap_content"
+	   	 		android:layout_height="wrap_content"
+	   	 		android:text="@string/no_net_connection"
+	   	 		android:textSize="23dp"
+	   	 		android:layout_marginLeft="5dp"
+	   	 		android:textColor="#6E6E6E"
+		        />
+		    <Button  android:id="@+id/button_main_reload"
+		       android:layout_width="wrap_content"
+	   	 	   android:layout_height="wrap_content"
+	   	 	   android:layout_marginLeft="5dp"
+	   	 	   android:text="@string/retry"
+		        />
+		</LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_progress"
@@ -107,7 +138,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="All Viewed!"
+            android:text="@string/all_viewed"
             android:textColor="@color/text_gray"
             android:textSize="30dp" />
     </LinearLayout>
@@ -152,7 +183,31 @@
                 android:layout_marginRight="3dp"            
                 />
         </LinearLayout>
-
+		
+        <LinearLayout 
+	   	 	android:id="@+id/layout_drawer_reload"
+	   	 	android:layout_width="fill_parent"
+	   	 	android:layout_height="fill_parent"
+	     	android:gravity="center"
+	     	android:background="@color/gray_background"
+	     	android:visibility="gone"
+	     	>
+		    <TextView 
+		        android:layout_width="wrap_content"
+	   	 		android:layout_height="wrap_content"
+	   	 		android:text="@string/no_net_connection"
+	   	 		android:textSize="23dp"
+	   	 		android:layout_marginLeft="5dp"
+	   	 		android:textColor="#6E6E6E"
+		        />
+		    <Button  android:id="@+id/button_drawer_reload"
+		       android:layout_width="wrap_content"
+	   	 	   android:layout_height="wrap_content"
+	   	 	   android:layout_marginLeft="5dp"
+	   	 	   android:text="@string/retry"
+		        />
+		</LinearLayout>
+        
         <LinearLayout
             android:id="@+id/layout_drawer_progress"
             android:layout_width="fill_parent"
