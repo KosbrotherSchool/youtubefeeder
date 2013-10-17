@@ -270,7 +270,7 @@ public class UpdateVideosService extends Service {
 		// 建立待處理意圖
 		PendingIntent pIntent = PendingIntent.getActivity(this, 0, call, 0);
 		// 指定通知欄位要顯示的圖示
-		int icon = R.drawable.app_icon;
+		int icon = R.drawable.app_icon_small;
 		// 指定通知出現時要顯示的文字,幾秒後會消失只剩圖示
 		String ticket = "YoutubeFeeder更新";
 		// 何時送出通知,傳入當前時間則立即發出通知
