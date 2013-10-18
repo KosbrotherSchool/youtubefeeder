@@ -206,18 +206,18 @@ containing a value of this type.
         public static final int my_novel_selector=0x7f020025;
     }
     public static final class id {
-        public static final int action1=0x7f05004e;
-        public static final int action_settings=0x7f05004f;
+        public static final int action1=0x7f05004f;
+        public static final int action_settings=0x7f050050;
         public static final int adLayout=0x7f05000c;
         public static final int button_drawer_reload=0x7f050014;
-        public static final int button_favorite=0x7f050044;
+        public static final int button_favorite=0x7f050045;
         public static final int button_log_in=0x7f050007;
         public static final int button_main_reload=0x7f05000a;
         public static final int button_notify_time=0x7f050038;
-        public static final int button_playlist=0x7f050045;
-        public static final int button_share=0x7f050046;
+        public static final int button_playlist=0x7f050046;
+        public static final int button_share=0x7f050047;
         public static final int button_try_as_guest=0x7f050008;
-        public static final int button_youtube=0x7f050047;
+        public static final int button_youtube=0x7f050048;
         public static final int checkbox_auto=0x7f05001a;
         public static final int checkbox_random=0x7f05001c;
         public static final int checkbox_repeat=0x7f05001b;
@@ -230,7 +230,7 @@ containing a value of this type.
         public static final int image_list=0x7f050023;
         public static final int image_news_list=0x7f050026;
         public static final int imageview_search=0x7f050032;
-        public static final int layout_action_buttons=0x7f050043;
+        public static final int layout_action_buttons=0x7f050044;
         public static final int layout_draw_account_info=0x7f05000f;
         public static final int layout_drawer_progress=0x7f050015;
         public static final int layout_drawer_reload=0x7f050013;
@@ -239,10 +239,10 @@ containing a value of this type.
         public static final int layout_no_data=0x7f050036;
         public static final int layout_progress=0x7f05000b;
         public static final int layout_repeat=0x7f050019;
-        public static final int layout_video_introduction=0x7f050041;
-        public static final int layout_video_list=0x7f050049;
+        public static final int layout_video_introduction=0x7f050042;
+        public static final int layout_video_list=0x7f05004a;
         public static final int layout_video_player=0x7f050017;
-        public static final int layout_videos=0x7f050048;
+        public static final int layout_videos=0x7f050049;
         public static final int left_avatar=0x7f050010;
         public static final int left_drawer=0x7f05000e;
         public static final int left_list_view=0x7f050016;
@@ -255,17 +255,18 @@ containing a value of this type.
         public static final int load_more_grid=0x7f050034;
         public static final int load_more_progressBar=0x7f050035;
         public static final int main_grid_view=0x7f05000d;
-        public static final int menu_all_read=0x7f05004b;
-        public static final int menu_refresh=0x7f05004c;
-        public static final int menu_search=0x7f05004a;
-        public static final int menu_setting=0x7f05004d;
+        public static final int menu_all_read=0x7f05004c;
+        public static final int menu_refresh=0x7f05004d;
+        public static final int menu_search=0x7f05004b;
+        public static final int menu_setting=0x7f05004e;
         public static final int new_fragment=0x7f05001f;
         public static final int news_list=0x7f050033;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
         public static final int number_picker=0x7f05002f;
+        public static final int other_views=0x7f050040;
         public static final int pager=0x7f050018;
-        public static final int play_all=0x7f050050;
+        public static final int play_all=0x7f050051;
         public static final int radio_notify=0x7f050039;
         public static final int radio_unnotify=0x7f05003a;
         public static final int realtabcontent=0x7f050021;
@@ -284,8 +285,8 @@ containing a value of this type.
         public static final int text_no_data=0x7f050022;
         public static final int text_playlist_id=0x7f050025;
         public static final int text_playlist_title=0x7f050024;
-        public static final int youtube_text_description=0x7f050042;
-        public static final int youtube_text_title=0x7f050040;
+        public static final int youtube_text_description=0x7f050043;
+        public static final int youtube_text_title=0x7f050041;
         public static final int youtube_view=0x7f05003f;
     }
     public static final class layout {

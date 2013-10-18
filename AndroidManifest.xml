@@ -46,8 +46,8 @@
         </activity>
         <activity
         	android:name=".PlayerViewActivity"	
-        	android:screenOrientation="nosensor"
-        	android:configChanges="orientation|screenSize|keyboardHidden"
+        	android:screenOrientation="sensor"
+        	android:configChanges="keyboardHidden|orientation|screenSize"
    			>
     	</activity>
     	<activity

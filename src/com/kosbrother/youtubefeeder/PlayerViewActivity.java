@@ -1,9 +1,11 @@
 package com.kosbrother.youtubefeeder;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import android.annotation.SuppressLint;
@@ -11,17 +13,21 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
@@ -43,7 +49,8 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.youtube.music.channels.entity.YoutubePlaylist;
 
 @SuppressLint("NewApi")
-public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
+public class PlayerViewActivity extends YouTubeFailureRecoveryActivity implements
+	View.OnClickListener,YouTubePlayer.OnFullscreenListener{
 
 	private LinearLayout progressLayout;
 	private LinearLayout layoutVideos;
@@ -92,6 +99,10 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	
 	private Boolean isVideos = false;
 //	private Boolean fullScreen = false;
+	private Boolean isFullScreen;
+	
+	private YouTubePlayerView playerView;
+	private LinearLayout otherViews;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -134,8 +145,8 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		credential.setBackOff(new ExponentialBackOff());
 		credential.setSelectedAccountName(mChosenAccountName);
 
-		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
-		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
+		playerView = (YouTubePlayerView) findViewById(R.id.youtube_view);
+		playerView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
 		
 		playlistEventListener = new MyPlaylistEventListener();
@@ -168,6 +179,7 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		layoutVideosList = (LinearLayout) findViewById(R.id.layout_video_list);
 		layoutActionButtons = (LinearLayout) findViewById(R.id.layout_action_buttons);
 		layoutVideoIntroduction = (LinearLayout) findViewById(R.id.layout_video_introduction);
+		otherViews = (LinearLayout) findViewById(R.id.other_views);
 		
 		textTitle = (TextView) findViewById(R.id.youtube_text_title);
 		textDescription = (TextView) findViewById(R.id.youtube_text_description);
@@ -259,17 +271,23 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		mPlayer = player;
 		mPlayer.setPlayerStateChangeListener(playerStateChangeListener);
 		mPlayer.setPlaylistEventListener(playlistEventListener);
-		mPlayer.setOnFullscreenListener(new OnFullscreenListener() {
-            @Override
-            public void onFullscreen(boolean _isFullScreen) {
-               
-            }
-        });
+		player.addFullscreenControlFlag(YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT);
+		player.setOnFullscreenListener(this);
+		player.setShowFullscreenButton(false);
+//		mPlayer.setFullscreenControlFlags(YouTubePlayer.FULLSCREEN_FLAG_CONTROL_ORIENTATION);
+		mPlayer.addFullscreenControlFlag(YouTubePlayer.FULLSCREEN_FLAG_ALWAYS_FULLSCREEN_IN_LANDSCAPE);
+//		mPlayer.setOnFullscreenListener(new OnFullscreenListener() {
+//            @Override
+//            public void onFullscreen(boolean _isFullScreen) {
+//               
+//            }
+//        });
 		if (!wasRestored) {
 			if(isVideos){
 				for(String item: videosTitle){
 					TextView newTV = new TextView(this);
 					newTV.setText(item);
+					@SuppressWarnings("deprecation")
 					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 						     LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 				    params.setMargins(5, 5, 5, 5); //left, top, right, bottom
@@ -283,10 +301,10 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 		}
 	}
 
-	@Override
-	protected YouTubePlayer.Provider getYouTubePlayerProvider() {
-		return (YouTubePlayerView) findViewById(R.id.youtube_view);
-	}
+//	@Override
+//	protected YouTubePlayer.Provider getYouTubePlayerProvider() {
+//		return (YouTubePlayerView) findViewById(R.id.youtube_view);
+//	}
 	
 	@Override
 	public void onBackPressed() {
@@ -319,6 +337,7 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	
 	private final class MyPlayerStateChangeListener implements
 			PlayerStateChangeListener {
+		@SuppressWarnings("unused")
 		String playerState = "UNINITIALIZED";
 
 		@Override
@@ -395,6 +414,7 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 			return null;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected void onPostExecute(Object result) {
 			// TODO Auto-generated method stub
@@ -520,5 +540,63 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity {
 	          }
 	      }
 	  }
+
+
+	@Override
+	  protected YouTubePlayer.Provider getYouTubePlayerProvider() {
+	    return playerView;
+	  }
+	
+	@Override
+	public void onFullscreen(boolean _isFullscreen) {
+		// TODO Auto-generated method stub
+		isFullScreen = _isFullscreen;
+		doLayout();
+	}	
+
+	@Override
+	public void onClick(View arg0) {
+		// TODO Auto-generated method stub
+		mPlayer.setFullscreen(!isFullScreen);
+	}
+	
+	@Override
+	  public void onConfigurationChanged(Configuration newConfig) {
+	    super.onConfigurationChanged(newConfig);
+	    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+	    	isFullScreen = true;
+	    }else{
+	    	isFullScreen = false;
+	    }
+//	    mPlayer.setFullscreen(!isFullScreen);
+	    doLayout();
+	}
+	
+	private void doLayout() {
+		// TODO Auto-generated method stub
+		LinearLayout.LayoutParams playerParams =
+		        (LinearLayout.LayoutParams) playerView.getLayoutParams();
+		if (isFullScreen) {
+		    // When in fullscreen, the visibility of all other views than the player should be set to
+		    // GONE and the player should be laid out across the whole screen.
+		    playerParams.width = LayoutParams.MATCH_PARENT;
+		    playerParams.height = LayoutParams.MATCH_PARENT;
+		    otherViews.setVisibility(View.GONE);
+		}else{
+			
+			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+		        playerParams.width  = 0;
+		        playerParams.height = MATCH_PARENT;
+		        otherViews.setVisibility(View.VISIBLE);
+		        playerParams.weight = 1;
+		        
+		      }else{
+		    	otherViews.setVisibility(View.VISIBLE);
+		    	playerParams.width  = MATCH_PARENT;
+		        playerParams.height = WRAP_CONTENT;
+		        getActionBar().show();
+		      }			
+		} 
+	}
 	
 }
