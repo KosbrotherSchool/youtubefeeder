@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.kosbrother.youtubefeeder.DeveloperKey;
 import com.youtube.music.channels.entity.Channel;
 import com.youtube.music.channels.entity.YoutubePlaylist;
 import com.youtube.music.channels.entity.YoutubeVideo;
@@ -48,6 +49,7 @@ public class ChannelApi {
 
     public static ArrayList<YoutubeVideo> getPlaylistVideos(String listId, int page) {
         ArrayList<YoutubeVideo> videos = new ArrayList();
+//        String url = "https://gdata.youtube.com/feeds/api/users/default/suggestion?type=channel&inline=true&key=" + DeveloperKey.DEVELOPER_KEY;
         String url = "http://gdata.youtube.com/feeds/api/playlists/" + listId + "?v=2&alt=json&start-index=" + (page * 50 + 1) + "&max-results=50";
         String message = getMessageFromServer("GET", null, null, url);
         if (message == null) {

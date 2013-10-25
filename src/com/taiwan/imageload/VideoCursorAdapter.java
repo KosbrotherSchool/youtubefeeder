@@ -19,10 +19,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kosbrother.youtubefeeder.Constants;
 import com.kosbrother.youtubefeeder.MainActivity;
 import com.kosbrother.youtubefeeder.NetworkUtil;
 import com.kosbrother.youtubefeeder.PlayerViewActivity;
 import com.kosbrother.youtubefeeder.R;
+import com.kosbrother.youtubefeeder.database.ChannelTable;
 import com.kosbrother.youtubefeeder.database.VideoTable;
 
 public class VideoCursorAdapter extends SimpleCursorAdapter {
@@ -204,6 +206,32 @@ public class VideoCursorAdapter extends SimpleCursorAdapter {
 	
 	public static HashMap<String,String> getMap(){
 		return checkMap;
+	}
+	
+	public static void SelectAll(Context context){
+		ContentResolver cr = context.getContentResolver();
+		Cursor theVideoCursor = cr.query(VideoTable.CONTENT_URI, Constants.PROJECTION_VIDEO, 
+    			null, null, null);
+		int title_index  = theVideoCursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA1);
+        int id_index = theVideoCursor.getColumnIndex(VideoTable.COLUMN_NAME_DATA2);
+		theVideoCursor.moveToFirst();		
+		if(theVideoCursor.getCount()!=0){
+			String id = theVideoCursor.getString(id_index);
+			String title = theVideoCursor.getString(title_index);
+			checkMap.put(id, title);
+			while(theVideoCursor.moveToNext()){
+				String idMore = theVideoCursor.getString(id_index);
+				String titleMore = theVideoCursor.getString(title_index);
+				checkMap.put(idMore, titleMore);
+			}
+		}else{
+			Toast.makeText(context, "No Videos", Toast.LENGTH_SHORT).show();
+		}
+		
+	}
+	
+	public static void cleanHashMap(){
+		checkMap.clear();
 	}
     
 }

@@ -11,6 +11,8 @@
     <string name="all_read">標示全閱讀</string>
     <string name="menu_search">搜索</string>
     <string name="setting">設定</string>
+    <string name="menu_send_mail">聯絡我們</string>
+    <string name="menu_select_all">選擇全部</string>
     
     <string name="error">Error</string>
     <string name="error_format">[Error] %s</string>

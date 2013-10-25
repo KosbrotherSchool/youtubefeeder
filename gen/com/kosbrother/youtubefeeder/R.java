@@ -206,8 +206,8 @@ containing a value of this type.
         public static final int my_novel_selector=0x7f020025;
     }
     public static final class id {
-        public static final int action1=0x7f05004f;
-        public static final int action_settings=0x7f050050;
+        public static final int action1=0x7f050051;
+        public static final int action_settings=0x7f050052;
         public static final int adLayout=0x7f05000c;
         public static final int button_drawer_reload=0x7f050014;
         public static final int button_favorite=0x7f050045;
@@ -256,9 +256,11 @@ containing a value of this type.
         public static final int load_more_progressBar=0x7f050035;
         public static final int main_grid_view=0x7f05000d;
         public static final int menu_all_read=0x7f05004c;
-        public static final int menu_refresh=0x7f05004d;
+        public static final int menu_email=0x7f050050;
+        public static final int menu_refresh=0x7f05004e;
         public static final int menu_search=0x7f05004b;
-        public static final int menu_setting=0x7f05004e;
+        public static final int menu_select_all=0x7f05004d;
+        public static final int menu_setting=0x7f05004f;
         public static final int new_fragment=0x7f05001f;
         public static final int news_list=0x7f050033;
         public static final int none=0x7f050000;
@@ -266,7 +268,7 @@ containing a value of this type.
         public static final int number_picker=0x7f05002f;
         public static final int other_views=0x7f050040;
         public static final int pager=0x7f050018;
-        public static final int play_all=0x7f050051;
+        public static final int play_all=0x7f050053;
         public static final int radio_notify=0x7f050039;
         public static final int radio_unnotify=0x7f05003a;
         public static final int realtabcontent=0x7f050021;
@@ -317,11 +319,11 @@ containing a value of this type.
     public static final class string {
         public static final int accounts=0x7f06001a;
         public static final int action_settings=0x7f060016;
-        public static final int add_favorte_list=0x7f060042;
-        public static final int add_to_favorite_list=0x7f060049;
-        public static final int add_to_list=0x7f06004a;
+        public static final int add_favorte_list=0x7f060044;
+        public static final int add_to_favorite_list=0x7f06004b;
+        public static final int add_to_list=0x7f06004c;
         public static final int all_read=0x7f06001b;
-        public static final int all_viewed=0x7f060024;
+        public static final int all_viewed=0x7f060026;
         public static final int app_name=0x7f060015;
         /**   Title for notification shown when GooglePlayServices needs to be
         enabled for a application to work. [CHAR LIMIT=70] 
@@ -346,8 +348,8 @@ containing a value of this type.
         [CHAR LIMIT=70] 
          */
         public static final int auth_client_using_bad_version_title=0x7f06000f;
-        public static final int auto_play=0x7f06004e;
-        public static final int click_to_set_account=0x7f060039;
+        public static final int auto_play=0x7f060050;
+        public static final int click_to_set_account=0x7f06003b;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
         can enable it [CHAR LIMIT=40] 
@@ -403,84 +405,86 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f06000e;
-        public static final int dialog_no=0x7f060036;
-        public static final int dialog_yes=0x7f060035;
-        public static final int downloading=0x7f06003d;
-        public static final int drawer_close=0x7f060021;
-        public static final int drawer_open=0x7f060020;
-        public static final int error=0x7f06001e;
-        public static final int error_format=0x7f06001f;
+        public static final int dialog_no=0x7f060038;
+        public static final int dialog_yes=0x7f060037;
+        public static final int downloading=0x7f06003f;
+        public static final int drawer_close=0x7f060023;
+        public static final int drawer_open=0x7f060022;
+        public static final int error=0x7f060020;
+        public static final int error_format=0x7f060021;
         /**  Youtube Player 
  Youtube Player 
  Youtube Player 
          */
-        public static final int error_player=0x7f060029;
-        public static final int every=0x7f060038;
+        public static final int error_player=0x7f06002b;
+        public static final int every=0x7f06003a;
         public static final int hello_world=0x7f060017;
-        public static final int hours=0x7f060037;
+        public static final int hours=0x7f060039;
         /**  PlayerViewActivity 
  PlayerViewActivity 
  PlayerViewActivity 
          */
-        public static final int intro=0x7f060048;
-        public static final int launch_time=0x7f060028;
+        public static final int intro=0x7f06004a;
+        public static final int launch_time=0x7f06002a;
         /**  video list 
  video list 
  video list 
          */
-        public static final int likes=0x7f060025;
-        public static final int loading_data=0x7f060046;
-        public static final int log_in_youtube=0x7f060044;
-        public static final int login_first=0x7f060050;
-        public static final int mark_as_read=0x7f06002c;
+        public static final int likes=0x7f060027;
+        public static final int loading_data=0x7f060048;
+        public static final int log_in_youtube=0x7f060046;
+        public static final int login_first=0x7f060052;
+        public static final int mark_as_read=0x7f06002e;
         public static final int menu_search=0x7f06001c;
-        public static final int my_lists=0x7f060041;
+        public static final int menu_select_all=0x7f06001f;
+        public static final int menu_send_mail=0x7f06001e;
+        public static final int my_lists=0x7f060043;
         /**  MainActivity 
  MainActivity 
  MainActivity 
          */
-        public static final int my_subscriptions=0x7f060040;
-        public static final int no_data=0x7f06003e;
-        public static final int no_net_connection=0x7f060022;
-        public static final int no_network=0x7f060047;
-        public static final int not_signed_in=0x7f06002d;
+        public static final int my_subscriptions=0x7f060042;
+        public static final int no_data=0x7f060040;
+        public static final int no_net_connection=0x7f060024;
+        public static final int no_network=0x7f060049;
+        public static final int not_signed_in=0x7f06002f;
         public static final int phone_language=0x7f060018;
-        public static final int play_all=0x7f06002b;
+        public static final int play_all=0x7f06002d;
         /**  Contexual menu 
  Contexual menu 
  Contexual menu 
          */
-        public static final int play_selected=0x7f06002a;
-        public static final int re_play=0x7f06004f;
+        public static final int play_selected=0x7f06002c;
+        public static final int re_play=0x7f060051;
         public static final int refresh=0x7f060019;
-        public static final int retry=0x7f060023;
-        public static final int search_hint=0x7f06003f;
+        public static final int retry=0x7f060025;
+        public static final int search_hint=0x7f060041;
         public static final int setting=0x7f06001d;
         /**  Setting 
  Setting 
  Setting 
          */
-        public static final int setting_account=0x7f06002e;
-        public static final int setting_select_time=0x7f060034;
-        public static final int setting_update_inform=0x7f060031;
-        public static final int setting_update_inform_no=0x7f060033;
-        public static final int setting_update_inform_yes=0x7f060032;
-        public static final int setting_update_time=0x7f060030;
-        public static final int setting_update_video=0x7f06002f;
-        public static final int share=0x7f06004b;
-        public static final int tab_favorite=0x7f06003b;
-        public static final int tab_list=0x7f06003c;
+        public static final int setting_account=0x7f060030;
+        public static final int setting_select_time=0x7f060036;
+        public static final int setting_update_inform=0x7f060033;
+        public static final int setting_update_inform_no=0x7f060035;
+        public static final int setting_update_inform_yes=0x7f060034;
+        public static final int setting_update_time=0x7f060032;
+        public static final int setting_update_video=0x7f060031;
+        public static final int share=0x7f06004d;
+        public static final int tab_favorite=0x7f06003d;
+        public static final int tab_list=0x7f06003e;
         /**  Channel Tab  
  Channel Tab  
  Channel Tab  
          */
-        public static final int tab_recent=0x7f06003a;
-        public static final int the_play_list=0x7f06004d;
-        public static final int time=0x7f060026;
-        public static final int to_log_in=0x7f060043;
-        public static final int to_youtube=0x7f06004c;
-        public static final int try_as_guest=0x7f060045;
-        public static final int views=0x7f060027;
+        public static final int tab_recent=0x7f06003c;
+        public static final int the_play_list=0x7f06004f;
+        public static final int time=0x7f060028;
+        public static final int to_log_in=0x7f060045;
+        public static final int to_youtube=0x7f06004e;
+        public static final int try_as_guest=0x7f060047;
+        public static final int views=0x7f060029;
     }
     public static final class style {
         /** 

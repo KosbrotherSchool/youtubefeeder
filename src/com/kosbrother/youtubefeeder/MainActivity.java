@@ -211,17 +211,26 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				case R.id.action1:					
 					HashMap<String, String> map = mVideoAdapter.getMap();
 					if (map.size()!=0){
+						ContentResolver cr = mActivity.getContentResolver();
 						ArrayList<String> videoKeys = new ArrayList<String>();
 						ArrayList<String> videoValues = new ArrayList<String>();					
 						for (HashMap.Entry<String, String> entry : map.entrySet()) {
 						    // use "entry.getKey()" and "entry.getValue()"
 							videoKeys.add(entry.getKey());
-							videoValues.add(entry.getValue());						
+							videoValues.add(entry.getValue());
+												
+			            	ContentValues values = new ContentValues();
+			            	values.put(VideoTable.COLUMN_NAME_DATA9, 1);
+			            	cr.update(VideoTable.CONTENT_URI, values, VideoTable.COLUMN_NAME_DATA2+" = ?", new String[] {entry.getKey()});
 						}
+						
 						Intent intent = new Intent(mActivity, PlayerViewActivity.class);  
 			    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Key, videoKeys);
 			    		intent.putStringArrayListExtra(PlayerViewActivity.Videos_Title_Key, videoValues);
-			    		mActivity.startActivity(intent);  
+			    		mActivity.startActivity(intent);
+			    		
+			    		VideoCursorAdapter.cleanHashMap();
+			    		mVideoAdapter.notifyDataSetChanged();
 					}
 					mode.finish();	// Automatically exists the action mode, when the user selects this action
 					break;
@@ -532,9 +541,19 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				progressLayout.setVisibility(View.VISIBLE);
 				loadData();
 				break;	
-//			case R.id.menu_accounts:
-//				chooseAccount();
-//				break;
+			case R.id.menu_email:
+				final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+	            emailIntent.setType("plain/text");
+	            emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] { "kosbrotherschool@gmail.com" });
+	            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "聯絡我們 from YoutubeFeeder");
+	            emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
+	            startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+				break;
+			case R.id.menu_select_all:
+				VideoCursorAdapter.SelectAll(mActivity);
+				mVideoAdapter.notifyDataSetChanged();
+				showActionMode();
+				break;
 			case R.id.menu_setting:
 				Intent intentSetting = new Intent(MainActivity.this, SettingActivity.class);  
     			startActivity(intentSetting);  
@@ -935,10 +954,11 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
         @Override
 		protected Integer doInBackground(Integer... ints) {
 			// TODO Auto-generated method stub
-        	String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-			File Directory = new File(extStorageDirectory+"/Android_Music_Channel/");
-			Directory.mkdirs();
-			File file = new File(Directory, channel_name);
+        	File internalDir = getFilesDir(); 
+//        	String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+//			File Directory = new File(extStorageDirectory+"/Android_Music_Channel/");
+//			Directory.mkdirs();
+			File file = new File(internalDir, channel_name);
 			try {
 				URL url = new URL(channel_URL);
 				URLConnection connection = url.openConnection();
@@ -1019,8 +1039,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		try {
 			mSubscriptionChannels.clear();
 		 	//read the file and save to Array
-			String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-	    	String strFile =  extStorageDirectory +"/Android_Music_Channel/"+file;
+//			String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+//	    	String strFile =  extStorageDirectory +"/Android_Music_Channel/"+file;
+			String internalDir = getFilesDir().toString();
+			String strFile =  internalDir +"/"+file;
 			BufferedReader reader = new BufferedReader( new FileReader(strFile));
 			LineNumberReader lineReader = new LineNumberReader(reader);
 	        String line;
@@ -1042,6 +1064,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 //	        isFileExist = true;
 	        return true;
 		}catch (IOException ex) {
+			Log.e(TAG, ex.toString());
 //			 isFileExist = false;
 			return false;
 		}		
@@ -1327,7 +1350,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	
 	@Override
 	public void onDestroy() {
-		super.onDestroy();		
+		super.onDestroy();
+		VideoCursorAdapter.cleanHashMap();
 	}
 	
 	private void haveGooglePlayServices() {
