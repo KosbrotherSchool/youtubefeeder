@@ -86,4 +86,8 @@
     <string name="re_play">REPLAY</string>
     <string name="login_first">Need Log In Youtube First!</string>
     
+    <!-- SearchActivity -->
+    <string name="search_video">Video</string>
+    <string name="search_channel">Channel</string>
+    
 </resources>

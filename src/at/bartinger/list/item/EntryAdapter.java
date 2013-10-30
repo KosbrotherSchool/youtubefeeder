@@ -59,7 +59,10 @@ public class EntryAdapter extends ArrayAdapter<Item> {
 				
 				if(!ei.picUrl.equals("")) {
 					imageLoader.DisplayImage(ei.picUrl, image);
+				}else if(!(ei.picInt == -1)){
+					image.setImageResource(ei.picInt);
 				}
+				
 			}
 		}
 		return v;

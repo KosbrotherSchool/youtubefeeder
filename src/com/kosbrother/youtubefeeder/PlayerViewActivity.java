@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 
+import com.google.android.youtube.player.YouTubeIntents;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
 import com.google.android.youtube.player.YouTubePlayer.OnFullscreenListener;
@@ -258,7 +259,12 @@ public class PlayerViewActivity extends YouTubeFailureRecoveryActivity implement
             @Override
             public void onClick(View v) {          	
             	Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.YOUTUBE_WATCH_URL_PREFIX+videoId));
-                startActivity(browserIntent);
+            	startActivity(browserIntent);
+
+// 				Youtube has no intent for www.youtube.com/channels 
+//            	Intent intent = YouTubeIntents.createUserIntent(PlayerViewActivity.this, "NewMovie520");
+//            	startActivity(intent);
+
             }         
 
         });

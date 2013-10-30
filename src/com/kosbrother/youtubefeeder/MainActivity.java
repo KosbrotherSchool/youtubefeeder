@@ -66,6 +66,7 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdRequest.ErrorCode;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
+import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -161,6 +162,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private boolean isInitialized = false;
 	private boolean isListSetted = false;
 	private boolean isHasPlusData = false;
+	public static boolean isRefreshList = false;
 	
 	private int sectionListPosition;
 	
@@ -636,6 +638,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
         	YouTube youtube = new YouTube.Builder(transport, jsonFactory,
 					credential).setApplicationName(Constants.APP_NAME)
 					.build();
+        	
+//        	Log.i(TAG, youtube.getRequestFactory().toString());
 
 			try {					
 				ContentResolver cr = getContentResolver();
@@ -701,6 +705,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 						updateVideos( cr, 2, theChannel.getId(), theChannel.getTitle());
 													
 					}
+					
+					items.add(new EntryItem("Add Channel", R.drawable.icon_add));
+					items.add(new EntryItem("Manage Channel", R.drawable.icon_check));
 					
 					// set drawer list 					
 					sectionListPosition = items.size();
@@ -800,6 +807,10 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			        
 			        // set drawer list
 					if (!isListSetted){
+						// add Add Channel and Manage Channel tab
+						items.add(new EntryItem("Recommend Channel", R.drawable.icon_add));
+						items.add(new EntryItem("Manage Channel", R.drawable.icon_check));
+						
 						sectionListPosition = items.size();
 						items.add(new SectionItem(getResources().getString(R.string.my_lists)));
 						Log.i(TAG, "SetPlayListData for not initial");
@@ -840,13 +851,19 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				public void onItemClick(AdapterView<?> parent, View v,
 						int position, long id) {
 					if(!items.get(position).isSection()){
-			    		if (position < sectionListPosition){
+			    		if (position < (sectionListPosition - 2) ){
 				    		EntryItem item = (EntryItem)items.get(position);			    		
 //				    		Toast.makeText(MainActivity.this, "id =  " + item.subtitle , Toast.LENGTH_SHORT).show();				    		
 				    		Intent intent = new Intent(MainActivity.this, ChannelTabs.class);  
 				    		intent.putExtra("ChannelTitle", item.title);  
 				    		intent.putExtra("ChannelId", item.subtitle);  
 				    		startActivity(intent);  
+			    		}else if(position == (sectionListPosition - 1) ){
+			    			Toast.makeText(mActivity, "manage channel", Toast.LENGTH_SHORT).show();
+			    		}else if(position == (sectionListPosition - 2) ){
+			    			Toast.makeText(mActivity, "add channel", Toast.LENGTH_SHORT).show();
+			    			Intent intent = new Intent(MainActivity.this, RecommendChannelsActivity.class);
+			    			startActivity(intent);  
 			    		}else{
 			    			EntryItem item = (EntryItem)items.get(position);			    					    		
 			    			Intent intent = new Intent(MainActivity.this, PlaylistVideosActivity.class);  
@@ -1344,6 +1361,17 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					connectPlusClient(mChosenAccountName);
 				}
 			}
+			
+			if(isRefreshList){
+				if (mDrawerLayout.isDrawerOpen(leftDrawer)){
+			    	mDrawerLayout.closeDrawer(leftDrawer);
+			    }
+				isRefreshList = false;
+				isListSetted = false;
+				items.clear();
+				mSubscriptionChannels.clear();
+				loadData();
+			}
 		}	
 		
 	}
@@ -1388,5 +1416,16 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public static void setIsLoadingVideos(boolean isLoading){
 		isLoadingVideos = isLoading;
 	} 
+	
+	@Override
+	public void onBackPressed() {
+//	    super.onBackPressed();
+	    if (mDrawerLayout.isDrawerOpen(leftDrawer)){
+	    	mDrawerLayout.closeDrawer(leftDrawer);
+	    }else{
+	    	finish();
+	    }    
+	}
+	
 	
 }
