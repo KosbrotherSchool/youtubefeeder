@@ -77,6 +77,13 @@
             >
         </activity>
         
+    	<activity
+            android:name=".ManageChannelsActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="portrait" 
+            >
+        </activity>
+        
     	<receiver
             android:name="com.kosbrother.youtubefeeder.NetworkChangeReceiver"
             android:label="NetworkChangeReceiver" >

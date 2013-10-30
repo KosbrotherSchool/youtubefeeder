@@ -9,6 +9,7 @@ import com.kosbrother.youtubefeeder.api.ChannelApi;
 import com.taiwan.imageload.ListVideoAdapter;
 import com.taiwan.imageload.LoadMoreGridView;
 import com.taiwan.imageload.LoadMoreGridView.OnLoadMoreListener;
+import com.youtube.music.channels.entity.Channel;
 import com.youtube.music.channels.entity.YoutubeVideo;
 
 import android.annotation.SuppressLint;
@@ -37,11 +38,13 @@ public class SearchActivity extends Activity{
 	private EditText mEditText;
 	private ImageView mImageButton;
 	private ArrayList<YoutubeVideo> videos = new ArrayList<YoutubeVideo>();
-	private ArrayList<YoutubeVideo> moreVideos = new ArrayList<YoutubeVideo>() ;
+	private ArrayList<YoutubeVideo> moreVideos = new ArrayList<YoutubeVideo>();
 	private String mKeyword = "";
 	private Boolean checkLoad = true;
 	private int myPage =  0;
 	
+	private ArrayList<Channel> channels = new ArrayList<Channel>();
+	private ArrayList<Channel> moreChannels = new ArrayList<Channel>();
 	
 	private LoadMoreGridView myGrid;
 //  private GridViewAdapter  myGridViewAdapter;
@@ -117,12 +120,16 @@ public class SearchActivity extends Activity{
 		mEditText = (EditText) findViewById (R.id.edittext_search);
         mImageButton = (ImageView) findViewById (R.id.imageview_search);
 		
+        myPage = 0;
+        mKeyword = "big bang";
+        new SearchChannelsTask().execute();
+        
         myGrid.setOnLoadMoreListener(new OnLoadMoreListener() {
 			public void onLoadMore() {
 				// Do the work to load more items at the end of list
 				if(checkLoad){
 					myPage = myPage +1;
-					new LoadMoreTask().execute();
+					new LoadMoreVideosTask().execute();
 				}else{
 					myGrid.onLoadMoreComplete();
 				}
@@ -146,7 +153,7 @@ public class SearchActivity extends Activity{
 	                		// run search
 	                		myPage = 0;
 	                		mKeyword = mEditText.getText().toString();
-	                		new DownloadChannelsTask().execute();
+	                		new DownloadVideosTask().execute();
 	                	}
 	                    return true;
 	                }
@@ -173,7 +180,7 @@ public class SearchActivity extends Activity{
             		// run search
             		myPage = 0;
             		mKeyword = mEditText.getText().toString();
-            		new DownloadChannelsTask().execute();
+            		new DownloadVideosTask().execute();
             	}
             }
         });
@@ -204,7 +211,34 @@ public class SearchActivity extends Activity{
 		}
 	}
 	
-	private class DownloadChannelsTask extends AsyncTask {
+	private class SearchChannelsTask extends AsyncTask {
+
+        @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Object doInBackground(Object... params) {
+            // TODO Auto-generated method stub
+
+        	channels = ChannelApi.searchChannels(mKeyword, myPage);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            // TODO Auto-generated method stub
+            super.onPostExecute(result);
+            progressLayout.setVisibility(View.GONE);
+
+        }
+    }
+	
+	
+	private class DownloadVideosTask extends AsyncTask {
 
         @Override
         protected void onPreExecute() {
@@ -243,7 +277,9 @@ public class SearchActivity extends Activity{
         }
     }
 	
-	private class LoadMoreTask extends AsyncTask {
+	
+	
+	private class LoadMoreVideosTask extends AsyncTask {
 
         @Override
         protected void onPreExecute() {

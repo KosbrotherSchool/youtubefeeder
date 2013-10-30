@@ -859,9 +859,11 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 				    		intent.putExtra("ChannelId", item.subtitle);  
 				    		startActivity(intent);  
 			    		}else if(position == (sectionListPosition - 1) ){
-			    			Toast.makeText(mActivity, "manage channel", Toast.LENGTH_SHORT).show();
+//			    			Toast.makeText(mActivity, "manage channel", Toast.LENGTH_SHORT).show();
+			    			Intent intent = new Intent(MainActivity.this, ManageChannelsActivity.class);
+			    			startActivity(intent); 
 			    		}else if(position == (sectionListPosition - 2) ){
-			    			Toast.makeText(mActivity, "add channel", Toast.LENGTH_SHORT).show();
+//			    			Toast.makeText(mActivity, "add channel", Toast.LENGTH_SHORT).show();
 			    			Intent intent = new Intent(MainActivity.this, RecommendChannelsActivity.class);
 			    			startActivity(intent);  
 			    		}else{
@@ -1363,9 +1365,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			}
 			
 			if(isRefreshList){
-				if (mDrawerLayout.isDrawerOpen(leftDrawer)){
-			    	mDrawerLayout.closeDrawer(leftDrawer);
-			    }
+//				if (mDrawerLayout.isDrawerOpen(leftDrawer)){
+//			    	mDrawerLayout.closeDrawer(leftDrawer);
+//			    }
 				isRefreshList = false;
 				isListSetted = false;
 				items.clear();

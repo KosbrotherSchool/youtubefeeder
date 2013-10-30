@@ -20,8 +20,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -31,6 +33,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.services.youtube.YouTubeScopes;
 import com.taiwan.imageload.ListChannelAdapter;
 import com.taiwan.imageload.LoadMoreGridView;
+import com.taiwan.imageload.LoadMoreGridView.OnLoadMoreListener;
 import com.youtube.music.channels.entity.Channel;
 
 
@@ -49,6 +52,11 @@ public class RecommendChannelsActivity extends Activity {
     private static ListChannelAdapter myListAdapter;
     private ArrayList<Channel> recommendChannels = new ArrayList<Channel>();
     
+    private int myPage = 0;
+    private Boolean isLoadingMore = false;
+    private Boolean canLoadMore = true;
+    
+    private LinearLayout loadmoreLayout;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,18 +65,47 @@ public class RecommendChannelsActivity extends Activity {
 		
 		progressLayout = (LinearLayout) findViewById (R.id.layout_progress);
 		myGrid = (LoadMoreGridView) findViewById(R.id.news_list);
-		
+		loadmoreLayout = (LinearLayout) findViewById(R.id.load_more_grid);
+	
 		mEmail = loadAccount();
 		new GetSuggestChannelsTask().execute();
 		MainActivity.isRefreshList = true;
 		
+		myGrid.setOnLoadMoreListener(new OnLoadMoreListener() {
+			public void onLoadMore() {
+				// Do the work to load more items at the end of list
+				if(!isLoadingMore && canLoadMore){
+					isLoadingMore = true;
+					myPage = myPage +1;
+					new GetSuggestChannelsTask().execute();
+				}else{
+					myGrid.onLoadMoreComplete();
+				}
+			}
+		});
+		
+		int sdkVersion = android.os.Build.VERSION.SDK_INT; 
+        if(sdkVersion > 10){
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
+		
 		return true;
+	}
+	
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+
+	    int itemId = item.getItemId();
+	    switch (itemId) {
+	    case android.R.id.home:
+	        finish();
+	        break;
+	    }
+	    return true;
 	}
 	
 	
@@ -122,9 +159,18 @@ public class RecommendChannelsActivity extends Activity {
 	
 	public  class GetSuggestChannelsTask extends AsyncTask{
 	    private static final String TAG = "TokenInfoTask";
-//	    private static final String NAME_KEY = "given_name";
-//	    protected RecommendChannelsActivity mActivity;
-
+	    
+	    @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+        	 super.onPreExecute();
+        	 if (!isLoadingMore){
+        	   progressLayout.setVisibility(View.VISIBLE);
+        	 }else{
+        	    loadmoreLayout.setVisibility(View.VISIBLE);
+        	 }
+        }
+	    
 	    @Override
 	    protected Void doInBackground(Object... params) {
 	      try {
@@ -148,9 +194,20 @@ public class RecommendChannelsActivity extends Activity {
         protected void onPostExecute(Object result) {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
-            progressLayout.setVisibility(View.GONE);
-            myListAdapter = new ListChannelAdapter(RecommendChannelsActivity.this, recommendChannels);
-            myGrid.setAdapter(myListAdapter);
+            if(isLoadingMore){
+            	isLoadingMore = false;
+            	loadmoreLayout.setVisibility(View.GONE);
+            	myListAdapter.notifyDataSetChanged();
+            	myGrid.onLoadMoreComplete();
+            	if(!canLoadMore){
+            		Toast.makeText(RecommendChannelsActivity.this, "No More Data!", Toast.LENGTH_SHORT).show();
+            	}
+            }else{
+            	progressLayout.setVisibility(View.GONE);
+            	myListAdapter = new ListChannelAdapter(RecommendChannelsActivity.this, recommendChannels);
+                myGrid.setAdapter(myListAdapter);
+            }           
+            
           	
         }
 	    
@@ -180,25 +237,32 @@ public class RecommendChannelsActivity extends Activity {
 	        }
 
 	        URL url = new URL("https://gdata.youtube.com/feeds/api/users/default/suggestion?type=channel&inline=true&access_token=" 
-	        		+ token  + "&key=AIzaSyC6zd4TsN6RR5mJMR_O9srbzXS9OM2R1wg" + "&v=2" + "&fields=entry(content(entry(title)))" + "&alt=json");
+	        		+ token  + "&key=AIzaSyC6zd4TsN6RR5mJMR_O9srbzXS9OM2R1wg" + "&v=2" + "&fields=entry(content(entry(title)))" + "&alt=json&start-index=" + (myPage * 15 + 1) + "&max-results=15" );
 	        HttpURLConnection con = (HttpURLConnection) url.openConnection();       
 	        int sc = con.getResponseCode();
 	        Log.i(TAG, con.getResponseMessage());
 	        if (sc == 200) {
 	          InputStream is = con.getInputStream();
 	          String response = readResponse(is);
-	          recommendChannels = getChannels(response);
+	          ArrayList<Channel> moreChannels= getChannels(response);
+	          if(moreChannels.size() == 0){
+	        	  canLoadMore = false;
+	          }else{
+	        	  recommendChannels.addAll(moreChannels);
+	          }
 //	          String name = getFirstName(response);
 //	          mActivity.show("Hello " + name + "!");
 	          is.close();
 	          return;
 	        } else if (sc == 401) {
+	        	canLoadMore = false;
 	            GoogleAuthUtil.invalidateToken(RecommendChannelsActivity.this, token);
 	            onError("Server auth error, please try again.", null);
 	            Log.i(TAG, "Server auth error: " + readResponse(con.getErrorStream()));
 	            return;
 	        } else {
-	          onError("Server returned the following error code: " + sc, null);
+	        	canLoadMore = false;
+	        	onError("Server returned the following error code: " + sc, null);
 	          return;
 	        }
 	    }

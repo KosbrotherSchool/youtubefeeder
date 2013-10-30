@@ -1,7 +1,9 @@
 package com.kosbrother.youtubefeeder.api;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -20,7 +22,9 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.kosbrother.youtubefeeder.DeveloperKey;
+import com.kosbrother.youtubefeeder.RecommendChannelsActivity;
 import com.youtube.music.channels.entity.Channel;
 import com.youtube.music.channels.entity.YoutubePlaylist;
 import com.youtube.music.channels.entity.YoutubeVideo;
@@ -386,7 +390,91 @@ public class ChannelApi {
 //        }
 //        return channels;
 //    }
+    
+    public static ArrayList<Channel> searchChannels(String query, int page) {
+      ArrayList<Channel> channels = new ArrayList<Channel>();
+      
+      if (query.indexOf("(") != -1) {
+          String name2 = query.substring(0, query.indexOf("("));
+          query = name2;
+      }
+      try {
+          query = URLEncoder.encode(query, "utf-8");
+      } catch (UnsupportedEncodingException e1) {
+          e1.printStackTrace();
+          return null;
+      } 
+      
+      try {
+			URL url = new URL("http://gdata.youtube.com/feeds/api/channels?q="
+					+ query + "&start-index=" + (page * 12 + 1)
+					+ "&max-results=12&v=2&alt=json"+"&fields=entry(title,yt:channelId,media:thumbnail)");
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			int sc = con.getResponseCode();
+			Log.i(TAG, con.getResponseMessage());
+			
+			if (sc == 200) {
+				InputStream is = con.getInputStream();
+				String response = readResponse(is);
+				channels = getChannels(response);
+				is.close();
+			} else if (sc == 401) {
+				// onError("Server auth error, please try again.", null);
+				Log.i(TAG,"Server auth error: "+ readResponse(con.getErrorStream()));
+			} else {
+				// onError("Server returned the following error code: " + sc, null);
+			}
+      
+      }catch(Exception e){
+    	  
+      }
+      
+      return channels;
+  }
 
+    
+    private static String readResponse(InputStream is) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] data = new byte[2048];
+        int len = 0;
+        while ((len = is.read(data, 0, data.length)) >= 0) {
+            bos.write(data, 0, len);
+        }
+        return new String(bos.toByteArray(), "UTF-8");
+    }
+    
+    private static ArrayList<Channel> getChannels(String response) {
+		// TODO Auto-generated method stub
+    	ArrayList<Channel> channelLists = new ArrayList<Channel>();
+    	
+    	try {
+			JSONObject object = new JSONObject(response);
+			JSONObject feedObject = object.getJSONObject("feed");
+			JSONArray channelArray = feedObject.getJSONArray("entry");
+			for (int i=0; i< channelArray.length(); i++){
+				String title =  channelArray.getJSONObject(i).getJSONObject("title").getString("$t");
+				String pic = channelArray.getJSONObject(i).getJSONArray("media$thumbnail").getJSONObject(0).getString("url");
+				String id  = channelArray.getJSONObject(i).getJSONObject("yt$channelId").getString("$t");
+				
+				channelLists.add(new Channel(
+						id,
+						title,
+						pic,
+						0));
+			}
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    	
+    	
+		return channelLists;
+	}
+    
+    
+    
     public static String getMessageFromServer(String requestMethod, String apiPath, JSONObject json, String apiUrl) {
         URL url;
         try {

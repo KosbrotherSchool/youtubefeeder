@@ -30,5 +30,31 @@
         android:background="@color/gray_background"
         />
     
+	<LinearLayout 
+   	 	android:id="@+id/load_more_grid"
+   	 	android:layout_width="fill_parent"
+   	 	android:layout_height="wrap_content"
+     	android:background="#FFFFFF"
+     	android:gravity="center"
+     	android:layout_weight="0"
+     	android:visibility="gone"
+     	>
+
+	    <TextView 
+	        android:layout_width="wrap_content"
+   	 		android:layout_height="wrap_content"
+   	 		android:text="@string/downloading"
+	        />
+	    <ProgressBar
+	        android:id="@+id/load_more_progressBar"
+	        android:layout_width="36dp"
+	        android:layout_height="36dp"
+	        android:layout_centerInParent="true"
+	        android:indeterminate="true"
+	        android:indeterminateDrawable="@drawable/costum_progress_bar"
+	        android:padding="3dp"
+	        android:visibility="visible"
+	        />
+	</LinearLayout>
     
 </LinearLayout>
