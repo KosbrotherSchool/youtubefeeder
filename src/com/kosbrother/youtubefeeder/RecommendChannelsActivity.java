@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -42,12 +43,13 @@ public class RecommendChannelsActivity extends Activity {
     private String mEmail;
     private static final String SCOPE = "oauth2:" + YouTubeScopes.YOUTUBE;
     
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "RecommendChannelsActivity";
     
     public static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1001;
     public static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
     
     private LinearLayout progressLayout;
+    private LinearLayout layout_reload;
     private LoadMoreGridView myGrid;
     private static ListChannelAdapter myListAdapter;
     private ArrayList<Channel> recommendChannels = new ArrayList<Channel>();
@@ -57,6 +59,7 @@ public class RecommendChannelsActivity extends Activity {
     private Boolean canLoadMore = true;
     
     private LinearLayout loadmoreLayout;
+    private Button buttonReload;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +69,9 @@ public class RecommendChannelsActivity extends Activity {
 		progressLayout = (LinearLayout) findViewById (R.id.layout_progress);
 		myGrid = (LoadMoreGridView) findViewById(R.id.news_list);
 		loadmoreLayout = (LinearLayout) findViewById(R.id.load_more_grid);
-	
+		layout_reload = (LinearLayout) findViewById(R.id.layout_reload);
+		buttonReload = (Button) findViewById(R.id.button_reload);
+		
 		mEmail = loadAccount();
 		new GetSuggestChannelsTask().execute();
 //		MainActivity.isRefreshList = true;
@@ -83,6 +88,14 @@ public class RecommendChannelsActivity extends Activity {
 				}
 			}
 		});
+		
+		buttonReload.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				progressLayout.setVisibility(View.VISIBLE);
+				new GetSuggestChannelsTask().execute();
+			}
+		});	
 		
 		int sdkVersion = android.os.Build.VERSION.SDK_INT; 
         if(sdkVersion > 10){
@@ -204,8 +217,12 @@ public class RecommendChannelsActivity extends Activity {
             	}
             }else{
             	progressLayout.setVisibility(View.GONE);
-            	myListAdapter = new ListChannelAdapter(RecommendChannelsActivity.this, recommendChannels);
-                myGrid.setAdapter(myListAdapter);
+            	if (recommendChannels.size()!=0){
+            		myListAdapter = new ListChannelAdapter(RecommendChannelsActivity.this, recommendChannels);
+            		myGrid.setAdapter(myListAdapter);
+            	}else{
+            		layout_reload.setVisibility(View.VISIBLE);
+            	}
             }           
             
           	

@@ -57,4 +57,27 @@
 	        />
 	</LinearLayout>
     
+	<LinearLayout 
+   	 	android:id="@+id/layout_reload"
+   	 	android:layout_width="fill_parent"
+   	 	android:layout_height="fill_parent"
+     	android:gravity="center"
+     	android:visibility="gone"
+     	>
+	    <TextView 
+	        android:layout_width="wrap_content"
+   	 		android:layout_height="wrap_content"
+   	 		android:text="無法連線"
+   	 		android:textSize="23dp"
+   	 		android:layout_marginLeft="5dp"
+   	 		android:textColor="#6E6E6E"
+	        />
+	    <Button  android:id="@+id/button_reload"
+	       android:layout_width="wrap_content"
+   	 	   android:layout_height="wrap_content"
+   	 	   android:layout_marginLeft="5dp"
+   	 	   android:text="重試"
+	        />
+	</LinearLayout>
+	
 </LinearLayout>

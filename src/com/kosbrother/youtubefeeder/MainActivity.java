@@ -706,8 +706,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 													
 					}
 					
-					items.add(new EntryItem("Add Channel", R.drawable.icon_add));
-					items.add(new EntryItem("Manage Channel", R.drawable.icon_check));
+					items.add(new EntryItem(getResources().getString(R.string.channel_remommend), R.drawable.icon_add));
+					items.add(new EntryItem(getResources().getString(R.string.channel_manage), R.drawable.icon_check));
 					
 					// set drawer list 					
 					sectionListPosition = items.size();
@@ -808,8 +808,8 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			        // set drawer list
 					if (!isListSetted){
 						// add Add Channel and Manage Channel tab
-						items.add(new EntryItem("Recommend Channel", R.drawable.icon_add));
-						items.add(new EntryItem("Manage Channel", R.drawable.icon_check));
+						items.add(new EntryItem(getResources().getString(R.string.channel_remommend), R.drawable.icon_add));
+						items.add(new EntryItem(getResources().getString(R.string.channel_manage), R.drawable.icon_check));
 						
 						sectionListPosition = items.size();
 						items.add(new SectionItem(getResources().getString(R.string.my_lists)));

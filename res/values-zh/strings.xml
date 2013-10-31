@@ -72,6 +72,8 @@
     <string name="try_as_guest">訪客登入</string>
     <string name="loading_data">資料整理中...</string>
     <string name="no_network">無網路連線...</string>
+    <string name="channel_remommend">頻道推薦</string>
+    <string name="channel_manage">頻道管理</string>
     
     <!-- PlayerViewActivity -->
     <string name="intro">簡介:</string>
@@ -83,5 +85,8 @@
     <string name="auto_play">自動播放</string>
     <string name="re_play">重復播放</string>
     <string name="login_first">需要先登入Youtube!</string>
+    
+    <!-- ManageChannelsActivity -->
+    <string name="menu_unsubscribe">取消訂閱</string>
     
 </resources>

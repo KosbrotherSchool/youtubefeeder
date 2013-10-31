@@ -73,6 +73,8 @@
     <string name="try_as_guest">Try As Guest</string>
     <string name="loading_data">Initializing...</string>
     <string name="no_network">No NetWork Connection...</string>
+    <string name="channel_remommend">Recommend Channel</string>
+    <string name="channel_manage">Manage Channel</string>
     
     
     <!-- PlayerViewActivity -->
@@ -89,5 +91,8 @@
     <!-- SearchActivity -->
     <string name="search_video">Video</string>
     <string name="search_channel">Channel</string>
+    
+    <!-- ManageChannelsActivity -->
+    <string name="menu_unsubscribe">UnSubscribe</string>
     
 </resources>

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -54,6 +55,8 @@ public class ManageChannelsActivity extends Activity {
     private static ArrayList<String> unSubscribeIds = new ArrayList<String>();
     private static boolean isUnSubOK = true;
     
+    private static ProgressDialog mProgressDialog;
+    
     private static boolean mModeIsShowing = false;
 	private static ActionMode mMode;
     private static ActionMode.Callback modeCallBack = new ActionMode.Callback() {
@@ -75,7 +78,7 @@ public class ManageChannelsActivity extends Activity {
 		/** This is called when the action mode is created. This is called by startActionMode() */
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-			menu.add(0, MENU_ID_UNSUBSCRIBE, 0, "UnSubscribe").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+			menu.add(0, MENU_ID_UNSUBSCRIBE, 0, mActivity.getResources().getString(R.string.menu_unsubscribe)).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 			return true;
 		}
 		
@@ -92,6 +95,7 @@ public class ManageChannelsActivity extends Activity {
 							// unsubscribe
 							unSubscribeIds.add(entry.getValue());							
 						}
+						MainActivity.isRefreshList = true;
 						new unSubscribeTask().execute();
 					}
 					mode.finish();	
@@ -128,7 +132,7 @@ public class ManageChannelsActivity extends Activity {
 		
 		new GetSuggestChannelsTask().execute();
 		
-		MainActivity.isRefreshList = true;
+//		MainActivity.isRefreshList = true;
 		
 		int sdkVersion = android.os.Build.VERSION.SDK_INT; 
         if(sdkVersion > 10){
@@ -172,7 +176,8 @@ public class ManageChannelsActivity extends Activity {
         protected void onPreExecute() {
             // TODO Auto-generated method stub
         	 super.onPreExecute();
-
+        	 mProgressDialog = ProgressDialog.show(mActivity, null, "UnSubscribing...");
+        	 mProgressDialog.setCancelable(true);
         }
 		
 		@Override
@@ -200,6 +205,7 @@ public class ManageChannelsActivity extends Activity {
         protected void onPostExecute(Object result) {
             // TODO Auto-generated method stub
             super.onPostExecute(result);
+            mProgressDialog.dismiss();
             if (isUnSubOK){
             	Toast.makeText(mActivity, "UnSubscribe Success!", Toast.LENGTH_SHORT).show();
             	myListAdapter.notifyDataSetChanged();
