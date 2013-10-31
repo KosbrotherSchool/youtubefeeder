@@ -69,7 +69,7 @@ public class RecommendChannelsActivity extends Activity {
 	
 		mEmail = loadAccount();
 		new GetSuggestChannelsTask().execute();
-		MainActivity.isRefreshList = true;
+//		MainActivity.isRefreshList = true;
 		
 		myGrid.setOnLoadMoreListener(new OnLoadMoreListener() {
 			public void onLoadMore() {

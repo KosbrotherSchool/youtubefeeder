@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.youtube.player.YouTubeIntents;
+import com.kosbrother.youtubefeeder.MainActivity;
 import com.kosbrother.youtubefeeder.R;
 import com.youtube.music.channels.entity.Channel;
 
@@ -74,6 +75,9 @@ public class ListChannelAdapter extends BaseAdapter {
 //	            	
 					Intent intent = YouTubeIntents.createUserIntent(activity, id);
 					activity.startActivity(intent);
+					
+					// set MainActivity to refresh
+					MainActivity.isRefreshList = true;
 	                
 	            }
 	        });

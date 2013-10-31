@@ -6,6 +6,7 @@ import java.util.HashMap;
 //import com.costum.android.widget.LoadMoreListView;
 //import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
 import com.kosbrother.youtubefeeder.api.ChannelApi;
+import com.taiwan.imageload.ListChannelAdapter;
 import com.taiwan.imageload.ListVideoAdapter;
 import com.taiwan.imageload.LoadMoreGridView;
 import com.taiwan.imageload.LoadMoreGridView.OnLoadMoreListener;
@@ -25,10 +26,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +44,7 @@ public class SearchActivity extends Activity{
 	private ArrayList<YoutubeVideo> videos = new ArrayList<YoutubeVideo>();
 	private ArrayList<YoutubeVideo> moreVideos = new ArrayList<YoutubeVideo>();
 	private String mKeyword = "";
-	private Boolean checkLoad = true;
+	private Boolean canLoad = true;
 	private int myPage =  0;
 	
 	private ArrayList<Channel> channels = new ArrayList<Channel>();
@@ -49,9 +53,13 @@ public class SearchActivity extends Activity{
 	private LoadMoreGridView myGrid;
 //  private GridViewAdapter  myGridViewAdapter;
 	private static ListVideoAdapter myListAdapter;
+	private static ListChannelAdapter myListChannelAdapter;
 	private LinearLayout    loadmoreLayout;
 	private LinearLayout 	progressLayout;
 	private LinearLayout 	nodataLayout;
+	private RadioButton     radioVideo;
+	private RadioButton     radioChannel;
+	private Boolean isRadioCheckChange = false;
 	
 	private static Activity mActivity;
 	private static boolean mModeIsShowing = false;
@@ -119,17 +127,23 @@ public class SearchActivity extends Activity{
 		myGrid = (LoadMoreGridView) findViewById(R.id.news_list);
 		mEditText = (EditText) findViewById (R.id.edittext_search);
         mImageButton = (ImageView) findViewById (R.id.imageview_search);
-		
-        myPage = 0;
-        mKeyword = "big bang";
-        new SearchChannelsTask().execute();
+        radioVideo = (RadioButton) findViewById(R.id.radio_search_video);
+        radioChannel = (RadioButton) findViewById(R.id.radio_search_channel);
+        
+//        myPage = 0;
+//        mKeyword = "big bang";
+//        new SearchChannelsTask().execute();
         
         myGrid.setOnLoadMoreListener(new OnLoadMoreListener() {
 			public void onLoadMore() {
 				// Do the work to load more items at the end of list
-				if(checkLoad){
+				if(canLoad){
 					myPage = myPage +1;
-					new LoadMoreVideosTask().execute();
+					if (radioVideo.isChecked()){
+						new LoadMoreVideosTask().execute();
+					}else{
+						new LoadMoreChannelsTask().execute();
+					}
 				}else{
 					myGrid.onLoadMoreComplete();
 				}
@@ -145,6 +159,8 @@ public class SearchActivity extends Activity{
 	                	if(mEditText.getText().toString().equals("") || mEditText.getText().toString().equals(0) ){
 	                		Toast.makeText(SearchActivity.this, "請輸入搜索文字", Toast.LENGTH_SHORT).show();
 	                	}else{
+	                		isRadioCheckChange = false;
+	                		canLoad = true;
 	                		progressLayout.setVisibility(View.VISIBLE);
 	                		nodataLayout.setVisibility(View.GONE);
 	                		
@@ -153,7 +169,11 @@ public class SearchActivity extends Activity{
 	                		// run search
 	                		myPage = 0;
 	                		mKeyword = mEditText.getText().toString();
-	                		new DownloadVideosTask().execute();
+	                		if (radioVideo.isChecked()){
+	                			new DownloadVideosTask().execute();
+	                		}else if(radioChannel.isChecked()){
+	                			new SearchChannelsTask().execute();
+	                		}
 	                	}
 	                    return true;
 	                }
@@ -172,6 +192,8 @@ public class SearchActivity extends Activity{
             	if(mEditText.getText().toString().equals("") || mEditText.getText().toString().equals(0) ){
             		Toast.makeText(SearchActivity.this, "請輸入搜索文字", Toast.LENGTH_SHORT).show();
             	}else{
+            		isRadioCheckChange = false;
+            		canLoad = true;
             		progressLayout.setVisibility(View.VISIBLE);
             		nodataLayout.setVisibility(View.GONE);
             		
@@ -180,10 +202,34 @@ public class SearchActivity extends Activity{
             		// run search
             		myPage = 0;
             		mKeyword = mEditText.getText().toString();
-            		new DownloadVideosTask().execute();
+            		if (radioVideo.isChecked()){
+            			new DownloadVideosTask().execute();
+            		}else if(radioChannel.isChecked()){
+            			new SearchChannelsTask().execute();
+            		}
             	}
             }
         });
+		
+		radioVideo.setOnCheckedChangeListener(new OnCheckedChangeListener(){
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				isRadioCheckChange = true;
+			}
+			
+		});
+		
+		radioChannel.setOnCheckedChangeListener(new OnCheckedChangeListener(){
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				isRadioCheckChange = true;
+			}
+			
+		});
 		
 		int sdkVersion = android.os.Build.VERSION.SDK_INT; 
         if(sdkVersion > 10){
@@ -233,7 +279,16 @@ public class SearchActivity extends Activity{
             // TODO Auto-generated method stub
             super.onPostExecute(result);
             progressLayout.setVisibility(View.GONE);
-
+            if(channels !=null){           	
+            	  try{
+            		  myListChannelAdapter = new ListChannelAdapter(SearchActivity.this, channels);
+            		  myGrid.setAdapter(myListChannelAdapter);
+            	  }catch(Exception e){
+            		 
+            	  }
+              }else{
+                nodataLayout.setVisibility(View.VISIBLE);
+           }
         }
     }
 	
@@ -277,6 +332,55 @@ public class SearchActivity extends Activity{
         }
     }
 	
+	private class LoadMoreChannelsTask extends AsyncTask {
+
+        @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+            super.onPreExecute();
+            loadmoreLayout.setVisibility(View.VISIBLE);
+
+        }
+
+        @Override
+        protected Object doInBackground(Object... params) {
+            // TODO Auto-generated method stub
+
+        	moreChannels = ChannelApi.searchChannels(mKeyword, myPage);
+        	if(moreChannels!= null){
+	        	for(int i=0; i<moreChannels.size();i++){
+	        		channels.add(moreChannels.get(i));
+	            }
+        	}
+        	
+        	
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            // TODO Auto-generated method stub
+            super.onPostExecute(result);
+            loadmoreLayout.setVisibility(View.GONE);
+            
+            if(moreChannels!= null){
+            	if (!isRadioCheckChange){
+            		myListChannelAdapter.notifyDataSetChanged();
+            	}else{
+            		isRadioCheckChange = false;
+            		myListChannelAdapter = new ListChannelAdapter(SearchActivity.this, channels);
+            		myGrid.setAdapter(myListChannelAdapter);
+            	}
+            }else{
+            	canLoad= false;
+                Toast.makeText(SearchActivity.this, "no more data", Toast.LENGTH_SHORT).show();            	
+            }       
+            myGrid.onLoadMoreComplete();
+          	
+          	
+        }
+    }
+	
 	
 	
 	private class LoadMoreVideosTask extends AsyncTask {
@@ -311,9 +415,15 @@ public class SearchActivity extends Activity{
             loadmoreLayout.setVisibility(View.GONE);
             
             if(moreVideos!= null){
-            	myListAdapter.notifyDataSetChanged();	                
+            	if (!isRadioCheckChange){
+            		myListAdapter.notifyDataSetChanged();
+            	}else{
+            		 isRadioCheckChange = false;
+            		 myListAdapter = new ListVideoAdapter(SearchActivity.this, videos, "");
+             		 myGrid.setAdapter(myListAdapter);
+            	}
             }else{
-                checkLoad= false;
+            	canLoad= false;
                 Toast.makeText(SearchActivity.this, "no more data", Toast.LENGTH_SHORT).show();            	
             }       
             myGrid.onLoadMoreComplete();
