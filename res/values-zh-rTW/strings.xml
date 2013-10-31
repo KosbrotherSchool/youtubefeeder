@@ -89,4 +89,10 @@
     <!-- ManageChannelsActivity -->
     <string name="menu_unsubscribe">取消訂閱</string>
     
+    <!-- Titles -->
+    <string name="title_manage">頻道管理</string>
+    <string name="title_recommend">頻道推薦</string>
+    <string name="title_search">搜索</string>
+    <string name="title_setting">設定</string>
+    
 </resources>

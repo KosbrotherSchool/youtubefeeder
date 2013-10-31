@@ -503,6 +503,14 @@ containing a value of this type.
         public static final int tab_recent=0x7f06003c;
         public static final int the_play_list=0x7f060051;
         public static final int time=0x7f060028;
+        /**  Titles 
+ Titles 
+ Titles 
+         */
+        public static final int title_manage=0x7f060058;
+        public static final int title_recommend=0x7f060059;
+        public static final int title_search=0x7f06005a;
+        public static final int title_setting=0x7f06005b;
         public static final int to_log_in=0x7f060045;
         public static final int to_youtube=0x7f060050;
         public static final int try_as_guest=0x7f060047;

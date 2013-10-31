@@ -275,6 +275,10 @@ int string tab_list 0x7f06003e
 int string tab_recent 0x7f06003c
 int string the_play_list 0x7f060051
 int string time 0x7f060028
+int string title_manage 0x7f060058
+int string title_recommend 0x7f060059
+int string title_search 0x7f06005a
+int string title_setting 0x7f06005b
 int string to_log_in 0x7f060045
 int string to_youtube 0x7f060050
 int string try_as_guest 0x7f060047

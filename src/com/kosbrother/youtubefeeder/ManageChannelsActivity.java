@@ -113,6 +113,8 @@ public class ManageChannelsActivity extends Activity {
 		mActivity = this;
 		isUnSubOK = true;
 		
+		setTitle(getResources().getString(R.string.title_manage));
+		
 		mSubscriptionChannels.clear();
 		
 		progressLayout = (LinearLayout) findViewById (R.id.layout_progress);

@@ -42,6 +42,8 @@ public class PlaylistVideosActivity extends FragmentActivity {
         	channelTitle = "";
         }
         
+        setTitle(listTitle);
+        
         newFragment =  PlaylistVideosFragment.newInstance(listId, 0, PlaylistVideosActivity.this, channelTitle);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(CONTENT_VIEW_ID, newFragment).commit();

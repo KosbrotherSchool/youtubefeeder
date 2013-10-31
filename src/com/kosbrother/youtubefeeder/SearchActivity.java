@@ -130,6 +130,8 @@ public class SearchActivity extends Activity{
         radioVideo = (RadioButton) findViewById(R.id.radio_search_video);
         radioChannel = (RadioButton) findViewById(R.id.radio_search_channel);
         
+        setTitle(getResources().getString(R.string.title_search));
+        
 //        myPage = 0;
 //        mKeyword = "big bang";
 //        new SearchChannelsTask().execute();

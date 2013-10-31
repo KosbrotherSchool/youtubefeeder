@@ -48,6 +48,8 @@ public class ChannelTabs extends FragmentActivity {
         channelTitle = mBundle.getString("ChannelTitle");
         channelId = mBundle.getString("ChannelId");
         
+        setTitle(channelTitle);
+        
         setContentView(R.layout.fragment_tabs_pager);
         mTabHost = (TabHost)findViewById(android.R.id.tabhost);
         mTabHost.setup();

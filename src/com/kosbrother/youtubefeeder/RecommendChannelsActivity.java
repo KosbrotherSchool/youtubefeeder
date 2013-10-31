@@ -72,6 +72,8 @@ public class RecommendChannelsActivity extends Activity {
 		layout_reload = (LinearLayout) findViewById(R.id.layout_reload);
 		buttonReload = (Button) findViewById(R.id.button_reload);
 		
+		setTitle(getResources().getString(R.string.title_recommend));
+		
 		mEmail = loadAccount();
 		new GetSuggestChannelsTask().execute();
 //		MainActivity.isRefreshList = true;

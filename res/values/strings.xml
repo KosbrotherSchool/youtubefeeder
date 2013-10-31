@@ -95,4 +95,11 @@
     <!-- ManageChannelsActivity -->
     <string name="menu_unsubscribe">UnSubscribe</string>
     
+    <!-- Titles -->
+    <string name="title_manage">Manage Channel</string>
+    <string name="title_recommend">Recommend Channel</string>
+    <string name="title_search">Search</string>
+    <string name="title_setting">Setting</string>
+        
+    
 </resources>

@@ -66,7 +66,8 @@ OnConnectionFailedListener{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.layout_setting);
-
+		setTitle(getResources().getString(R.string.title_setting));
+		
 		textAccount = (TextView) findViewById(R.id.text_current_account);
 		buttonTimer = (Button) findViewById(R.id.button_notify_time);
 		radioNotify = (RadioButton) findViewById(R.id.radio_notify);
