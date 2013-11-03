@@ -49,5 +49,22 @@ public class Constants {
 		ChannelTable.COLUMN_NAME_DATA3,
 		ChannelTable.COLUMN_NAME_DATA4,
     };
-    
+	
+   public static final String[] CHANNEL_KEYS = new String[]{
+	 "music",
+	 "comedy",
+	 "film_entertainment",
+	 "gaming",
+	 "beauty_fashion",
+	 "from_tv",
+	 "automotive",
+	 "animation",
+	 "sports",
+	 "how-to_diy",
+	 "tech",
+	 "cooking_health",
+	 "news_politics",
+	 "lifestyle"
+   };
+	
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">YoutubeFeeder</string>
+    <string name="app_name">YoutubeReader</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="phone_language">En</string>
@@ -75,6 +75,7 @@
     <string name="no_network">No NetWork Connection...</string>
     <string name="channel_remommend">Recommend Channel</string>
     <string name="channel_manage">Manage Channel</string>
+    <string name="channel_more">More Channels</string>
     
     
     <!-- PlayerViewActivity -->
@@ -98,6 +99,7 @@
     <!-- Titles -->
     <string name="title_manage">Manage Channel</string>
     <string name="title_recommend">Recommend Channel</string>
+    <string name="title_more">Browse Channels</string>
     <string name="title_search">Search</string>
     <string name="title_setting">Setting</string>
         

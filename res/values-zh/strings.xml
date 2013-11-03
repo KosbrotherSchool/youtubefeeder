@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">YoutubeFeeder</string>
+    <string name="app_name">Youtube訂閱器</string>
     <string name="action_settings">設定</string>
     <string name="hello_world">Hello world!</string>
     <string name="phone_language">TW</string>
@@ -74,6 +74,7 @@
     <string name="no_network">無網路連線...</string>
     <string name="channel_remommend">頻道推薦</string>
     <string name="channel_manage">頻道管理</string>
+    <string name="channel_more">更多頻道</string>
     
     <!-- PlayerViewActivity -->
     <string name="intro">簡介:</string>
@@ -92,6 +93,7 @@
     <!-- Titles -->
     <string name="title_manage">頻道管理</string>
     <string name="title_recommend">頻道推薦</string>
+    <string name="title_more">頻道瀏覽</string>
     <string name="title_search">搜索</string>
     <string name="title_setting">設定</string>
     

@@ -202,124 +202,123 @@ containing a value of this type.
         public static final int ic_menu_refresh=0x7f020021;
         public static final int icon_add=0x7f020022;
         public static final int icon_check=0x7f020023;
-        public static final int icon_search=0x7f020024;
-        public static final int login_background=0x7f020025;
-        public static final int logo=0x7f020026;
-        public static final int my_novel_selector=0x7f020027;
+        public static final int icon_more=0x7f020024;
+        public static final int icon_search=0x7f020025;
+        public static final int login_background=0x7f020026;
+        public static final int logo=0x7f020027;
+        public static final int my_novel_selector=0x7f020028;
     }
     public static final class id {
-        public static final int action1=0x7f050057;
-        public static final int action_settings=0x7f050058;
+        public static final int action1=0x7f050056;
+        public static final int action_settings=0x7f050057;
         public static final int adLayout=0x7f05000c;
         public static final int button_drawer_reload=0x7f050014;
-        public static final int button_favorite=0x7f05004b;
+        public static final int button_favorite=0x7f05004a;
         public static final int button_log_in=0x7f050007;
         public static final int button_main_reload=0x7f05000a;
-        public static final int button_notify_time=0x7f05003e;
-        public static final int button_playlist=0x7f05004c;
-        public static final int button_reload=0x7f050036;
-        public static final int button_share=0x7f05004d;
+        public static final int button_notify_time=0x7f05003d;
+        public static final int button_playlist=0x7f05004b;
+        public static final int button_reload=0x7f050035;
+        public static final int button_share=0x7f05004c;
         public static final int button_try_as_guest=0x7f050008;
-        public static final int button_youtube=0x7f05004e;
+        public static final int button_youtube=0x7f05004d;
         public static final int checkbox_auto=0x7f05001a;
-        public static final int checkbox_channel=0x7f050026;
+        public static final int checkbox_channel=0x7f050025;
         public static final int checkbox_random=0x7f05001c;
         public static final int checkbox_repeat=0x7f05001b;
-        public static final int checkbox_video=0x7f050029;
+        public static final int checkbox_video=0x7f050028;
         public static final int delete_fragment=0x7f050020;
         public static final int drawer_layout=0x7f050005;
-        public static final int edittext_search=0x7f05003a;
+        public static final int edittext_search=0x7f050039;
         public static final int home=0x7f05001e;
         public static final int hybrid=0x7f050004;
-        public static final int image_list=0x7f050022;
-        public static final int image_news_list=0x7f050028;
-        public static final int imageview_search=0x7f05003b;
-        public static final int layout_action_buttons=0x7f05004a;
+        public static final int image_list=0x7f050021;
+        public static final int image_news_list=0x7f050027;
+        public static final int imageview_search=0x7f05003a;
+        public static final int layout_action_buttons=0x7f050049;
         public static final int layout_draw_account_info=0x7f05000f;
         public static final int layout_drawer_progress=0x7f050015;
         public static final int layout_drawer_reload=0x7f050013;
         public static final int layout_login=0x7f050006;
         public static final int layout_main_reload=0x7f050009;
-        public static final int layout_no_data=0x7f05003c;
+        public static final int layout_no_data=0x7f05003b;
         public static final int layout_progress=0x7f05000b;
-        public static final int layout_reload=0x7f050035;
+        public static final int layout_reload=0x7f050034;
         public static final int layout_repeat=0x7f050019;
-        public static final int layout_video_introduction=0x7f050048;
-        public static final int layout_video_list=0x7f050050;
+        public static final int layout_video_introduction=0x7f050047;
+        public static final int layout_video_list=0x7f05004f;
         public static final int layout_video_player=0x7f050017;
-        public static final int layout_videos=0x7f05004f;
+        public static final int layout_videos=0x7f05004e;
         public static final int left_avatar=0x7f050010;
         public static final int left_drawer=0x7f05000e;
         public static final int left_list_view=0x7f050016;
         public static final int left_log_in=0x7f050012;
         public static final int left_name=0x7f050011;
-        public static final int list_item_entry_drawable=0x7f050041;
-        public static final int list_item_entry_summary=0x7f050043;
-        public static final int list_item_entry_title=0x7f050042;
-        public static final int list_item_section_text=0x7f050044;
-        public static final int load_more_grid=0x7f050033;
-        public static final int load_more_progressBar=0x7f050034;
+        public static final int list_item_entry_drawable=0x7f050040;
+        public static final int list_item_entry_summary=0x7f050042;
+        public static final int list_item_entry_title=0x7f050041;
+        public static final int list_item_section_text=0x7f050043;
+        public static final int load_more_grid=0x7f050032;
+        public static final int load_more_progressBar=0x7f050033;
         public static final int main_grid_view=0x7f05000d;
-        public static final int menu_all_read=0x7f050052;
-        public static final int menu_email=0x7f050056;
-        public static final int menu_refresh=0x7f050054;
-        public static final int menu_search=0x7f050051;
-        public static final int menu_select_all=0x7f050053;
-        public static final int menu_setting=0x7f050055;
+        public static final int menu_all_read=0x7f050051;
+        public static final int menu_email=0x7f050055;
+        public static final int menu_refresh=0x7f050053;
+        public static final int menu_search=0x7f050050;
+        public static final int menu_select_all=0x7f050052;
+        public static final int menu_setting=0x7f050054;
         public static final int new_fragment=0x7f05001f;
-        public static final int news_list=0x7f050032;
+        public static final int news_list=0x7f050031;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
-        public static final int number_picker=0x7f050031;
-        public static final int other_views=0x7f050046;
+        public static final int number_picker=0x7f050030;
+        public static final int other_views=0x7f050045;
         public static final int pager=0x7f050018;
-        public static final int play_all=0x7f050059;
-        public static final int radio_notify=0x7f05003f;
-        public static final int radio_search_channel=0x7f050039;
-        public static final int radio_search_video=0x7f050038;
-        public static final int radio_unnotify=0x7f050040;
-        public static final int realtabcontent=0x7f050021;
+        public static final int play_all=0x7f050058;
+        public static final int radio_notify=0x7f05003e;
+        public static final int radio_search_channel=0x7f050038;
+        public static final int radio_search_video=0x7f050037;
+        public static final int radio_unnotify=0x7f05003f;
         public static final int satellite=0x7f050002;
-        public static final int searchTextLayout=0x7f050037;
+        public static final int searchTextLayout=0x7f050036;
         public static final int simple_fragment=0x7f05001d;
         public static final int terrain=0x7f050003;
-        public static final int text_author=0x7f05002f;
-        public static final int text_current_account=0x7f05003d;
-        public static final int text_id=0x7f050030;
-        public static final int text_list_date=0x7f05002c;
-        public static final int text_list_duration=0x7f05002b;
-        public static final int text_list_like=0x7f05002e;
-        public static final int text_list_views=0x7f05002d;
-        public static final int text_news_list=0x7f05002a;
-        public static final int text_no_data=0x7f050027;
-        public static final int text_playlist_id=0x7f050024;
-        public static final int text_playlist_title=0x7f050023;
-        public static final int text_sub_id=0x7f050025;
-        public static final int youtube_text_description=0x7f050049;
-        public static final int youtube_text_title=0x7f050047;
-        public static final int youtube_view=0x7f050045;
+        public static final int text_author=0x7f05002e;
+        public static final int text_current_account=0x7f05003c;
+        public static final int text_id=0x7f05002f;
+        public static final int text_list_date=0x7f05002b;
+        public static final int text_list_duration=0x7f05002a;
+        public static final int text_list_like=0x7f05002d;
+        public static final int text_list_views=0x7f05002c;
+        public static final int text_news_list=0x7f050029;
+        public static final int text_no_data=0x7f050026;
+        public static final int text_playlist_id=0x7f050023;
+        public static final int text_playlist_title=0x7f050022;
+        public static final int text_sub_id=0x7f050024;
+        public static final int youtube_text_description=0x7f050048;
+        public static final int youtube_text_title=0x7f050046;
+        public static final int youtube_view=0x7f050044;
     }
     public static final class layout {
         public static final int drawer_layout=0x7f030000;
         public static final int fragment_pager=0x7f030001;
         public static final int fragment_stack=0x7f030002;
-        public static final int fragment_tabs=0x7f030003;
-        public static final int fragment_tabs_pager=0x7f030004;
-        public static final int item_channel__list_manage=0x7f030005;
-        public static final int item_channel_list=0x7f030006;
-        public static final int item_nothing=0x7f030007;
-        public static final int item_playlist_item=0x7f030008;
-        public static final int item_video_list=0x7f030009;
-        public static final int layout_log_in=0x7f03000a;
-        public static final int layout_num_picker=0x7f03000b;
-        public static final int layout_recommend_channels=0x7f03000c;
-        public static final int layout_search=0x7f03000d;
-        public static final int layout_setting=0x7f03000e;
-        public static final int list_item_entry=0x7f03000f;
-        public static final int list_item_section=0x7f030010;
-        public static final int loadmore_grid=0x7f030011;
-        public static final int playerview_demo=0x7f030012;
-        public static final int playerview_video_fragment=0x7f030013;
+        public static final int fragment_tabs_pager=0x7f030003;
+        public static final int item_channel__list_manage=0x7f030004;
+        public static final int item_channel_list=0x7f030005;
+        public static final int item_nothing=0x7f030006;
+        public static final int item_playlist_item=0x7f030007;
+        public static final int item_video_list=0x7f030008;
+        public static final int layout_log_in=0x7f030009;
+        public static final int layout_num_picker=0x7f03000a;
+        public static final int layout_recommend_channels=0x7f03000b;
+        public static final int layout_search=0x7f03000c;
+        public static final int layout_setting=0x7f03000d;
+        public static final int list_item_entry=0x7f03000e;
+        public static final int list_item_section=0x7f03000f;
+        public static final int loadmore_grid=0x7f030010;
+        public static final int playerview_demo=0x7f030011;
+        public static final int playerview_video_fragment=0x7f030012;
     }
     public static final class menu {
         public static final int activity_main=0x7f090000;
@@ -331,8 +330,8 @@ containing a value of this type.
         public static final int accounts=0x7f06001a;
         public static final int action_settings=0x7f060016;
         public static final int add_favorte_list=0x7f060044;
-        public static final int add_to_favorite_list=0x7f06004d;
-        public static final int add_to_list=0x7f06004e;
+        public static final int add_to_favorite_list=0x7f06004e;
+        public static final int add_to_list=0x7f06004f;
         public static final int all_read=0x7f06001b;
         public static final int all_viewed=0x7f060026;
         public static final int app_name=0x7f060015;
@@ -359,8 +358,9 @@ containing a value of this type.
         [CHAR LIMIT=70] 
          */
         public static final int auth_client_using_bad_version_title=0x7f06000f;
-        public static final int auto_play=0x7f060052;
+        public static final int auto_play=0x7f060053;
         public static final int channel_manage=0x7f06004b;
+        public static final int channel_more=0x7f06004c;
         public static final int channel_remommend=0x7f06004a;
         public static final int click_to_set_account=0x7f06003b;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
@@ -437,7 +437,7 @@ containing a value of this type.
  PlayerViewActivity 
  PlayerViewActivity 
          */
-        public static final int intro=0x7f06004c;
+        public static final int intro=0x7f06004d;
         public static final int launch_time=0x7f06002a;
         /**  video list 
  video list 
@@ -446,7 +446,7 @@ containing a value of this type.
         public static final int likes=0x7f060027;
         public static final int loading_data=0x7f060048;
         public static final int log_in_youtube=0x7f060046;
-        public static final int login_first=0x7f060054;
+        public static final int login_first=0x7f060055;
         public static final int mark_as_read=0x7f06002e;
         public static final int menu_search=0x7f06001c;
         public static final int menu_select_all=0x7f06001f;
@@ -455,7 +455,7 @@ containing a value of this type.
  ManageChannelsActivity 
  ManageChannelsActivity 
          */
-        public static final int menu_unsubscribe=0x7f060057;
+        public static final int menu_unsubscribe=0x7f060058;
         public static final int my_lists=0x7f060043;
         /**  MainActivity 
  MainActivity 
@@ -473,14 +473,14 @@ containing a value of this type.
  Contexual menu 
          */
         public static final int play_selected=0x7f06002c;
-        public static final int re_play=0x7f060053;
+        public static final int re_play=0x7f060054;
         public static final int refresh=0x7f060019;
         public static final int retry=0x7f060025;
-        public static final int search_channel=0x7f060056;
+        public static final int search_channel=0x7f060057;
         public static final int search_hint=0x7f060041;
         /**  SearchActivity 
          */
-        public static final int search_video=0x7f060055;
+        public static final int search_video=0x7f060056;
         public static final int setting=0x7f06001d;
         /**  Setting 
  Setting 
@@ -493,7 +493,7 @@ containing a value of this type.
         public static final int setting_update_inform_yes=0x7f060034;
         public static final int setting_update_time=0x7f060032;
         public static final int setting_update_video=0x7f060031;
-        public static final int share=0x7f06004f;
+        public static final int share=0x7f060050;
         public static final int tab_favorite=0x7f06003d;
         public static final int tab_list=0x7f06003e;
         /**  Channel Tab  
@@ -501,18 +501,19 @@ containing a value of this type.
  Channel Tab  
          */
         public static final int tab_recent=0x7f06003c;
-        public static final int the_play_list=0x7f060051;
+        public static final int the_play_list=0x7f060052;
         public static final int time=0x7f060028;
         /**  Titles 
  Titles 
  Titles 
          */
-        public static final int title_manage=0x7f060058;
-        public static final int title_recommend=0x7f060059;
-        public static final int title_search=0x7f06005a;
-        public static final int title_setting=0x7f06005b;
+        public static final int title_manage=0x7f060059;
+        public static final int title_more=0x7f06005b;
+        public static final int title_recommend=0x7f06005a;
+        public static final int title_search=0x7f06005c;
+        public static final int title_setting=0x7f06005d;
         public static final int to_log_in=0x7f060045;
-        public static final int to_youtube=0x7f060050;
+        public static final int to_youtube=0x7f060051;
         public static final int try_as_guest=0x7f060047;
         public static final int views=0x7f060029;
     }

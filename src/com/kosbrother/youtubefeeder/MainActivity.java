@@ -707,6 +707,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					}
 					
 					items.add(new EntryItem(getResources().getString(R.string.channel_remommend), R.drawable.icon_add));
+//					items.add(new EntryItem(getResources().getString(R.string.channel_more), R.drawable.icon_more));
 					items.add(new EntryItem(getResources().getString(R.string.channel_manage), R.drawable.icon_check));
 					
 					// set drawer list 					
@@ -809,6 +810,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 					if (!isListSetted){
 						// add Add Channel and Manage Channel tab
 						items.add(new EntryItem(getResources().getString(R.string.channel_remommend), R.drawable.icon_add));
+//						items.add(new EntryItem(getResources().getString(R.string.channel_more), R.drawable.icon_more));
 						items.add(new EntryItem(getResources().getString(R.string.channel_manage), R.drawable.icon_check));
 						
 						sectionListPosition = items.size();
@@ -861,7 +863,11 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 			    		}else if(position == (sectionListPosition - 1) ){
 //			    			Toast.makeText(mActivity, "manage channel", Toast.LENGTH_SHORT).show();
 			    			Intent intent = new Intent(MainActivity.this, ManageChannelsActivity.class);
-			    			startActivity(intent); 
+			    			startActivity(intent);
+//			    		}else if(position == (sectionListPosition - 2) ){
+//			    			Toast.makeText(mActivity, "more channel", Toast.LENGTH_SHORT).show();
+//			    			Intent intent = new Intent(MainActivity.this, MoreChannelsActivity.class);
+//			    			startActivity(intent); 
 			    		}else if(position == (sectionListPosition - 2) ){
 //			    			Toast.makeText(mActivity, "add channel", Toast.LENGTH_SHORT).show();
 			    			Intent intent = new Intent(MainActivity.this, RecommendChannelsActivity.class);
